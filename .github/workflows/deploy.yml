@@ -40,7 +40,6 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           command: |
             set -e
-            # 同步 H5 构建产物到服务器（UniApp 输出在 unpackage/dist/build/h5/）
+            # UniApp H5 输出在 unpackage/dist/build/h5/
             rsync -avz --delete /home/runner/work/qianduan/qianduan/unpackage/dist/build/h5/ root@127.0.0.1:/www/sushang-qianduan/
-            # 重新加载 nginx
             nginx -s reload
