@@ -29,7 +29,7 @@ jobs:
         run: npm run build:h5
 
       - name: Create tar archive
-        run: tar -czf /tmp/sushang-qianduan-h5.tar.gz -C dist/build/h5 .
+        run: tar -czf dist.tar.gz -C dist/build/h5 .
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.10
@@ -38,9 +38,8 @@ jobs:
           port: 22
           username: root
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          command: |
+          script: |
             set -e
             mkdir -p /www/sushang-qianduan/h5
-            tar -xzf - -C /www/sushang-qianduan/h5/
-            nginx -s reload
-          tar: /tmp/sushang-qianduan-h5.tar.gz
+            echo "${{ secrets.DEPLOY_SSH_KEY }}" > /tmp/deploy_key.pem && chmod 600 /tmp/deploy_key.pem
+            cat ${{ github.workspace }}/dist.tar.gz | ssh -o StrictHostKeyChecking=no -i /tmp/deploy_key.pem root@47.96.102.163 "cd /www/sushang-qianduan/h5 && tar -xz && nginx -s reload"
