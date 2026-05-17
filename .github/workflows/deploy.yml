@@ -41,5 +41,5 @@ jobs:
           command: |
             set -e
             # UniApp H5 输出在 unpackage/dist/build/h5/
-            rsync -avz --delete /home/runner/work/qianduan/qianduan/unpackage/dist/build/h5/ root@127.0.0.1:/www/sushang-qianduan/
+            rsync -avz --delete /home/runner/work/qianduan/qianduan/unpackage/dist/build/h5/ root@127.0.0.1:/www/sushang-qianduan/h5/
             nginx -s reload
