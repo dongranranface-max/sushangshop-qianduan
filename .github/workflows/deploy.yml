@@ -24,7 +24,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build H5
         run: npm run build:h5
@@ -41,5 +41,5 @@ jobs:
           command: |
             set -e
             # UniApp H5 输出在 unpackage/dist/build/h5/
-            rsync -avz --delete /home/runner/work/qianduan/qianduan/unpackage/dist/build/h5/ root@127.0.0.1:/www/sushang-qianduan/h5/
+            rsync -avz --delete /home/runner/work/sushangshop-qianduan/sushangshop-qianduan/unpackage/dist/build/h5/ root@127.0.0.1:/www/sushang-qianduan/h5/
             nginx -s reload
