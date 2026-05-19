@@ -12,7 +12,7 @@
         v-for="tab in tabs"
         :key="tab.key"
         :class="['tab-item', { active: currentTab === tab.key }]"
-        @click="currentTab = tab.key"
+        @click="switchTab(tab.key)"
       >
         <text>{{ tab.label }}</text>
       </view>
@@ -31,10 +31,10 @@
             <text class="name">{{ item.name }}</text>
             <view class="price-row">
               <text class="price">¥{{ item.price }}</text>
-              <text class="points-tag">+{{ item.ecoPoints }}积分</text>
+              <text class="points-tag">+{{ item.ecoPoints || 0 }}积分</text>
             </view>
             <view class="exchange-row">
-              <text class="exchange-label">可用{{ item.ecoPoints }}积分抵扣</text>
+              <text class="exchange-label">可用{{ item.ecoPoints || 0 }}积分抵扣</text>
               <text class="exchange-btn">立即换购</text>
             </view>
           </view>
@@ -50,33 +50,68 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { productApi } from '@/utils/api'
 
 const statusBarHeight = ref(20)
 const currentTab = ref('all')
 const products = ref<any[]>([])
+const categories = ref<any[]>([])
 const loading = ref(false)
+const page = ref(1)
+const hasMore = ref(true)
 
-const tabs = [
-  { key: 'all', label: '全部' },
-  { key: 'digital', label: '数码' },
-  { key: 'home', label: '家居' },
-  { key: 'food', label: '食品' },
-]
+const tabs = computed(() => {
+  const base = [{ key: 'all', label: '全部' }]
+  const cats = categories.value.map((c: any) => ({ key: c.id, label: c.name }))
+  return [...base, ...cats]
+})
 
 const filteredProducts = computed(() => {
   if (currentTab.value === 'all') return products.value
-  return products.value
+  return products.value.filter((p: any) => p.categoryId === currentTab.value)
 })
 
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
+  loadCategories()
   loadProducts()
 })
 
-function loadProducts() {
-  // TODO: 调用 API
-  // uni.request({ url: '/api/v1/products?type=exchange' })
+async function loadCategories() {
+  try {
+    const res = await productApi.getCategories()
+    categories.value = res || []
+  } catch (e) {
+    console.error('加载分类失败', e)
+  }
+}
+
+async function loadProducts() {
+  if (loading.value || !hasMore.value) return
+  loading.value = true
+  try {
+    const res = await productApi.getList({ type: 2, page: page.value, limit: 20 })
+    if (page.value === 1) {
+      products.value = res.items || []
+    } else {
+      products.value.push(...(res.items || []))
+    }
+    hasMore.value = res.items?.length === 20
+    page.value++
+  } catch (e: any) {
+    uni.showToast({ title: e.message || '加载失败', icon: 'none' })
+  } finally {
+    loading.value = false
+  }
+}
+
+function switchTab(key: string) {
+  currentTab.value = key
+  products.value = []
+  page.value = 1
+  hasMore.value = true
+  loadProducts()
 }
 
 function loadMore() {
@@ -98,7 +133,7 @@ function goDetail(item: any) {
 }
 
 .page-header {
-  padding: $spacing-base 0 $spacing-base;
+  padding: $spacing-base 0 $spacing-sm;
 
   .page-title {
     font-size: 40rpx;
@@ -117,18 +152,23 @@ function goDetail(item: any) {
 
 .mall-tabs {
   display: flex;
-  gap: $spacing-lg;
+  gap: $spacing-base;
   margin-bottom: $spacing-base;
+  overflow-x: auto;
+  padding-bottom: $spacing-sm;
   border-bottom: 1rpx solid $border-color;
 
   .tab-item {
+    flex-shrink: 0;
     padding-bottom: $spacing-sm;
     font-size: 28rpx;
     color: $text-secondary;
+    border-bottom: 4rpx solid transparent;
+    transition: all 0.2s;
 
     &.active {
       color: $primary;
-      border-bottom: 4rpx solid $primary;
+      border-bottom-color: $primary;
     }
   }
 }
@@ -144,23 +184,23 @@ function goDetail(item: any) {
 }
 
 .product-card {
-  background: $bg-card;
-  border-radius: $radius-md;
+  background: $bg-secondary;
+  border-radius: $radius-lg;
   overflow: hidden;
 
   .cover {
     width: 100%;
     height: 320rpx;
-    background: $bg-secondary;
   }
 
   .info {
-    padding: $spacing-sm $spacing-base;
+    padding: $spacing-sm;
 
     .name {
-      font-size: 26rpx;
+      font-size: 28rpx;
       color: $text-primary;
       display: block;
+      margin-bottom: 8rpx;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -169,50 +209,57 @@ function goDetail(item: any) {
     .price-row {
       display: flex;
       align-items: center;
-      gap: $spacing-sm;
-      margin-top: 8rpx;
+      gap: 8rpx;
+      margin-bottom: 8rpx;
 
       .price {
         font-size: 32rpx;
         font-weight: 700;
-        color: $danger;
+        color: $primary;
       }
 
       .points-tag {
-        font-size: 20rpx;
-        color: $primary;
-        background: rgba($primary, 0.15);
-        padding: 2rpx 12rpx;
-        border-radius: 8rpx;
+        font-size: 22rpx;
+        color: $text-secondary;
+        background: $bg-tertiary;
+        padding: 2rpx 8rpx;
+        border-radius: 4rpx;
       }
     }
 
     .exchange-row {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      margin-top: 8rpx;
+      align-items: center;
 
       .exchange-label {
-        font-size: 20rpx;
+        font-size: 22rpx;
         color: $text-muted;
       }
 
       .exchange-btn {
-        font-size: 22rpx;
-        color: $bg-primary;
-        background: $primary;
+        background: linear-gradient(135deg, $primary, darken($primary, 10%));
+        border-radius: $radius;
+        font-size: 24rpx;
+        font-weight: 600;
+        color: #0a0a0b;
         padding: 6rpx 16rpx;
-        border-radius: 20rpx;
       }
     }
   }
 }
 
-.loading, .empty {
+.loading {
   text-align: center;
-  padding: $spacing-xl;
+  padding: $spacing-base;
   color: $text-muted;
   font-size: 26rpx;
+}
+
+.empty {
+  text-align: center;
+  padding: 80rpx 0;
+  color: $text-muted;
+  font-size: 28rpx;
 }
 </style>

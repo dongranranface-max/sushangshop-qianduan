@@ -7,13 +7,17 @@
       <text class="page-sub">消费积分免费换商品</text>
     </view>
 
-    <view class="user-points-banner">
+    <view class="user-points-banner" v-if="consumerPointsData">
       <text class="label">我的消费积分</text>
-      <text class="value">{{ consumerPoints.toLocaleString() }}</text>
+      <text class="value">{{ Number(consumerPointsData.consumerPoints || 0).toLocaleString() }}</text>
       <text class="tip">仅限消费积分兑换，兑换后不退</text>
     </view>
+    <view class="user-points-banner loading" v-else>
+      <text class="value">--</text>
+      <text class="tip">加载中...</text>
+    </view>
 
-    <scroll-view scroll-y class="product-list">
+    <scroll-view scroll-y class="product-list" @scrolltolower="loadMore">
       <view class="product-grid">
         <view
           v-for="item in products"
@@ -28,11 +32,17 @@
               <text class="points">{{ item.requiredPoints }}积分</text>
               <text class="free">免费兑换</text>
             </view>
-            <view :class="['exchange-btn', { disabled: consumerPoints < item.requiredPoints }]">
-              {{ consumerPoints >= item.requiredPoints ? '立即兑换' : '积分不足' }}
+            <view
+              :class="['exchange-btn', { disabled: !canRedeem(item) }]"
+            >
+              {{ canRedeem(item) ? '立即兑换' : '积分不足' }}
             </view>
           </view>
         </view>
+      </view>
+      <view v-if="loading" class="loading">加载中...</view>
+      <view v-if="!loading && products.length === 0" class="empty">
+        <text>暂无兑换商品</text>
       </view>
     </scroll-view>
 
@@ -41,27 +51,75 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { walletApi, productApi } from '@/utils/api'
 
 const statusBarHeight = ref(20)
-const consumerPoints = ref(0)
+const loading = ref(false)
+const consumerPointsData = ref<{ consumerPoints: string } | null>(null)
 const products = ref<any[]>([])
+const page = ref(1)
+const hasMore = ref(true)
+
+function getUserId(): string {
+  return uni.getStorageSync('userId') || ''
+}
+
+function canRedeem(item: any): boolean {
+  if (!consumerPointsData.value) return false
+  return Number(consumerPointsData.value.consumerPoints || 0) >= Number(item.requiredPoints || 0)
+}
 
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
   loadData()
+  loadProducts()
 })
 
-function loadData() {
-  // TODO: 调用 /api/v1/wallet/balance 获取消费积分
-  consumerPoints.value = 0
-  // TODO: 调用 /api/v1/products?type=redemption 获取兑换商品
+async function loadData() {
+  const userId = getUserId()
+  if (!userId) return
+  try {
+    consumerPointsData.value = await walletApi.getBalance(userId)
+  } catch (e) {
+    console.error('获取积分失败', e)
+  }
+}
+
+async function loadProducts() {
+  if (loading.value || !hasMore.value) return
+  loading.value = true
+  try {
+    const res = await productApi.getList({ type: 3, page: page.value, limit: 20 })
+    if (page.value === 1) {
+      products.value = res.items || []
+    } else {
+      products.value.push(...(res.items || []))
+    }
+    hasMore.value = res.items?.length === 20
+    page.value++
+  } catch (e: any) {
+    uni.showToast({ title: e.message || '加载失败', icon: 'none' })
+  } finally {
+    loading.value = false
+  }
+}
+
+function loadMore() {
+  loadProducts()
 }
 
 function goExchange(item: any) {
-  if (consumerPoints.value < item.requiredPoints) {
-    uni.showToast({ title: '积分不足', icon: 'none' })
+  if (!canRedeem(item)) {
+    uni.showToast({ title: '消费积分不足', icon: 'none' })
+    return
+  }
+  // 检查是否已登录
+  const userId = getUserId()
+  if (!userId) {
+    uni.showToast({ title: '请先登录', icon: 'none' })
+    setTimeout(() => uni.navigateTo({ url: '/pages/auth/login' }), 1000)
     return
   }
   uni.navigateTo({ url: `/pages/order/confirm?productId=${item.id}&mode=redeem` })
@@ -78,7 +136,7 @@ function goExchange(item: any) {
 }
 
 .page-header {
-  padding: $spacing-base 0;
+  padding: $spacing-base 0 $spacing-sm;
 
   .page-title {
     font-size: 40rpx;
@@ -134,23 +192,23 @@ function goExchange(item: any) {
 }
 
 .product-card {
-  background: $bg-card;
-  border-radius: $radius-md;
+  background: $bg-secondary;
+  border-radius: $radius-lg;
   overflow: hidden;
 
   .cover {
     width: 100%;
-    height: 280rpx;
-    background: $bg-secondary;
+    height: 320rpx;
   }
 
   .info {
-    padding: $spacing-sm $spacing-base;
+    padding: $spacing-sm;
 
     .name {
-      font-size: 26rpx;
+      font-size: 28rpx;
       color: $text-primary;
       display: block;
+      margin-bottom: 8rpx;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -159,36 +217,52 @@ function goExchange(item: any) {
     .points-price {
       display: flex;
       align-items: center;
-      gap: $spacing-sm;
-      margin: 8rpx 0;
+      gap: 8rpx;
+      margin-bottom: 8rpx;
 
       .points {
-        font-size: 32rpx;
+        font-size: 28rpx;
         font-weight: 700;
         color: $primary;
       }
 
       .free {
-        font-size: 20rpx;
-        color: $text-muted;
-        text-decoration: line-through;
+        font-size: 22rpx;
+        color: #52c41a;
+        background: rgba(82, 196, 26, 0.15);
+        padding: 2rpx 8rpx;
+        border-radius: 4rpx;
       }
     }
 
     .exchange-btn {
-      background: $primary;
-      color: #000;
+      background: linear-gradient(135deg, $primary, darken($primary, 10%));
+      border-radius: $radius;
+      text-align: center;
       font-size: 26rpx;
       font-weight: 600;
-      text-align: center;
-      padding: 12rpx;
-      border-radius: 24rpx;
+      color: #0a0a0b;
+      padding: 10rpx 0;
 
       &.disabled {
-        background: $bg-secondary;
+        background: $bg-tertiary;
         color: $text-muted;
       }
     }
   }
+}
+
+.loading {
+  text-align: center;
+  padding: $spacing-base;
+  color: $text-muted;
+  font-size: 26rpx;
+}
+
+.empty {
+  text-align: center;
+  padding: 80rpx 0;
+  color: $text-muted;
+  font-size: 28rpx;
 }
 </style>

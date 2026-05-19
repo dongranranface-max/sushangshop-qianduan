@@ -10,6 +10,7 @@ $primary-dark: #00CC00;
 // 背景色
 $bg-primary: #0A0A0A;
 $bg-secondary: #0D0D0D;
+$bg-tertiary: #111111;
 $bg-card: rgba(0, 255, 0, 0.05);
 $bg-card-hover: rgba(0, 255, 0, 0.08);
 $bg-overlay: rgba(0, 0, 0, 0.8);
@@ -44,6 +45,7 @@ $radius-sm: 8rpx;
 $radius-md: 16rpx;
 $radius-lg: 24rpx;
 $radius-full: 9999rpx;
+$radius: $radius-md;
 
 // 阴影 - 发光效果
 $shadow-glow: 0 0 30px rgba($primary, 0.4);
