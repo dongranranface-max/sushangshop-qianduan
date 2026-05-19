@@ -115,6 +115,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { marketingApi } from '@/utils/api'
+import { requireAuth } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
 const currentTab = ref<'available' | 'used' | 'expired'>('available')
@@ -138,6 +139,7 @@ const expiredCoupons = ref<Coupon[]>([])
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
+  if (!requireAuth()) return
   loadCoupons()
 })
 

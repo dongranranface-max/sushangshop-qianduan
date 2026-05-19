@@ -103,15 +103,15 @@
   ],
   "globalStyle": {
     "navigationBarTextStyle": "white",
-    "navigationBarTitleText": "ECO MALL",
-    "navigationBarBackgroundColor": "#0A0A0A",
-    "backgroundColor": "#0A0A0A",
+    "navigationBarTitleText": "集享公社",
+    "navigationBarBackgroundColor": "#060B28",
+    "backgroundColor": "#060B28",
     "backgroundTextStyle": "dark"
   },
   "tabBar": {
-    "color": "#5A5A5A",
-    "selectedColor": "#00FF00",
-    "backgroundColor": "rgba(10, 10, 10, 0.95)",
+    "color": "#475569",
+    "selectedColor": "#4D8EFF",
+    "backgroundColor": "rgba(6, 11, 40, 0.92)",
     "borderStyle": "black",
     "list": [
       {

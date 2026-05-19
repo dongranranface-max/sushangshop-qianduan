@@ -106,6 +106,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { productApi, userApi, addressApi, orderApi } from '@/utils/api'
+import { requireAuth } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
 const productId = ref('')
@@ -119,6 +120,7 @@ const submitting = ref(false)
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
+  if (!requireAuth()) return
 
   const pages = getCurrentPages()
   const current = pages[pages.length - 1]

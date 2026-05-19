@@ -118,6 +118,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { productApi } from '@/utils/api'
+import { requireAuth } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
 const currentTab = ref('detail')
@@ -159,10 +160,6 @@ const actionLabel = computed(() => ({
 
 const selectedSku = computed(() => quantity.value > 1 ? `× ${quantity.value}` : '')
 
-function getUserId(): string {
-  return uni.getStorageSync('userId') || ''
-}
-
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
@@ -198,12 +195,7 @@ function handleAddCart() {
 
 function handleBuy() {
   showSkuModal.value = false
-  const userId = getUserId()
-  if (!userId) {
-    uni.showToast({ title: '请先登录', icon: 'none' })
-    setTimeout(() => uni.navigateTo({ url: '/pages/auth/login' }), 1000)
-    return
-  }
+  if (!requireAuth()) return
   if (!productId.value) return
 
   if (mode.value === 'redeem') {
@@ -222,10 +214,10 @@ function handleBuy() {
 .page-container { min-height: 100vh; background: $bg-primary; padding-bottom: 120rpx; }
 
 .nav-bar { display: flex; align-items: center; padding: 16rpx 32rpx; gap: 32rpx;
-  .nav-back, .nav-share { width: 64rpx; height: 64rpx; display: flex; align-items: center; justify-content: center; font-size: 40rpx; color: #fff; }
+  .nav-back, .nav-share { width: 64rpx; height: 64rpx; display: flex; align-items: center; justify-content: center; font-size: 40rpx; color: #fff; background: $glass-bg; backdrop-filter: blur(20px); border: 1rpx solid $glass-border; border-radius: 50%; }
   .nav-tabs { flex: 1; display: flex; justify-content: center; gap: 48rpx;
-    .nav-tab { font-size: 30rpx; color: rgba(255,255,255,0.6); padding-bottom: 4rpx;
-      &.active { color: #fff; font-weight: 600; border-bottom: 4rpx solid $primary; }
+    .nav-tab { font-size: 30rpx; color: rgba(255,255,255,0.5); padding-bottom: 4rpx;
+      &.active { color: #fff; font-weight: 700; border-bottom: 4rpx solid $primary-light; text-shadow: 0 0 10rpx rgba(0,242,254,0.4); }
     }
   }
 }
@@ -236,13 +228,20 @@ function handleBuy() {
 
 .product-info { padding: $spacing-base $spacing-lg;
   .price-row { display: flex; align-items: baseline; gap: $spacing-sm; margin-bottom: $spacing-sm;
-    .current-price { font-size: 48rpx; font-weight: 700; color: $primary;
-      .symbol { font-size: 32rpx; }
+    .current-price {
+      font-size: 48rpx; font-weight: 800;
+      background: linear-gradient(135deg, $primary-light, $primary-dark);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 10rpx rgba(0,242,254,0.3));
+      letter-spacing: -1rpx;
+      .symbol { font-size: 28rpx; }
     }
     .original-price { font-size: 28rpx; color: $text-muted; text-decoration: line-through; }
     .mode-tag { font-size: 22rpx; padding: 4rpx 16rpx; border-radius: 6rpx; margin-left: auto;
-      &.mode-exchange { background: rgba($primary, 0.15); color: $primary; }
-      &.mode-redeem { background: rgba(#52c41a, 0.15); color: #52c41a; }
+      &.mode-exchange { background: rgba(77,142,255,0.15); color: $primary-light; border: 1rpx solid rgba(77,142,255,0.3); }
+      &.mode-redeem { background: rgba(255,140,0,0.15); color: $accent; border: 1rpx solid rgba(255,140,0,0.3); }
     }
   }
   .name-row { margin-bottom: $spacing-xs;
@@ -257,7 +256,7 @@ function handleBuy() {
   }
 }
 
-.sku-section { display: flex; align-items: center; padding: $spacing-base $spacing-lg; background: $bg-card; border-top: 1rpx solid $border-color; border-bottom: 1rpx solid $border-color;
+.sku-section { display: flex; align-items: center; padding: $spacing-base $spacing-lg; background: $glass-bg; border-top: 1rpx solid $glass-border; border-bottom: 1rpx solid $glass-border;
   .sku-label { font-size: 28rpx; color: $text-secondary; margin-right: $spacing-base; }
   .sku-content { flex: 1; font-size: 28rpx; color: $text-primary; }
   .sku-arrow { font-size: 32rpx; color: $text-muted; }
@@ -272,7 +271,7 @@ function handleBuy() {
   .empty-review { text-align: center; padding: 80rpx 0; color: $text-muted; font-size: 28rpx; }
 }
 
-.bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; padding: 16rpx 32rpx; padding-bottom: calc(16rpx + env(safe-area-inset-bottom)); background: rgba(13,13,13,0.95); backdrop-filter: blur(30px); border-top: 1rpx solid $border-color;
+.bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; padding: 16rpx 32rpx; padding-bottom: calc(16rpx + env(safe-area-inset-bottom)); background: rgba(6,11,40,0.92); backdrop-filter: blur(20px); border-top: 1rpx solid rgba(255,255,255,0.08);
   .action-icons { display: flex; gap: $spacing-xl; margin-right: $spacing-base;
     .action-icon-item { display: flex; flex-direction: column; align-items: center; gap: 4rpx; font-size: 40rpx; position: relative;
       .cart-badge { position: absolute; top: -8rpx; right: -16rpx; min-width: 32rpx; height: 32rpx; background: $danger; border-radius: 16rpx; font-size: 20rpx; color: #fff; display: flex; align-items: center; justify-content: center; }
@@ -280,11 +279,10 @@ function handleBuy() {
     }
   }
   .action-buttons { flex: 1; display: flex; gap: $spacing-sm;
-    .btn-add-cart { flex: 1; height: 80rpx; line-height: 80rpx; text-align: center; background: $bg-card; border: 1rpx solid $border-color; border-radius: 40rpx; font-size: 28rpx; color: $text-primary; }
-    .btn-buy-now { flex: 1; height: 80rpx; line-height: 80rpx; text-align: center; border-radius: 40rpx; font-size: 28rpx; font-weight: 600; color: #0a0a0b;
-      &.btn-consume { background: linear-gradient(135deg, $primary, darken($primary, 10%)); }
-      &.btn-exchange { background: linear-gradient(135deg, $primary, darken($primary, 10%)); }
-      &.btn-redeem { background: linear-gradient(135deg, #52c41a, #237804); }
+    .btn-add-cart { flex: 1; height: 80rpx; line-height: 80rpx; text-align: center; background: rgba(77,142,255,0.10); border: 1rpx solid rgba(77,142,255,0.30); border-radius: 40rpx; font-size: 28rpx; color: $primary-light; }
+    .btn-buy-now { flex: 1; height: 80rpx; line-height: 80rpx; text-align: center; border-radius: 40rpx; font-size: 28rpx; font-weight: 700; color: #fff;
+      &.btn-consume, &.btn-exchange { background: $accent-fire; box-shadow: $shadow-fire; }
+      &.btn-redeem { background: linear-gradient(135deg, $accent-light, $accent); box-shadow: $shadow-fire; }
     }
   }
 }

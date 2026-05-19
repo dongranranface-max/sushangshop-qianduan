@@ -244,8 +244,9 @@ function goProduct(p: any) {
   .search-input-wrap {
     display: flex;
     align-items: center;
-    background: $bg-card;
-    border: 1rpx solid $border-color;
+    background: $glass-bg;
+    backdrop-filter: blur(20px);
+    border: 1rpx solid $glass-border;
     border-radius: 50rpx;
     padding: 0 $spacing-base;
     height: 72rpx;
@@ -253,6 +254,7 @@ function goProduct(p: any) {
     .search-icon {
       font-size: 32rpx;
       margin-right: $spacing-sm;
+      color: $primary-light;
     }
 
     .search-input {
@@ -280,14 +282,16 @@ function goProduct(p: any) {
     align-items: center;
     gap: 4rpx;
     padding: $spacing-sm 0;
-    border-radius: $radius-md;
-    background: $bg-card;
-    border: 2rpx solid transparent;
-    transition: all 0.2s;
+    border-radius: $radius-lg;
+    background: $glass-bg;
+    backdrop-filter: blur(20px);
+    border: 1rpx solid $glass-border;
+    transition: all 0.3s;
 
     &.active {
       border-color: $primary;
-      background: rgba($primary, 0.1);
+      background: linear-gradient(135deg, rgba(77,142,255,0.15), rgba(77,142,255,0.08));
+      box-shadow: $shadow-glow;
     }
 
     .mall-tab-icon {
@@ -297,9 +301,11 @@ function goProduct(p: any) {
     .mall-tab-text {
       font-size: 24rpx;
       color: $text-secondary;
+      font-weight: 500;
 
       .active & {
-        color: $primary;
+        color: $primary-light;
+        font-weight: 700;
       }
     }
   }
@@ -314,8 +320,8 @@ function goProduct(p: any) {
 .category-nav {
   width: 160rpx;
   height: calc(100vh - 300rpx);
-  background: $bg-secondary;
-  border-right: 1rpx solid $border-color;
+  background: rgba(10, 22, 40, 0.8);
+  border-right: 1rpx solid $border-light;
 
   .category-item {
     display: flex;
@@ -373,17 +379,25 @@ function goProduct(p: any) {
 }
 
 .product-card {
-  background: $bg-card;
-  border-radius: $radius-md;
+  background: $glass-bg;
+  backdrop-filter: blur(20px);
+  border: 1rpx solid $glass-border;
+  border-radius: $radius-lg;
   overflow: hidden;
+
+  &:active {
+    border-color: rgba(77,142,255,0.4);
+    box-shadow: $shadow-glow;
+  }
 
   .product-image {
     width: 100%;
     height: 300rpx;
+    background: linear-gradient(135deg, #0A1628 0%, #1E293B 100%);
   }
 
   .product-info {
-    padding: $spacing-sm;
+    padding: $spacing-base;
 
     .product-name {
       font-size: 26rpx;
@@ -392,44 +406,48 @@ function goProduct(p: any) {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      margin-bottom: 8rpx;
+      margin-bottom: 12rpx;
     }
 
     .product-price {
       display: flex;
-      align-items: baseline;
-      gap: 8rpx;
+      align-items: center;
+      gap: 0;
       flex-wrap: wrap;
 
       .price-symbol {
-        font-size: 24rpx;
-        color: $primary;
+        font-size: 22rpx;
+        color: $primary-light;
       }
 
       .price-value {
-        font-size: 32rpx;
+        font-size: 30rpx;
         font-weight: 700;
-        color: $primary;
+        color: $primary-light;
       }
 
       .original-price {
         font-size: 22rpx;
         color: $text-muted;
         text-decoration: line-through;
+        margin-left: 8rpx;
       }
 
       .points-tag {
         font-size: 20rpx;
-        color: $gold;
-        background: rgba($gold, 0.15);
-        padding: 2rpx 8rpx;
-        border-radius: 4rpx;
+        color: $accent;
+        background: rgba($accent, 0.15);
+        padding: 2rpx 10rpx;
+        border-radius: 999rpx;
+        margin-left: 8rpx;
+        font-weight: 600;
       }
 
       .points-tag-full {
         font-size: 24rpx;
-        color: $gold;
-        font-weight: 600;
+        color: $accent;
+        font-weight: 700;
+        text-shadow: 0 0 8rpx rgba($accent, 0.3);
       }
     }
   }

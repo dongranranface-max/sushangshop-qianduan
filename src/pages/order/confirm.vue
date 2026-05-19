@@ -119,6 +119,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { orderApi, addressApi, walletApi, productApi } from '@/utils/api'
+import { requireAuth, getCurrentUserId } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
 const mode = ref<'exchange' | 'redeem'>('exchange')
@@ -131,34 +132,22 @@ const orderItems = ref<any[]>([])
 const address = ref<any>(null)
 const ecoPointsData = ref<any>(null)
 const consumerPoints = ref(0)
-const userId = ref('')
-
 const modeLabel = computed(() => mode.value === 'exchange' ? '换购' : '兑换')
 const goodsAmount = computed(() => orderItems.value.reduce((s, i) => s + Number(i.price) * i.quantity, 0).toFixed(2))
 const actualAmount = computed(() => Math.max(0, parseFloat(goodsAmount.value)).toFixed(2))
 const totalRequiredPoints = computed(() => orderItems.value.reduce((s, i) => s + Number(i.requiredPoints || 0) * i.quantity, 0))
 const availableEcoPoints = computed(() => Number(ecoPointsData.value?.ecoPoints || 0))
 
-function getUserId(): string {
-  return uni.getStorageSync('userId') || ''
-}
-
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
-  userId.value = getUserId()
-
   const pages = getCurrentPages()
   const current = pages[pages.length - 1]
   const opts = (current as any).options || {}
   productId.value = opts.productId || ''
   mode.value = opts.mode === 'redeem' ? 'redeem' : 'exchange'
 
-  if (!userId.value) {
-    uni.showToast({ title: '请先登录', icon: 'none' })
-    setTimeout(() => uni.navigateTo({ url: '/pages/auth/login' }), 1000)
-    return
-  }
+  if (!requireAuth()) return
 
   loadData()
 })
@@ -209,7 +198,7 @@ async function submitOrder() {
 
   try {
     const res = await orderApi.create({
-      userId: userId.value,
+      userId: getCurrentUserId(),
       orderType: mode.value === 'redeem' ? 3 : 2,
       addressId: address.value.id,
       items: orderItems.value,
@@ -263,11 +252,12 @@ async function submitOrder() {
 .address-section {
   display: flex;
   align-items: center;
-  background: $bg-card;
-  border-radius: $radius-md;
+  background: $glass-bg;
+  backdrop-filter: blur(20px);
+  border: 1rpx solid $glass-border;
+  border-radius: $radius-lg;
   padding: $spacing-lg;
   margin-bottom: $spacing-base;
-  border: 1rpx solid $border-color;
 
   .address-icon { font-size: 48rpx; margin-right: $spacing-base; }
   .address-info { flex: 1;
@@ -346,15 +336,15 @@ async function submitOrder() {
   padding: 16rpx 32rpx;
   padding-bottom: calc(16rpx + constant(safe-area-inset-bottom));
   padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
-  background: rgba(13, 13, 13, 0.95);
-  backdrop-filter: blur(30px);
-  border-top: 1rpx solid $border-color;
+  background: rgba(6,11,40,0.92);
+  backdrop-filter: blur(20px);
+  border-top: 1rpx solid rgba(255,255,255,0.08);
 
   .total-info {
     .total-label { font-size: 26rpx; color: $text-secondary; }
-    .total-price { font-size: 44rpx; font-weight: 700; color: $primary; margin-left: $spacing-xs; }
+    .total-price { font-size: 44rpx; font-weight: 800; background: linear-gradient(135deg, $accent-light, $accent-dark); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 0 8rpx rgba(255,140,0,0.4)); margin-left: $spacing-xs; }
   }
-  .submit-btn { background: linear-gradient(135deg, $primary, darken($primary, 10%)); color: #0a0a0b; padding: 24rpx 64rpx; border-radius: 50rpx; font-size: 32rpx; font-weight: 600;
+  .submit-btn { background: $accent-fire; color: #fff; padding: 24rpx 64rpx; border-radius: 50rpx; font-size: 32rpx; font-weight: 700; box-shadow: $shadow-fire;
     &.loading { opacity: 0.6; }
   }
 }

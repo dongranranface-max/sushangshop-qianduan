@@ -77,6 +77,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { orderApi } from '@/utils/api'
+import { requireAuth } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
 const currentTab = ref('all')
@@ -113,13 +114,10 @@ function formatTime(dateStr: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
-function getUserId(): string {
-  return uni.getStorageSync('userId') || ''
-}
-
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
+  if (!requireAuth()) return
   loadOrders()
 })
 

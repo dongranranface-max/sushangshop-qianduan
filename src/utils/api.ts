@@ -100,11 +100,7 @@ export const authApi = {
   login: (phone: string, password: string) =>
     request<{
       token: string
-      userId: string
-      phone: string
-      level: number
-      nickname: string
-      avatar: string
+      user: { id: string; phone: string; level: number; nickname: string; avatar: string }
     }>({
       url: '/auth/login',
       method: 'POST',
@@ -112,11 +108,11 @@ export const authApi = {
     }).then((res) => {
       setToken(res.token)
       setUserInfo({
-        id: res.userId,
-        phone: res.phone,
-        nickname: res.nickname,
-        avatar: res.avatar,
-        level: res.level,
+        id: res.user.id,
+        phone: res.user.phone,
+        nickname: res.user.nickname,
+        avatar: res.user.avatar,
+        level: res.user.level,
       })
       return res
     }),
@@ -125,17 +121,20 @@ export const authApi = {
   register: (phone: string, password: string, inviteCode: string, verifyCode?: string) =>
     request<{
       token: string
-      userId: string
-      phone: string
-      level: number
-      inviteCode: string
+      user: { id: string; phone: string; level: number; nickname: string; avatar: string }
     }>({
       url: '/auth/register',
       method: 'POST',
       data: { phone, password, inviteCode, verifyCode: verifyCode || '' },
     }).then((res) => {
       setToken(res.token)
-      setUserInfo({ id: res.userId, phone: res.phone, level: res.level })
+      setUserInfo({
+        id: res.user.id,
+        phone: res.user.phone,
+        nickname: res.user.nickname,
+        avatar: res.user.avatar,
+        level: res.user.level,
+      })
       return res
     }),
 

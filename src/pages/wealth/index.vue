@@ -309,13 +309,13 @@ function goProjectDetail(project: any) {
 
 .asset-card {
   background: linear-gradient(
-    135deg,
-    rgba($primary, 0.25) 0%,
-    rgba($primary, 0.1) 100%
+    145deg,
+    rgba(30, 41, 59, 0.65) 0%,
+    rgba(10, 22, 40, 0.80) 100%
   );
-  backdrop-filter: blur(30px);
-  border: 1rpx solid rgba($primary, 0.3);
-  border-radius: $radius-lg;
+  backdrop-filter: blur(20px);
+  border: 1rpx solid rgba(77, 142, 255, 0.25);
+  border-radius: $radius-xl;
   padding: $spacing-lg;
   margin-bottom: $spacing-lg;
   
@@ -406,13 +406,13 @@ function goProjectDetail(project: any) {
 
 .level-card {
   background: linear-gradient(
-    135deg,
-    rgba($gold, 0.2) 0%,
-    rgba($gold, 0.05) 100%
+    145deg,
+    rgba(30, 41, 59, 0.65) 0%,
+    rgba(10, 22, 40, 0.80) 100%
   );
-  backdrop-filter: blur(30px);
-  border: 1rpx solid rgba($gold, 0.3);
-  border-radius: $radius-lg;
+  backdrop-filter: blur(20px);
+  border: 1rpx solid rgba(77, 142, 255, 0.25);
+  border-radius: $radius-xl;
   padding: $spacing-lg;
   margin-bottom: $spacing-lg;
   
@@ -555,10 +555,10 @@ function goProjectDetail(project: any) {
 }
 
 .invest-card {
-  background: $bg-card;
+  background: $glass-bg;
   backdrop-filter: blur(20px);
-  border: 1rpx solid $border-color;
-  border-radius: $radius-md;
+  border: 1rpx solid $glass-border;
+  border-radius: $radius-lg;
   padding: $spacing-base;
   
   .invest-header {
@@ -615,11 +615,16 @@ function goProjectDetail(project: any) {
       
       .stat-value {
         font-size: 40rpx;
-        font-weight: 700;
+        font-weight: 800;
         display: block;
-        
+        letter-spacing: -1rpx;
+
         &.profit {
-          color: $profit;
+          background: linear-gradient(135deg, $accent-light 0%, $accent-dark 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          filter: drop-shadow(0 0 8rpx rgba(255,140,0,0.5));
         }
       }
       
@@ -660,22 +665,24 @@ function goProjectDetail(project: any) {
     }
     
     .invest-btn {
-      background: linear-gradient(135deg, $profit, #00CC00);
-      color: #000;
+      background: $accent-fire;
+      color: #fff;
       font-size: 26rpx;
-      font-weight: 600;
+      font-weight: 700;
       padding: 12rpx 32rpx;
       border-radius: 50rpx;
       margin-left: $spacing-base;
+      box-shadow: $shadow-fire;
+      text-shadow: 0 2rpx 8rpx rgba(0,0,0,0.2);
     }
   }
 }
 
 .rules-section {
-  background: $bg-card;
+  background: $glass-bg;
   backdrop-filter: blur(20px);
-  border: 1rpx solid $border-color;
-  border-radius: $radius-md;
+  border: 1rpx solid $glass-border;
+  border-radius: $radius-lg;
   padding: $spacing-base;
   margin-bottom: $spacing-xl;
   

@@ -4,7 +4,7 @@
   "description": "生态积分商城 - Cyber-Tech赛博科技风",
   "scripts": {
     "dev:h5": "uni -p h5",
-    "build:h5": "uni build -p h5",
+    "build:h5": "uni build -p h5 && node scripts/fix-glob.js",
     "dev:mp-weixin": "uni -p mp-weixin",
     "build:mp-weixin": "uni build -p mp-weixin"
   },

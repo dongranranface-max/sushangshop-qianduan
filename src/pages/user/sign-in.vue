@@ -83,6 +83,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { requireAuth } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
 const signReward = ref(10)
@@ -136,6 +137,7 @@ const signRecords = computed(() =>
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
+  if (!requireAuth()) return
   loadSignedDays()
 })
 

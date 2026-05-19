@@ -53,6 +53,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { walletApi, productApi } from '@/utils/api'
+import { requireAuth } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
 const loading = ref(false)
@@ -60,10 +61,6 @@ const consumerPointsData = ref<{ consumerPoints: string } | null>(null)
 const products = ref<any[]>([])
 const page = ref(1)
 const hasMore = ref(true)
-
-function getUserId(): string {
-  return uni.getStorageSync('userId') || ''
-}
 
 function canRedeem(item: any): boolean {
   if (!consumerPointsData.value) return false
@@ -114,13 +111,7 @@ function goExchange(item: any) {
     uni.showToast({ title: '消费积分不足', icon: 'none' })
     return
   }
-  // 检查是否已登录
-  const userId = getUserId()
-  if (!userId) {
-    uni.showToast({ title: '请先登录', icon: 'none' })
-    setTimeout(() => uni.navigateTo({ url: '/pages/auth/login' }), 1000)
-    return
-  }
+  if (!requireAuth()) return
   uni.navigateTo({ url: `/pages/order/confirm?productId=${item.id}&mode=redeem` })
 }
 </script>

@@ -462,9 +462,9 @@ function goCheckout() {
   padding: 16rpx 32rpx;
   padding-bottom: calc(16rpx + constant(safe-area-inset-bottom));
   padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
-  background: rgba(13, 13, 13, 0.95);
-  backdrop-filter: blur(30px);
-  border-top: 1rpx solid $border-color;
+  background: rgba(6, 11, 40, 0.92);
+  backdrop-filter: blur(20px);
+  border-top: 1rpx solid rgba(255,255,255,0.08);
   
   .select-all {
     display: flex;
@@ -489,9 +489,10 @@ function goCheckout() {
     }
     
     .checkbox-checked {
-      background: $primary;
+      background: linear-gradient(135deg, $primary-light, $primary);
       border-color: $primary;
       color: #fff;
+      box-shadow: 0 0 12rpx rgba(77,142,255,0.4);
     }
   }
   
@@ -527,12 +528,13 @@ function goCheckout() {
   }
   
   .submit-btn {
-    background: linear-gradient(135deg, $primary, $primary-dark);
+    background: $accent-fire;
     color: #fff;
     padding: 20rpx 48rpx;
     border-radius: 50rpx;
     font-size: 30rpx;
-    font-weight: 600;
+    font-weight: 700;
+    box-shadow: $shadow-fire;
   }
   
   .delete-btn {

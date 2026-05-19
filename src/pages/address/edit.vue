@@ -45,6 +45,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { addressApi } from '@/utils/api'
+import { requireAuth } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
 const addressId = ref('')
@@ -64,6 +65,7 @@ const submitting = ref(false)
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
+  if (!requireAuth()) return
 
   const pages = getCurrentPages()
   const current = pages[pages.length - 1]

@@ -55,6 +55,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { financialApi } from '@/utils/api'
+import { requireAuth } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
 const holdings = ref<any[]>([])
@@ -63,6 +64,7 @@ const loading = ref(false)
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
+  if (!requireAuth()) return
   loadData()
 })
 
