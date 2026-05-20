@@ -1,72 +1,72 @@
-// ============================================
-// 集享公社 - Futuristic FinTech 设计系统
-// 玻璃拟态 (Glassmorphism) × 冰川蓝 × 火炎橙
-// ============================================
+// ===========================================
+//  集享公社 - 冰川白 · 清新金融风
+//  Glassmorphism × 清透冰蓝 × 暖阳金
+// ===========================================
 
 
 // ---------- 背景层 (Base) ----------
-// 深邃深蓝到黑色的径向渐变 — 深空科技感
-$bg-primary:    #060B28;   // 深空蓝（主背景）
-$bg-secondary:  #0A1628;   // 深藏青
-$bg-tertiary:  #1E293B;   // 清透浅蓝灰（卡片/容器层）
-$bg-overlay:   rgba(6, 11, 40, 0.88);
+// 深空黑：与 App.vue page { background: #060B28 } 保持一致
+$bg-primary:    #060B28;   // 深邃深空（主背景）
+$bg-secondary:  #0F172A;   // 次级深色
+$bg-tertiary:   #1E293B;   // 卡片层（中深色）
+$bg-overlay:    rgba(15, 23, 42, 0.92);
 
 // ---------- 玻璃容器层 (Container) ----------
-// 半透明磨砂玻璃面板
-$glass-bg:         rgba(30, 41, 59, 0.55);   // 清透浅蓝半透明
-$glass-bg-light:    rgba(30, 41, 59, 0.35);   // 更透
-$glass-bg-hover:   rgba(30, 41, 59, 0.70);   // hover态
-$glass-border:     rgba(255, 255, 255, 0.12); // 极细白描边
-$glass-border-lit: rgba(255, 255, 255, 0.25); // 高光描边
-$glass-blur:       20px;                       // 毛玻璃模糊度
+// 白色半透明磨砂玻璃面板（浅色背景专用）
+$glass-bg:         rgba(255, 255, 255, 0.72);   // 清透白半透明
+$glass-bg-light:   rgba(255, 255, 255, 0.45);   // 更透
+$glass-bg-hover:   rgba(255, 255, 255, 0.88);   // hover态
+$glass-border:     rgba(0, 0, 0, 0.08);         // 极细深色描边
+$glass-border-lit: rgba(0, 0, 0, 0.15);         // 高光描边
+$glass-blur:       16px;                         // 毛玻璃模糊度
 
-// ---------- 冰蓝系 (Primary - 资产/冷静态) ----------
-$primary:         #4D8EFF;   // 冰蓝主色
-$primary-light:   #00F2FE;   // 青蓝（电路感辅助线）
-$primary-dark:    #1B6FFC;   // 深海蓝
-$primary-glow:    rgba(77, 142, 255, 0.5);
+// ---------- 冰蓝系 (Primary - 冷静/资产态) ----------
+$primary:         #3B82F6;   // 天蓝主色
+$primary-light:   #60A5FA;   // 浅天蓝（悬停/辅助）
+$primary-dark:    #1D4ED8;   // 深海蓝
+$primary-glow:    rgba(59, 130, 246, 0.25);
 
-// ---------- 火炎系 (Action - 收益/动能态) ----------
-// 亮橙 → 赤红线性渐变（主按钮/核心数据）
-$accent:          #FF8C00;   // 亮橙
-$accent-light:   #FFB347;   // 琥珀橙
-$accent-dark:     #FF4500;   // 赤红（ fiery）
-$accent-glow:     rgba(255, 140, 0, 0.5);
-$accent-fire:     linear-gradient(135deg, #FF8C00 0%, #FF4500 100%); // 火炎渐变
+// ---------- 暖阳金系 (Action - 收益/动能态) ----------
+// 琥珀橙 → 珊瑚红（活力温暖，不刺眼）
+$accent:          #F59E0B;   // 琥珀橙
+$accent-light:    #FCD34D;   // 明黄
+$accent-dark:     #EF4444;   // 珊瑚红
+$accent-glow:     rgba(245, 158, 11, 0.3);
+$accent-fire:     linear-gradient(135deg, #F59E0B 0%, #EF4444 100%); // 暖阳渐变
 
 // ---------- 功能色 ----------
-$gold:            #FFD700;   // 琥珀金
-$warning:         #FF9F43;   // 橙黄警告
-$danger:          #FF4500;   // 赤红（等同于 accent-dark）
-$success:         #4D8EFF;   // 冰蓝成功
-$profit:          #FF8C00;   // 收益橙
+$gold:            #D97706;   // 琥珀金（深一度）
+$warning:         #F59E0B;   // 橙黄警告
+$danger:          #EF4444;   // 珊瑚红
+$success:         #10B981;   // 翠绿成功
+$profit:          #F59E0B;   // 收益橙
 
 // ---------- 文字色 ----------
-$text-primary:    #FFFFFF;   // 纯白
-$text-secondary:  #94A3B8;   // 冰灰蓝
-$text-muted:      #475569;    // 暗蓝灰
-$text-accent:     #FFD700;   // 琥珀金强调
+$text-primary:    #0F172A;   // 深墨色（主文字）
+$text-secondary:  #64748B;   // 灰蓝（次级文字）
+$text-muted:     #94A3B8;   // 淡灰（辅助）
+$text-accent:    #D97706;   // 琥珀强调
 
 // ---------- 边框/分割线 ----------
-$border-color:    rgba(255, 255, 255, 0.10);  // 极细白线
-$border-light:    rgba(255, 255, 255, 0.06);  // 极淡线
-$border-primary:  rgba(77, 142, 255, 0.30);  // 冰蓝边框
-$border-accent:   rgba(255, 140, 0, 0.35);   // 火炎边框
+$border-color:    rgba(0, 0, 0, 0.08);   // 极细深色线
+$border-light:    rgba(0, 0, 0, 0.04);   // 极淡线
+$border-primary:  rgba(59, 130, 246, 0.35); // 冰蓝边框
+$border-accent:  rgba(245, 158, 11, 0.40); // 暖阳边框
 
 // ---------- 圆角 ----------
 $radius-sm:   8rpx;
 $radius-md:   16rpx;
-$radius-lg:   24rpx;   // 大圆角（设计规范建议）
+$radius-lg:   24rpx;
 $radius-xl:   32rpx;
 $radius-full: 9999rpx;
 $radius: $radius-lg;
 
 // ---------- 阴影 ----------
-$shadow-glow:        0 0 30px rgba(77, 142, 255, 0.35);   // 冰蓝发光
-$shadow-glow-strong: 0 0 60px rgba(77, 142, 255, 0.55);   // 强发光
-$shadow-fire:        0 0 30px rgba(255, 140, 0, 0.45);     // 火炎发光
-$shadow-fire-strong: 0 0 50px rgba(255, 69, 0, 0.55);     // 赤红强发光
-$shadow-card:        0 8rpx 32rpx rgba(0, 0, 0, 0.5);     // 卡片阴影
+$shadow-glow:        0 4rpx 20rpx rgba(59, 130, 246, 0.20);   // 冰蓝光晕（浅色专用）
+$shadow-glow-strong: 0 8rpx 40rpx rgba(59, 130, 246, 0.30);   // 强冰蓝光晕
+$shadow-fire:        0 4rpx 20rpx rgba(245, 158, 11, 0.25);     // 暖阳光晕
+$shadow-fire-strong: 0 8rpx 40rpx rgba(239, 68, 68, 0.30);     // 珊瑚强光晕
+$shadow-card:        0 2rpx 12rpx rgba(0, 0, 0, 0.08);        // 轻柔卡片阴影
 
 // 间距
 $spacing-xs:  8rpx;
@@ -76,9 +76,9 @@ $spacing-lg:  32rpx;
 $spacing-xl:  48rpx;
 $spacing-2xl: 64rpx;
 
-// ============================================
+// ===========================================
 // 多行截断
-// ============================================
+// ===========================================
 @mixin line-clamp($lines) {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -87,10 +87,10 @@ $spacing-2xl: 64rpx;
   text-overflow: ellipsis;
 }
 
-// ============================================
-// 玻璃拟态卡片 (Glassmorphism)
-// 核心材质：半透明冰蓝面板 + 极细白描边 + 毛玻璃
-// ============================================
+// ===========================================
+// 玻璃拟态卡片 (Glassmorphism) - 浅色版
+// 白色半透明面板 + 深色细边框 + 柔和阴影
+// ===========================================
 .glass-card {
   background: $glass-bg;
   backdrop-filter: blur($glass-blur);
@@ -99,30 +99,19 @@ $spacing-2xl: 64rpx;
   border-radius: $radius-lg;
   position: relative;
   overflow: hidden;
+  box-shadow: $shadow-card;
 
-  // 顶部高光线条
+  // 顶部彩虹细线（彩色光感）
   &::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 1rpx;
     background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(255,255,255,0.3) 30%,
-      rgba(255,255,255,0.3) 70%,
-      transparent 100%);
-  }
-
-  // 底部微光
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 1rpx;
-    background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(77,142,255,0.2) 50%,
-      transparent 100%);
+      rgba(59,130,246,0.3) 0%,
+      rgba(245,158,11,0.3) 30%,
+      rgba(59,130,246,0.3) 70%,
+      rgba(245,158,11,0.3) 100%);
   }
 }
 
@@ -137,22 +126,21 @@ $spacing-2xl: 64rpx;
   }
 }
 
-// 火炎玻璃卡片（用于增值/理财核心入口）
+// 暖阳玻璃卡片（增值/理财入口）
 .glass-card-fire {
   @extend .glass-card;
-  border-color: rgba(255, 140, 0, 0.25);
+  border-color: rgba(245, 158, 11, 0.25);
   background: linear-gradient(
     135deg,
-    rgba(255, 140, 0, 0.12) 0%,
-    rgba(255, 69, 0, 0.08) 100%
+    rgba(245, 158, 11, 0.08) 0%,
+    rgba(239, 68, 68, 0.05) 100%
   );
 
   &::before {
     background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(255, 140, 0, 0.4) 30%,
-      rgba(255, 69, 0, 0.4) 70%,
-      transparent 100%);
+      rgba(245,158,11,0.4) 0%,
+      rgba(239,68,68,0.4) 50%,
+      rgba(245,158,11,0.4) 100%);
   }
 }
 
@@ -161,16 +149,17 @@ $spacing-2xl: 64rpx;
   @extend .glass-card;
   background: linear-gradient(
     145deg,
-    rgba(30, 41, 59, 0.65) 0%,
-    rgba(10, 22, 40, 0.80) 100%
+    rgba(59, 130, 246, 0.08) 0%,
+    rgba(245, 158, 11, 0.05) 100%
   );
-  border-color: rgba(77, 142, 255, 0.25);
+  border-color: rgba(59, 130, 246, 0.20);
   border-radius: $radius-xl;
+  box-shadow: $shadow-glow;
 }
 
-// ============================================
+// ===========================================
 // 按钮系统
-// ============================================
+// ===========================================
 .btn {
   display: flex;
   align-items: center;
@@ -190,15 +179,14 @@ $spacing-2xl: 64rpx;
   }
 }
 
-// 火炎行动按钮（主 CTA：立即申购/确认支付）
+// 暖阳行动按钮（主 CTA：立即申购/确认支付）
 .btn-fire {
   @extend .btn;
   background: $accent-fire;
   color: #fff;
   box-shadow: $shadow-fire;
-  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.2);
 
-  // 波纹扩散效果
   &::before {
     content: '';
     position: absolute;
@@ -245,7 +233,7 @@ $spacing-2xl: 64rpx;
   border: 2rpx solid $primary;
   color: $primary;
 
-  &:active { background: rgba(77, 142, 255, 0.12); }
+  &:active { background: rgba(59, 130, 246, 0.08); }
 }
 
 // 幽灵按钮
@@ -268,9 +256,9 @@ $spacing-2xl: 64rpx;
   font-size: 36rpx;
 }
 
-// ============================================
+// ===========================================
 // 标签
-// ============================================
+// ===========================================
 .tag {
   display: inline-flex;
   align-items: center;
@@ -282,31 +270,31 @@ $spacing-2xl: 64rpx;
 
 .tag-primary {
   @extend .tag;
-  background: rgba(77, 142, 255, 0.2);
-  color: $primary-light;
-  border: 1rpx solid rgba(0, 242, 254, 0.3);
+  background: rgba(59, 130, 246, 0.12);
+  color: $primary;
+  border: 1rpx solid rgba(59, 130, 246, 0.25);
 }
 
 .tag-accent {
   @extend .tag;
-  background: rgba(255, 140, 0, 0.2);
+  background: rgba(245, 158, 11, 0.12);
   color: $accent;
-  border: 1rpx solid rgba(255, 140, 0, 0.3);
+  border: 1rpx solid rgba(245, 158, 11, 0.25);
 }
 
 .tag-gold {
   @extend .tag;
-  background: rgba(255, 215, 0, 0.15);
+  background: rgba(217, 119, 6, 0.10);
   color: $gold;
-  border: 1rpx solid rgba(255, 215, 0, 0.3);
+  border: 1rpx solid rgba(217, 119, 6, 0.25);
 }
 
 .tag-fire {
   @extend .tag;
-  background: linear-gradient(135deg, rgba(255,140,0,0.25), rgba(255,69,0,0.20));
-  color: #FF8C00;
-  border: 1rpx solid rgba(255,69,0,0.4);
-  text-shadow: 0 0 8rpx rgba(255, 140, 0, 0.5);
+  background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.10));
+  color: $accent-dark;
+  border: 1rpx solid rgba(239, 68, 68, 0.25);
+  font-weight: 700;
 }
 
 .tag-outline {
@@ -316,9 +304,9 @@ $spacing-2xl: 64rpx;
   color: $text-secondary;
 }
 
-// ============================================
+// ===========================================
 // 搜索栏
-// ============================================
+// ===========================================
 .search-bar {
   display: flex;
   align-items: center;
@@ -328,10 +316,11 @@ $spacing-2xl: 64rpx;
   border: 1rpx solid $glass-border;
   border-radius: $radius-full;
   padding: 0 32rpx;
+  box-shadow: $shadow-card;
 
   .search-icon {
     font-size: 32rpx;
-    color: $primary-light;
+    color: $primary;
     margin-right: 16rpx;
   }
 
@@ -345,9 +334,9 @@ $spacing-2xl: 64rpx;
   }
 }
 
-// ============================================
+// ===========================================
 // 页面容器
-// ============================================
+// ===========================================
 .page-container {
   min-height: 100vh;
   background: $bg-primary;
@@ -370,9 +359,9 @@ $spacing-2xl: 64rpx;
   margin-top: 8rpx;
 }
 
-// ============================================
+// ===========================================
 // 区块
-// ============================================
+// ===========================================
 .section {
   margin-bottom: $spacing-xl;
 }
@@ -401,18 +390,18 @@ $spacing-2xl: 64rpx;
   }
 }
 
-// ============================================
-// 商品卡片（双色价格标签版）
-// ============================================
+// ===========================================
+// 商品卡片
+// ===========================================
 .product-card {
-  background: $glass-bg;
-  backdrop-filter: blur($glass-blur);
-  border: 1rpx solid $glass-border;
+  background: $bg-tertiary;
+  border: 1rpx solid $border-color;
   border-radius: $radius-lg;
   overflow: hidden;
+  box-shadow: $shadow-card;
 
   &:active {
-    border-color: rgba(77, 142, 255, 0.4);
+    border-color: rgba(59, 130, 246, 0.4);
     box-shadow: $shadow-glow;
   }
 }
@@ -420,7 +409,7 @@ $spacing-2xl: 64rpx;
 .product-image {
   width: 100%;
   aspect-ratio: 1;
-  background: linear-gradient(135deg, #0A1628 0%, #1E293B 100%);
+  background: linear-gradient(135deg, #E8EDF5 0%, #F1F5F9 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -470,16 +459,16 @@ $spacing-2xl: 64rpx;
 
   .price-cash {
     background: transparent;
-    color: $primary-light;
+    color: $primary;
     border: 1.5rpx solid $primary;
     padding: 0 14rpx;
     font-size: 22rpx;
   }
 }
 
-// ============================================
+// ===========================================
 // 列表项
-// ============================================
+// ===========================================
 .list-item {
   display: flex;
   align-items: center;
@@ -512,13 +501,13 @@ $spacing-2xl: 64rpx;
   }
 }
 
-// ============================================
+// ===========================================
 // 资产数据展示
-// ============================================
+// ===========================================
 .asset-number {
   font-size: 64rpx;
   font-weight: 800;
-  background: linear-gradient(135deg, #FFFFFF 0%, #CBD5E1 100%);
+  background: linear-gradient(135deg, #0F172A 0%, #334155 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -528,11 +517,10 @@ $spacing-2xl: 64rpx;
 
 .asset-number-fire {
   @extend .asset-number;
-  background: linear-gradient(135deg, $accent-light 0%, $accent-dark 100%);
+  background: linear-gradient(135deg, $accent 0%, $accent-dark 100%);
   -webkit-background-clip: text;
   background-clip: text;
-  text-shadow: none;
-  filter: drop-shadow(0 0 12rpx rgba(255, 140, 0, 0.6));
+  filter: none;
 }
 
 .asset-label {
@@ -541,13 +529,13 @@ $spacing-2xl: 64rpx;
   margin-top: 4rpx;
 }
 
-// ============================================
+// ===========================================
 // 冰蓝进度条
-// ============================================
+// ===========================================
 .progress-bar {
   width: 100%;
   height: 8rpx;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.08);
   border-radius: $radius-full;
   overflow: hidden;
 
@@ -555,14 +543,14 @@ $spacing-2xl: 64rpx;
     height: 100%;
     background: linear-gradient(90deg, $primary-dark, $primary-light);
     border-radius: $radius-full;
-    box-shadow: 0 0 12rpx rgba(0, 242, 254, 0.5);
+    box-shadow: 0 0 8rpx rgba(59, 130, 246, 0.4);
     transition: width 0.6s ease;
   }
 }
 
-// ============================================
+// ===========================================
 // 会员能量徽章 (V1-V9)
-// ============================================
+// ===========================================
 .member-badge {
   display: inline-flex;
   align-items: center;
@@ -574,50 +562,48 @@ $spacing-2xl: 64rpx;
   font-weight: 800;
   position: relative;
 
-  // 低等级：冷色调
+  // 低等级：冰蓝色
   &.v1, &.v2, &.v3 {
-    background: radial-gradient(circle at 30% 30%, rgba(77,142,255,0.4), rgba(77,142,255,0.1));
-    border: 2rpx solid rgba(77,142,255,0.5);
-    color: $primary-light;
-    box-shadow: 0 0 20rpx rgba(77,142,255,0.3);
+    background: radial-gradient(circle at 30% 30%, rgba(59,130,246,0.15), rgba(59,130,246,0.05));
+    border: 2rpx solid rgba(59,130,246,0.35);
+    color: $primary;
   }
 
   // 中等级：过渡
   &.v4, &.v5, &.v6 {
-    background: radial-gradient(circle at 30% 30%, rgba(0,242,254,0.4), rgba(255,140,0,0.15));
-    border: 2rpx solid rgba(0,242,254,0.5);
-    color: #fff;
-    box-shadow: 0 0 20rpx rgba(0,242,254,0.3);
+    background: radial-gradient(circle at 30% 30%, rgba(245,158,11,0.15), rgba(239,68,68,0.08));
+    border: 2rpx solid rgba(245,158,11,0.4);
+    color: $accent;
   }
 
   // 高等级：炽热
   &.v7, &.v8, &.v9 {
-    background: radial-gradient(circle at 30% 30%, rgba(255,69,0,0.6), rgba(139,0,0,0.3));
-    border: 2rpx solid rgba(255,69,0,0.6);
-    color: #fff;
-    box-shadow: 0 0 30rpx rgba(255,69,0,0.5);
+    background: radial-gradient(circle at 30% 30%, rgba(239,68,68,0.20), rgba(239,68,68,0.08));
+    border: 2rpx solid rgba(239,68,68,0.5);
+    color: $accent-dark;
+    box-shadow: 0 4rpx 20rpx rgba(239, 68, 68, 0.25);
     animation: badge-pulse 2s ease-in-out infinite;
   }
 }
 
 @keyframes badge-pulse {
-  0%, 100% { box-shadow: 0 0 20rpx rgba(255,69,0,0.4); }
-  50% { box-shadow: 0 0 40rpx rgba(255,69,0,0.7); }
+  0%, 100% { box-shadow: 0 4rpx 20rpx rgba(239,68,68,0.20); }
+  50% { box-shadow: 0 4rpx 30rpx rgba(239,68,68,0.40); }
 }
 
-// ============================================
-// 火炎呼吸灯（增值区入口）
-// ============================================
+// ===========================================
+// 暖阳呼吸灯（增值区入口）
+// ===========================================
 @keyframes fire-breathe {
   0%, 100% {
-    background: linear-gradient(135deg, rgba(255,140,0,0.15), rgba(255,69,0,0.10));
-    border-color: rgba(255,140,0,0.25);
-    box-shadow: 0 0 20rpx rgba(255,140,0,0.2);
+    background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(239,68,68,0.05));
+    border-color: rgba(245,158,11,0.25);
+    box-shadow: 0 4rpx 20rpx rgba(245,158,11,0.15);
   }
   50% {
-    background: linear-gradient(135deg, rgba(255,140,0,0.25), rgba(255,69,0,0.18));
-    border-color: rgba(255,69,0,0.45);
-    box-shadow: 0 0 40rpx rgba(255,140,0,0.4);
+    background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.10));
+    border-color: rgba(239,68,68,0.40);
+    box-shadow: 0 4rpx 30rpx rgba(245,158,11,0.30);
   }
 }
 
@@ -625,14 +611,14 @@ $spacing-2xl: 64rpx;
   animation: fire-breathe 2.5s ease-in-out infinite;
 }
 
-// ============================================
-// 电路光效线（辅助线）
-// ============================================
+// ===========================================
+// 电路光效线（浅色背景用更柔和的虚线）
+// ===========================================
 .circuit-line {
   position: absolute;
   background: linear-gradient(90deg, transparent, $primary-light, transparent);
   height: 1rpx;
-  opacity: 0.4;
+  opacity: 0.25;
 
   &.horizontal { width: 100%; }
   &.vertical {
@@ -642,9 +628,9 @@ $spacing-2xl: 64rpx;
   }
 }
 
-// ============================================
+// ===========================================
 // 空状态
-// ============================================
+// ===========================================
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -655,7 +641,7 @@ $spacing-2xl: 64rpx;
   .empty-icon {
     font-size: 120rpx;
     filter: grayscale(1);
-    opacity: 0.25;
+    opacity: 0.20;
     margin-bottom: $spacing-base;
   }
 
@@ -665,9 +651,9 @@ $spacing-2xl: 64rpx;
   }
 }
 
-// ============================================
+// ===========================================
 // 工具类
-// ============================================
+// ===========================================
 .flex { display: flex; }
 .flex-center { display: flex; align-items: center; justify-content: center; }
 .flex-between { display: flex; align-items: center; justify-content: space-between; }
@@ -692,13 +678,13 @@ $spacing-2xl: 64rpx;
 .mb-base { margin-bottom: $spacing-base; }
 .mb-lg { margin-bottom: $spacing-lg; }
 
-// 文字发光
+// 文字发光（浅色背景用柔和版）
 .text-glow {
-  text-shadow: 0 0 10rpx rgba(0, 242, 254, 0.6);
+  text-shadow: 0 2rpx 8rpx rgba(59, 130, 246, 0.4);
 }
 
 .text-glow-fire {
-  text-shadow: 0 0 10rpx rgba(255, 140, 0, 0.7);
+  text-shadow: 0 2rpx 8rpx rgba(245, 158, 11, 0.5);
 }
 
 // 边框发光
@@ -712,9 +698,9 @@ $spacing-2xl: 64rpx;
   box-shadow: $shadow-fire;
 }
 
-// ============================================
+// ===========================================
 // 安全区域
-// ============================================
+// ===========================================
 .safe-area-top {
   padding-top: constant(safe-area-inset-top);
   padding-top: env(safe-area-inset-top);
@@ -725,17 +711,18 @@ $spacing-2xl: 64rpx;
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-// ============================================
-// TabBar
-// ============================================
+// ===========================================
+// TabBar（浅色毛玻璃）
+// ===========================================
 .tabbar {
-  background: rgba(6, 11, 40, 0.92) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
   backdrop-filter: blur(20px);
-  border-top: 1rpx solid rgba(255,255,255,0.08);
+  border-top: 1rpx solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 -2rpx 20rpx rgba(0, 0, 0, 0.06);
 }
 
 // ---------- 旧变量别名（兼容已有代码，必须放末尾）----------
 $bg-card:         $glass-bg;
 $bg-card-hover:   $glass-bg-hover;
-$border-color:    $glass-border;
-$border-light:    rgba(255, 255, 255, 0.06);
+$border-color:    $border-color;
+$border-light:    $border-light;

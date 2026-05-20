@@ -2,15 +2,15 @@
 import { onLaunch, onShow, onHide } from '@dcloudio/uni-app'
 
 onLaunch(() => {
-  console.log('App 启动 - 集享公社')
+  // App 启动
 })
 
 onShow(() => {
-  console.log('App 显示')
+  // App 显示
 })
 
 onHide(() => {
-  console.log('App 隐藏')
+  // App 隐藏
 })
 </script>
 
