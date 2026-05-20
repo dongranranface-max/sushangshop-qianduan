@@ -42,6 +42,8 @@ jobs:
             ls -la
             exit 1
           fi
+          echo "TAR_SIZE=$(stat -c%s jixiang-qianduan-h5.tar.gz) bytes"
+          ls -lh jixiang-qianduan-h5.tar.gz
 
       - name: Deploy to Server
         run: |
@@ -50,5 +52,5 @@ jobs:
           ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
           echo '${{ secrets.DEPLOY_SSH_KEY }}' | base64 -d > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
-          scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key jixiang-qianduan-h5.tar.gz root@${{ secrets.DEPLOY_HOST }}:/tmp/
+          cat jixiang-qianduan-h5.tar.gz | ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key -o BatchMode=yes -o ConnectTimeout=30 root@${{ secrets.DEPLOY_HOST }} 'mkdir -p /www/jixiang-qianduan/h5 && tar -xzC /www/jixiang-qianduan/h5 && nginx -s reload'
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} "mkdir -p /www/jixiang-qianduan/h5 && cd /www/jixiang-qianduan/h5 && tar -xz && nginx -s reload"
