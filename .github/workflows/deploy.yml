@@ -34,23 +34,16 @@ jobs:
       - name: Find and package build output
         run: |
           set -e
-          if [ -d "unpackage/dist/build/h5" ]; then
-            echo "Using unpackage/dist/build/h5"
-            tar -czf jixiang-qianduan-h5.tar.gz -C unpackage/dist/build/h5 .
-          elif [ -d "dist/build/h5" ]; then
+          if [ -d "dist/build/h5" ]; then
             echo "Using dist/build/h5"
-            tar -czf jixiang-qianduan-h5.tar.gz -C dist/build/h5 .
           elif [ -d "dist" ]; then
             echo "Using dist"
-            tar -czf jixiang-qianduan-h5.tar.gz -C dist .
           else
             echo "ERROR: No build output found"
             ls -la
             exit 1
           fi
-          echo "TAR_SIZE=$(stat -c%s jixiang-qianduan-h5.tar.gz) bytes"
-          ls -lh jixiang-qianduan-h5.tar.gz
-          tar -tzf jixiang-qianduan-h5.tar.gz | head -5
+          echo "Build output verified"
 
       - name: Deploy to Server
         run: |
@@ -59,7 +52,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
           echo '${{ secrets.DEPLOY_SSH_KEY }}' | base64 -d > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} "mkdir -p /www/jixiang-qianduan/h5 && rm -rf /www/jixiang-qianduan/h5/* && ls -lh /www/jixiang-qianduan/h5/"
-          rsync -av --progress -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key -o Compression=no" jixiang-qianduan-h5.tar.gz root@${{ secrets.DEPLOY_HOST }}:/www/jixiang-qianduan/h5/jixiang-qianduan-h5.tar.gz
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} 'ls -lh /www/jixiang-qianduan/h5/jixiang-qianduan-h5.tar.gz && cd /www/jixiang-qianduan/h5 && tar -xzf jixiang-qianduan-h5.tar.gz && rm jixiang-qianduan-h5.tar.gz && ls -lh && nginx -s reload'
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} "mkdir -p /www/jixiang-qianduan/h5 && rm -rf /www/jixiang-qianduan/h5/*"
+          rsync -avz --progress -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key" dist/build/h5/ root@${{ secrets.DEPLOY_HOST }}:/www/jixiang-qianduan/h5/
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} 'ls -lh /www/jixiang-qianduan/h5/ && nginx -s reload'
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} "mkdir -p /www/jixiang-qianduan/h5 && cd /www/jixiang-qianduan/h5 && tar -xz && nginx -s reload"
