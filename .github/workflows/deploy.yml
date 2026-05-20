@@ -48,7 +48,7 @@ jobs:
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
-          echo '${{ secrets.DEPLOY_SSH_KEY }}' > /tmp/deploy_key
+          printf '%s\n' '${{ secrets.DEPLOY_SSH_KEY }}' > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
           scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key jixiang-qianduan-h5.tar.gz root@${{ secrets.DEPLOY_HOST }}:/tmp/
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} "mkdir -p /www/jixiang-qianduan/h5 && cd /www/jixiang-qianduan/h5 && tar -xz && nginx -s reload"
