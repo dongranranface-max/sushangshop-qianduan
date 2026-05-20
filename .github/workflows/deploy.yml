@@ -55,4 +55,3 @@ jobs:
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} "mkdir -p /www/jixiang-qianduan/h5 && rm -rf /www/jixiang-qianduan/h5/*"
           rsync -avz --progress -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key" dist/build/h5/ root@${{ secrets.DEPLOY_HOST }}:/www/jixiang-qianduan/h5/
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} 'ls -lh /www/jixiang-qianduan/h5/ && nginx -s reload'
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} "mkdir -p /www/jixiang-qianduan/h5 && cd /www/jixiang-qianduan/h5 && tar -xz && nginx -s reload"
