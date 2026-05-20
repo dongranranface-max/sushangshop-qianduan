@@ -154,7 +154,7 @@ export const userApi = {
   // 个人资料
   getProfile: () =>
     request<{
-      userId: string
+      id: string
       phone: string
       nickname: string
       avatar: string
@@ -182,7 +182,7 @@ export const userApi = {
     }>({ url: '/users/asset' }),
 
   // 绑定银行卡
-  bindBankCard: (data: { bankName: string; bankCard: string; realName: string; phone: string }) =>
+  bindBankCard: (data: { bankCard: string; bankName: string; realName: string }) =>
     request<any>({ url: '/users/bank-card', method: 'POST', data }),
 
   // 团队信息

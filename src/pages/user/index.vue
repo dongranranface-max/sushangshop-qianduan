@@ -235,17 +235,17 @@ async function loadUserData() {
     ])
     userInfo.value = {
       name: profile.nickname || profile.phone || '用户',
-      id: profile.userId || '',
+      id: profile.id || '',
       level: profile.level || 1,
       avatar: profile.avatar || '',
     }
     ecoPointsDisplay.value = Number(bal.ecoPoints || 0).toLocaleString()
     consumerPointsDisplay.value = Number(bal.consumerPoints || 0).toLocaleString()
     balanceDisplay.value = Number(bal.balance || 0).toFixed(2)
-    yesterdayProfit.value = bal.yesterdayProfit || '0.00'
-    levelName.value = bal.levelName || '新秀'
-    vipProgress.value = bal.vipProgress || 0
-    remainingPerformance.value = bal.remainingPerformance || 0
+    yesterdayProfit.value = '0.00'
+    levelName.value = profile.levelName || 'V1'
+    vipProgress.value = 0
+    remainingPerformance.value = Number(bal.teamPerformance || 0)
 
     loadOrderCounts()
   } catch (e) {
