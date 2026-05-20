@@ -37,6 +37,29 @@
         <text class="points-icon">💰</text>
         <text class="points-text">购买可得 {{ product.ecoPoints }} 生态积分</text>
       </view>
+
+      <!-- ========== 支付公式透明化（换购商品专属） ========== -->
+      <view class="settlement-formula" v-if="mode === 'exchange'">
+        <view class="formula-bar">
+          <text class="formula-icon">📐</text>
+          <text class="formula-text">
+            {{ product.totalPrice || product.price }}元 = 
+            <text class="formula-cash">{{ product.cashPrice || 0 }}元现金</text>
+            + 
+            <text class="formula-points">{{ product.requiredPoints || 0 }}生态积分</text>
+          </text>
+        </view>
+        <view class="reward-hint" v-if="product.ecoPoints">
+          <text class="reward-icon">🎁</text>
+          <text class="reward-text">下单预计返 {{ product.ecoPoints }} 消费积分</text>
+        </view>
+      </view>
+      <view class="settlement-formula" v-else-if="mode === 'consume' && product.ecoPoints">
+        <view class="formula-bar formula-simple">
+          <text class="formula-icon">🎁</text>
+          <text class="reward-text">下单得 {{ product.ecoPoints }} 生态积分</text>
+        </view>
+      </view>
     </view>
 
     <!-- SKU 选择 -->
@@ -260,6 +283,45 @@ function handleBuy() {
   .sku-label { font-size: 28rpx; color: var(--text-secondary); margin-right: var(--spacing-base); }
   .sku-content { flex: 1; font-size: 28rpx; color: var(--text-primary); }
   .sku-arrow { font-size: 32rpx; color: var(--text-muted); }
+}
+
+// 支付公式透明化
+.settlement-formula {
+  padding: var(--spacing-base) var(--spacing-lg);
+
+  .formula-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 16rpx 20rpx;
+    background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,212,255,0.04));
+    border: 1rpx solid rgba(0,212,255,0.20);
+    border-radius: var(--radius-md);
+    margin-bottom: 8rpx;
+
+    .formula-icon { font-size: 28rpx; }
+    .formula-text { font-size: 26rpx; color: var(--text-secondary); }
+    .formula-cash { color: var(--primary-light); font-weight: 700; }
+    .formula-points { color: var(--accent); font-weight: 700; }
+  }
+
+  .formula-simple {
+    background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,215,0,0.04));
+    border-color: rgba(255,215,0,0.20);
+  }
+
+  .reward-hint {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: 10rpx 20rpx;
+    background: rgba(255,107,53,0.08);
+    border: 1rpx solid rgba(255,107,53,0.15);
+    border-radius: var(--radius-md);
+
+    .reward-icon { font-size: 26rpx; }
+    .reward-text { font-size: 24rpx; color: var(--accent); font-weight: 600; }
+  }
 }
 
 .detail-section { padding: var(--spacing-base) var(--spacing-lg);
