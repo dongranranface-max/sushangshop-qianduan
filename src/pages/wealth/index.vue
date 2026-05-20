@@ -1,47 +1,41 @@
 <template>
   <view class="page-container">
-    <!-- 顶部安全区 -->
-    <view class="safe-area-top" :style="{ height: statusBarHeight + 'px' }"></view>
+    <!-- 顶部沉浸式资产状态栏 -->
+    <AssetStatusBar v-if="isLoggedIn" />
+    <view v-else class="safe-area-top" :style="{ height: statusBarHeight + 'px' }"></view>
     
     <!-- 页面标题 -->
-    <view class="page-header">
-      <text class="page-title">增值</text>
+    <view class="page-header" v-if="!isLoggedIn">
+      <text class="page-title">增值区</text>
     </view>
     
     <!-- 我的资产卡片 -->
     <view class="asset-card">
       <view class="asset-header">
-        <text class="asset-label">💰 我的资产</text>
-        <text class="asset-detail" @click="goAssetDetail">明细 ></text>
+        <text class="asset-label">💎 增值资产</text>
+        <text class="asset-detail" @click="goAssetDetail">明细 ›</text>
       </view>
       
       <view class="asset-values">
         <view class="asset-item">
           <text class="asset-value text-gold">{{ ecoPoints.toLocaleString() }}</text>
           <text class="asset-name">生态积分</text>
-          <text class="asset-sub">估值: ¥{{ (ecoPoints / 100).toFixed(2) }}</text>
+          <text class="asset-sub">≈ ¥{{ (ecoPoints / 100).toFixed(2) }}</text>
         </view>
         <view class="asset-divider"></view>
         <view class="asset-item">
-          <text class="asset-value text-purple">{{ creditPoints.toLocaleString() }}</text>
+          <text class="asset-value text-primary">{{ creditPoints.toLocaleString() }}</text>
           <text class="asset-name">消费积分</text>
-          <text class="asset-sub">可兑换免费商品</text>
+          <text class="asset-sub">可兑免费商品</text>
         </view>
       </view>
       
-      <view class="asset-actions">
-        <view class="action-btn" @click="goInvest">
-          <text class="action-icon">📈</text>
-          <text class="action-text">申购理财</text>
-        </view>
-        <view class="action-btn" @click="goMyInvest">
-          <text class="action-icon">📋</text>
-          <text class="action-text">我的理财</text>
-        </view>
-        <view class="action-btn" @click="goPointsDetail">
-          <text class="action-icon">📜</text>
-          <text class="action-text">积分明细</text>
-        </view>
+      <!-- 昨日分红大字 -->
+      <view class="yesterday-profit">
+        <text class="profit-chip-icon">🔥</text>
+        <text class="profit-chip-label">昨日分红</text>
+        <text class="profit-chip-value">+{{ yesterdayProfit.toFixed(2) }}</text>
+        <text class="profit-chip-unit">积分</text>
       </view>
     </view>
     
@@ -168,12 +162,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { walletApi, levelApi, financialApi } from '@/utils/api'
+import { isLoggedIn } from '@/utils/auth'
+import AssetStatusBar from '@/components/AssetStatusBar.vue'
 
 const statusBarHeight = ref(20)
-
-// 真实数据（API 接通前显示兜底值）
+const isLoggedInFlag = isLoggedIn()
 const ecoPoints = ref(0)
 const creditPoints = ref(0)
+const yesterdayProfit = ref(0)
 const loadingAsset = ref(false)
 const loadingProducts = ref(false)
 
@@ -210,6 +206,7 @@ async function loadAssetData() {
     const bal = await walletApi.getBalance()
     ecoPoints.value = Number(bal.ecoPoints || 0)
     creditPoints.value = Number(bal.consumerPoints || 0)
+    yesterdayProfit.value = Number(bal.yesterdayProfit || 0)
   } catch (e) {
     console.error('加载资产失败', e)
   } finally {
