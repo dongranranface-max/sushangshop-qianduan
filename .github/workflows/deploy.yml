@@ -32,10 +32,13 @@ jobs:
         run: |
           set -e
           if [ -d "unpackage/dist/build/h5" ]; then
+            echo "Using unpackage/dist/build/h5"
             tar -czf jixiang-qianduan-h5.tar.gz -C unpackage/dist/build/h5 .
           elif [ -d "dist/build/h5" ]; then
+            echo "Using dist/build/h5"
             tar -czf jixiang-qianduan-h5.tar.gz -C dist/build/h5 .
           elif [ -d "dist" ]; then
+            echo "Using dist"
             tar -czf jixiang-qianduan-h5.tar.gz -C dist .
           else
             echo "ERROR: No build output found"
@@ -44,6 +47,7 @@ jobs:
           fi
           echo "TAR_SIZE=$(stat -c%s jixiang-qianduan-h5.tar.gz) bytes"
           ls -lh jixiang-qianduan-h5.tar.gz
+          tar -tzf jixiang-qianduan-h5.tar.gz | head -5
 
       - name: Deploy to Server
         run: |
