@@ -59,7 +59,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
           echo '${{ secrets.DEPLOY_SSH_KEY }}' | base64 -d > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} "mkdir -p /www/jixiang-qianduan/h5 && rm -rf /www/jixiang-qianduan/h5/*"
-          rsync -av --progress -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key -o Compression=no" jixiang-qianduan-h5.tar.gz root@${{ secrets.DEPLOY_HOST }}:/tmp/jixiang-qianduan-h5.tar.gz
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} 'ls -lh /tmp/jixiang-qianduan-h5.tar.gz && cd /www/jixiang-qianduan/h5 && tar -tzf /tmp/jixiang-qianduan-h5.tar.gz | head -5 && tar -xzf /tmp/jixiang-qianduan-h5.tar.gz && rm /tmp/jixiang-qianduan-h5.tar.gz && nginx -s reload'
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} "mkdir -p /www/jixiang-qianduan/h5 && rm -rf /www/jixiang-qianduan/h5/* && ls -lh /www/jixiang-qianduan/h5/"
+          rsync -av --progress -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key -o Compression=no" jixiang-qianduan-h5.tar.gz root@${{ secrets.DEPLOY_HOST }}:/www/jixiang-qianduan/h5/jixiang-qianduan-h5.tar.gz
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} 'ls -lh /www/jixiang-qianduan/h5/jixiang-qianduan-h5.tar.gz && cd /www/jixiang-qianduan/h5 && tar -xzf jixiang-qianduan-h5.tar.gz && rm jixiang-qianduan-h5.tar.gz && ls -lh && nginx -s reload'
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} "mkdir -p /www/jixiang-qianduan/h5 && cd /www/jixiang-qianduan/h5 && tar -xz && nginx -s reload"
