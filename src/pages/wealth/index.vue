@@ -96,10 +96,19 @@
         </view>
       </view>
       
-      <view class="invest-list">
-        <view 
-          class="invest-card" 
-          v-for="project in investProjects" 
+      <!-- 加载骨架屏 -->
+      <HomeProductSkeleton v-if="loadingProducts" :count="3" />
+      <!-- 空状态 -->
+      <view v-else-if="!investProjects.length" class="invest-empty">
+        <text class="empty-icon">理</text>
+        <text class="empty-text">暂无理财项目</text>
+        <text class="empty-hint">平台正在加紧上架，敬请期待</text>
+      </view>
+      <!-- 理财列表 -->
+      <view v-else class="invest-list">
+        <view
+          class="invest-card"
+          v-for="project in investProjects"
           :key="project.id"
           @click="goProjectDetail(project)"
         >
@@ -172,6 +181,7 @@ import { onShow } from '@dcloudio/uni-app'
 import { walletApi, levelApi, financialApi } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
 import AssetStatusBar from '@/components/AssetStatusBar.vue'
+import HomeProductSkeleton from '@/components/HomeProductSkeleton.vue'
 
 const statusBarHeight = ref(20)
 const loggedIn = ref(checkAuth())
@@ -646,6 +656,42 @@ function goProjectDetail(project: any) {
   
   .arrow {
     margin-left: 4rpx;
+  }
+}
+
+.invest-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 40rpx;
+  @include premium-surface($bg-secondary);
+  border-radius: $radius-xl;
+
+  .empty-icon {
+    width: 96rpx;
+    height: 96rpx;
+    line-height: 96rpx;
+    text-align: center;
+    font-size: 40rpx;
+    font-weight: var(--weight-heavy);
+    background: $warm-yellow;
+    border: 1rpx solid $border-primary;
+    border-radius: 50%;
+    color: $navy;
+    margin-bottom: 24rpx;
+  }
+
+  .empty-text {
+    font-size: var(--font-card-title);
+    font-weight: var(--weight-semibold);
+    color: $text-primary;
+    margin-bottom: 8rpx;
+  }
+
+  .empty-hint {
+    font-size: var(--font-sm);
+    color: $text-muted;
   }
 }
 

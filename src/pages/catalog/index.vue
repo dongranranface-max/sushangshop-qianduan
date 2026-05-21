@@ -20,6 +20,13 @@
       </view>
     </view>
 
+    <!-- 未登录时简化资产提示条 -->
+    <view v-if="!loggedIn" class="guest-asset-strip" @click="goLogin">
+      <text class="strip-icon">积</text>
+      <text class="strip-text">登录后查看资产，享积分抵现</text>
+      <text class="strip-arrow">›</text>
+    </view>
+
     <!-- 商城类型切换 -->
     <view class="mall-tabs">
       <view
@@ -72,10 +79,8 @@
 
       <!-- 右侧商品列表 -->
       <scroll-view class="product-list" scroll-y @scrolltolower="loadMore">
-        <!-- 加载中 -->
-        <view v-if="loading" class="loading-wrap">
-          <text class="loading-text">加载中...</text>
-        </view>
+        <!-- 加载中骨架屏 -->
+        <HomeProductSkeleton v-if="loading" :count="4" />
 
         <!-- 空状态 -->
         <view v-else-if="products.length === 0" class="empty-wrap">
@@ -135,6 +140,7 @@ import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
 import AssetStatusBar from '@/components/AssetStatusBar.vue'
 import BrandLogo from '@/components/BrandLogo.vue'
+import HomeProductSkeleton from '@/components/HomeProductSkeleton.vue'
 
 const statusBarHeight = ref(20)
 const loggedIn = ref(checkAuth())
@@ -282,6 +288,10 @@ function loadMore() {
 function goProduct(p: any) {
   uni.navigateTo({ url: `/pages/product/detail?id=${p.id}&type=${currentType.value}` })
 }
+
+function goLogin() {
+  uni.navigateTo({ url: '/pages/auth/login' })
+}
 </script>
 
 <style lang="scss" scoped>
@@ -298,6 +308,44 @@ function goProduct(p: any) {
 
 .page-header {
   padding: 8rpx $spacing-base 0;
+}
+
+// 未登录资产感知条
+guest-asset-strip {
+  display: flex;
+  align-items: center;
+  margin: 0 $spacing-base $spacing-base;
+  padding: 16rpx 24rpx;
+  background: $warm-yellow;
+  border: 1rpx solid $border-primary;
+  border-radius: $radius-lg;
+
+  .strip-icon {
+    width: 40rpx;
+    height: 40rpx;
+    line-height: 40rpx;
+    text-align: center;
+    background: $navy;
+    color: $gold-light;
+    border-radius: 50%;
+    font-size: 20rpx;
+    font-weight: var(--weight-heavy);
+    flex-shrink: 0;
+    margin-right: 12rpx;
+  }
+
+  .strip-text {
+    flex: 1;
+    font-size: var(--font-sm);
+    color: $accent-dark;
+    font-weight: var(--weight-medium);
+  }
+
+  .strip-arrow {
+    font-size: 28rpx;
+    color: $accent-dark;
+    flex-shrink: 0;
+  }
 }
 
 .search-bar {
@@ -435,7 +483,8 @@ function goProduct(p: any) {
 
   .product-image {
     width: 100%;
-    height: 300rpx;
+    aspect-ratio: 4 / 3;
+    display: block;
     background: $bg-tertiary;
   }
 
@@ -445,10 +494,13 @@ function goProduct(p: any) {
     .product-name {
       font-size: 26rpx;
       color: var(--text-primary);
-      display: block;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
+      white-space: normal;
+      line-height: 1.4;
       margin-bottom: 12rpx;
     }
 

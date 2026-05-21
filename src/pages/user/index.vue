@@ -250,7 +250,7 @@ async function loadUserData() {
     ecoPointsDisplay.value = Number(bal.ecoPoints || 0).toLocaleString()
     consumerPointsDisplay.value = Number(bal.consumerPoints || 0).toLocaleString()
     balanceDisplay.value = Number(bal.balance || 0).toFixed(2)
-    yesterdayProfit.value = '0.00'
+    yesterdayProfit.value = Number(bal.yesterdayProfit || bal.todayEarnings || 0).toFixed(2)
     levelName.value = profile.levelName || 'V1'
     vipProgress.value = 0
     remainingPerformance.value = Number(bal.teamPerformance || 0)
@@ -368,8 +368,23 @@ function showComing() { uni.showToast({ title: '功能开发中', icon: 'none' }
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, var(--primary), var(--primary-light), var(--primary));
+  // 兼容方案：用线性渐变旋转模拟 conic-gradient 效果
+  background: linear-gradient(
+    var(--primary),
+    var(--primary-light),
+    var(--navy-muted),
+    var(--primary)
+  );
   animation: ring-spin 4s linear infinite;
+  // 兼容：不支持 conic-gradient 时保持静态渐变
+  @supports (background: conic-gradient(red, blue)) {
+    background: conic-gradient(
+      from 0deg,
+      var(--primary) 0deg,
+      var(--primary-light) 120deg,
+      var(--primary) 240deg
+    );
+  }
 }
 
 @keyframes ring-spin {
@@ -620,7 +635,10 @@ function showComing() { uni.showToast({ title: '功能开发中', icon: 'none' }
 .tools-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16rpx;
+  gap: 1rpx;
+  background: $border-light;
+  border-radius: $radius-xl;
+  overflow: hidden;
   margin-bottom: 20rpx;
 }
 
@@ -630,11 +648,15 @@ function showComing() { uni.showToast({ title: '功能开发中', icon: 'none' }
   flex-direction: column;
   align-items: center;
   gap: 10rpx;
-  padding: 20rpx 8rpx;
+  padding: 24rpx 8rpx;
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
-  border: 1rpx solid var(--glass-border);
-  border-radius: var(--radius-lg);
+  border: none;
+  border-radius: 0;
+  &:first-child { border-radius: $radius-xl 0 0 0; }
+  &:nth-child(4) { border-radius: 0 $radius-xl 0 0; }
+  &:nth-child(5) { border-radius: 0 0 0 $radius-xl; }
+  &:last-child { border-radius: 0 0 $radius-xl 0; }
 
   &:active {
     border-color: rgba(201,162,39,0.4);
@@ -764,6 +786,19 @@ function showComing() { uni.showToast({ title: '功能开发中', icon: 'none' }
   justify-content: space-between;
   margin-bottom: 24rpx;
   position: relative;
+
+  // 连接线
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 40rpx;
+    right: 40rpx;
+    height: 2rpx;
+    background: $border-primary;
+    z-index: 0;
+    transform: translateY(-50%);
+  }
 }
 
 .energy-orb {

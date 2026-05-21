@@ -4,6 +4,13 @@
     <AssetStatusBar v-if="loggedIn" />
     <view v-else class="safe-area-top" :style="{ height: statusBarHeight + 'px' }"></view>
     
+    <!-- 未登录时简化资产提示条 -->
+    <view v-if="!loggedIn" class="guest-asset-strip" @click="goLogin">
+      <text class="strip-icon">积</text>
+      <text class="strip-text">登录后查看资产，享积分抵现</text>
+      <text class="strip-arrow">›</text>
+    </view>
+
     <!-- 页面标题 -->
     <view class="page-header">
       <text class="page-title">购物车</text>
@@ -266,6 +273,10 @@ function goShop() {
   uni.switchTab({ url: '/pages/buy/index' })
 }
 
+function goLogin() {
+  uni.navigateTo({ url: '/pages/auth/login' })
+}
+
 function goProduct(id: number) {
   uni.navigateTo({ url: `/pages/product/detail?id=${id}` })
 }
@@ -285,6 +296,44 @@ function goCheckout() {
 
 .page-container {
   @include tab-page-shell;
+}
+
+// 未登录资产感知条
+guest-asset-strip {
+  display: flex;
+  align-items: center;
+  margin: 0 $spacing-base $spacing-base;
+  padding: 16rpx 24rpx;
+  background: $warm-yellow;
+  border: 1rpx solid $border-primary;
+  border-radius: $radius-lg;
+
+  .strip-icon {
+    width: 40rpx;
+    height: 40rpx;
+    line-height: 40rpx;
+    text-align: center;
+    background: $navy;
+    color: $gold-light;
+    border-radius: 50%;
+    font-size: 20rpx;
+    font-weight: var(--weight-heavy);
+    flex-shrink: 0;
+    margin-right: 12rpx;
+  }
+
+  .strip-text {
+    flex: 1;
+    font-size: var(--font-sm);
+    color: $accent-dark;
+    font-weight: var(--weight-medium);
+  }
+
+  .strip-arrow {
+    font-size: 28rpx;
+    color: $accent-dark;
+    flex-shrink: 0;
+  }
 }
 
 .page-header {
@@ -484,7 +533,7 @@ function goCheckout() {
   left: 0;
   right: 0;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   padding: 16rpx 32rpx;
   padding-bottom: calc(16rpx + constant(safe-area-inset-bottom));
   padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
@@ -492,7 +541,7 @@ function goCheckout() {
   backdrop-filter: blur(20px);
   border-top: 1rpx solid $border-light;
   box-shadow: 0 -8rpx 32rpx rgba(26, 36, 56, 0.06);
-  
+
   .select-all {
     display: flex;
     align-items: center;
@@ -518,6 +567,29 @@ function goCheckout() {
       background: $navy;
       border-color: $navy;
       color: $text-inverse;
+    }
+  }
+
+  .settlement-formula {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    padding: 10rpx 20rpx;
+    margin-bottom: 12rpx;
+    background: linear-gradient(135deg, $warm-yellow 0%, rgba(255,215,0,0.15) 100%);
+    border: 1rpx solid rgba(201,162,39,0.3);
+    border-radius: $radius-lg;
+    font-size: var(--font-sm);
+
+    .formula-label {
+      font-weight: var(--weight-bold);
+      color: $navy;
+      font-size: var(--font-caption);
+    }
+
+    .formula-value {
+      color: $accent-dark;
+      font-weight: var(--weight-semibold);
     }
   }
 
