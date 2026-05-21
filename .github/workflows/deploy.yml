@@ -32,6 +32,7 @@ jobs:
         run: |
           rm -rf dist build
           npm run build:h5
+          npm run verify:h5
 
       - name: Find and package build output
         run: |
@@ -55,5 +56,5 @@ jobs:
           echo '${{ secrets.DEPLOY_SSH_KEY }}' | base64 -d > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} "mkdir -p /www/jixiang-qianduan/h5 && rm -rf /www/jixiang-qianduan/h5/*"
-          rsync -avz --progress -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key" dist/build/h5/ root@${{ secrets.DEPLOY_HOST }}:/www/jixiang-qianduan/h5/
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} 'ls -lh /www/jixiang-qianduan/h5/ && nginx -s reload'
+          rsync -avz --delete --progress -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key" dist/build/h5/ root@${{ secrets.DEPLOY_HOST }}:/www/jixiang-qianduan/h5/
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/deploy_key root@${{ secrets.DEPLOY_HOST }} 'ls -lh /www/jixiang-qianduan/h5/assets/ | head -20 && nginx -s reload'

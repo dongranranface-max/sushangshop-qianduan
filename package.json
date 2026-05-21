@@ -6,8 +6,10 @@
     "postinstall": "node scripts/optimize-assets.mjs",
     "optimize:assets": "node scripts/optimize-assets.mjs",
     "dev:h5": "uni -p h5",
-    "preview:h5": "npm run build:h5 && npx --yes serve dist/build/h5 -s -l 5173",
     "build:h5": "uni build -p h5 && node scripts/fix-glob.js",
+    "preview:mall": "npm run build:h5 && node scripts/preview-mall.mjs",
+    "preview:h5": "npm run preview:mall",
+    "verify:h5": "node scripts/verify-h5-build.mjs",
     "dev:mp-weixin": "uni -p mp-weixin",
     "build:mp-weixin": "uni build -p mp-weixin"
   },
