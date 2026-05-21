@@ -104,7 +104,7 @@
     </view>
     
     <!-- 底部操作栏 -->
-    <view class="bottom-bar" v-if="cartItems.length > 0">
+    <view class="bottom-bar" v-if="cartItems.length > 0 && selectedCount > 0">
       <!-- 混合结算公式 -->
       <view class="settlement-formula" v-if="selectedCount > 0">
         <text class="formula-label">混合结算</text>
@@ -118,7 +118,7 @@
         <view class="total-info">
           <view class="total-row">
             <text class="total-label">合计:</text>
-            <text class="total-price">¥{{ totalPrice }}</text>
+            <text class="total-price">¥{{ Number(totalPrice).toFixed(2) }}</text>
           </view>
           <view class="points-row" v-if="totalPoints > 0">
             <text class="points-label">+{{ totalPoints }}积分</text>
@@ -175,13 +175,13 @@ const cartItems = ref<CartItem[]>([
 
 const consumeItems = computed(() => cartItems.value.filter(i => i.mall === 'consume'))
 const exchangeItems = computed(() => cartItems.value.filter(i => i.mall === 'exchange'))
+// redeemItems: 预留兑换商城商品，目前未在模板中渲染
 const redeemItems = computed(() => cartItems.value.filter(i => i.mall === 'redeem'))
 
 const totalPrice = computed(() => {
   return cartItems.value
     .filter(i => i.selected)
     .reduce((sum, i) => sum + i.price * i.quantity, 0)
-    .toFixed(2)
 })
 
 const totalCashDisplay = computed(() => {
@@ -193,13 +193,13 @@ const totalCashDisplay = computed(() => {
 
 const totalPointsDisplay = computed(() => {
   return cartItems.value
-    .filter(i => i.selected && i.mall === 'consume')
+    .filter(i => i.selected && i.points > 0)
     .reduce((sum, i) => sum + i.points * i.quantity, 0)
 })
 
 const totalPoints = computed(() => {
   return cartItems.value
-    .filter(i => i.selected && i.mall === 'consume')
+    .filter(i => i.selected && i.points > 0)
     .reduce((sum, i) => sum + i.points * i.quantity, 0)
 })
 

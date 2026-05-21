@@ -22,7 +22,9 @@
             <text class="user-name">{{ userInfo.name || '游客' }}</text>
             <!-- 会员能量徽章 -->
             <view class="member-badge" :class="'v' + (userInfo.level || 1)">
-              <text class="badge-text">V{{ userInfo.level || 1 }}</text>
+              <text class="badge-text" :class="{ 'badge-wide': String(userInfo.level || 1).length > 1 }">
+                V{{ userInfo.level || 1 }}
+              </text>
             </view>
           </view>
           <text class="user-id">ID: {{ shortId }}</text>
@@ -190,6 +192,7 @@ const consumerPointsDisplay = ref('0')
 const balanceDisplay = ref('0.00')
 const yesterdayProfit = ref('0.00')
 const vipProgress = ref(0)
+const isDataLoading = ref(false)
 const remainingPerformance = ref(0)
 const levelName = ref('')
 const orderCounts = ref<any>({ pending: 0, shipped: 0, received: 0, completed: 0 })
@@ -221,6 +224,7 @@ const menuItems = [
 
 const shortId = computed(() => {
   const id = userInfo.value.id || ''
+  if (!id) return ''
   return id.length > 8 ? id.slice(0, 8) + '...' : id
 })
 
@@ -232,10 +236,22 @@ onMounted(() => {
 
 onShow(() => {
   loggedIn.value = checkAuth()
-  if (loggedIn.value) loadUserData()
+  if (!loggedIn.value) {
+    userInfo.value = { name: '', id: '', level: 1, avatar: '' }
+    ecoPointsDisplay.value = '0'
+    consumerPointsDisplay.value = '0'
+    balanceDisplay.value = '0.00'
+    yesterdayProfit.value = '0.00'
+    vipProgress.value = 0
+    remainingPerformance.value = 0
+    levelName.value = ''
+    return
+  }
+  loadUserData()
 })
 
 async function loadUserData() {
+  isDataLoading.value = true
   try {
     const [profile, bal] = await Promise.all([
       userApi.getProfile(),
@@ -252,12 +268,17 @@ async function loadUserData() {
     balanceDisplay.value = Number(bal.balance || 0).toFixed(2)
     yesterdayProfit.value = Number(bal.yesterdayProfit || bal.todayEarnings || 0).toFixed(2)
     levelName.value = profile.levelName || 'V1'
-    vipProgress.value = 0
-    remainingPerformance.value = Number(bal.teamPerformance || 0)
+    const myPerformance = Number(bal.teamPerformance || 0)
+    const target = Number(data.minPerformance || 5000)
+    vipProgress.value = target > 0 ? Math.min(100, (myPerformance / target) * 100) : 0
+    remainingPerformance.value = Math.max(0, target - myPerformance)
 
     loadOrderCounts()
   } catch (e) {
     console.error('加载失败', e)
+    uni.showToast({ title: '加载失败，请下拉刷新', icon: 'none' })
+  } finally {
+    isDataLoading.value = false
   }
 }
 
@@ -268,7 +289,7 @@ async function loadOrderCounts() {
       statuses.map(s => orderApi.getList({ status: getStatusCode(s), limit: 1 }))
     )
     results.forEach((res: any, i) => {
-      orderCounts.value[statuses[i]] = res.total || 0
+      orderCounts.value[statuses[i]] = Number(res?.total ?? 0)
     })
   } catch (e) {
     console.error('订单计数失败', e)
@@ -402,6 +423,30 @@ function showComing() { uni.showToast({ title: '功能开发中', icon: 'none' }
   align-items: center;
   gap: 12rpx;
   margin-bottom: 6rpx;
+}
+
+// 会员徽章
+.member-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48rpx;
+  height: 36rpx;
+  padding: 0 8rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, $gold, $accent-dark);
+
+  .badge-text {
+    font-size: 20rpx;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #fff;
+
+    &.badge-wide {
+      font-size: 18rpx;
+      letter-spacing: 0.02em;
+    }
+  }
 }
 
 .user-name {

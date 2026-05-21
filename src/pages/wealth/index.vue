@@ -9,8 +9,27 @@
       <text class="page-title">增值区</text>
     </view>
     
+    <!-- 资产加载骨架屏 -->
+    <view class="asset-card" v-if="loadingAsset">
+      <view class="asset-header">
+        <view class="sk-line sk-short"></view>
+        <view class="sk-line sk-short"></view>
+      </view>
+      <view class="asset-values">
+        <view class="asset-item">
+          <view class="sk-value"></view>
+          <view class="sk-line sk-full"></view>
+        </view>
+        <view class="asset-divider"></view>
+        <view class="asset-item">
+          <view class="sk-value"></view>
+          <view class="sk-line sk-full"></view>
+        </view>
+      </view>
+    </view>
+
     <!-- 我的资产卡片 -->
-    <view class="asset-card">
+    <view class="asset-card" v-else>
       <view class="asset-header">
         <text class="asset-label">增值资产</text>
         <text class="asset-detail" @click="goAssetDetail">明细 ›</text>
@@ -71,7 +90,7 @@
         <view class="progress-bar">
           <view
             class="progress-fill"
-            :style="{ width: levelProgressPct + '%' }"
+            :style="{ width: (levelData.progressPct || levelProgressPct) + '%' }"
           />
         </view>
         <view class="progress-tip">
@@ -98,6 +117,12 @@
       
       <!-- 加载骨架屏 -->
       <HomeProductSkeleton v-if="loadingProducts" :count="3" />
+      <!-- 加载失败状态 -->
+      <view v-else-if="loadError" class="invest-empty" @click="loadFinancialProducts">
+        <text class="empty-icon">理</text>
+        <text class="empty-text">加载失败</text>
+        <text class="empty-hint">点击重试</text>
+      </view>
       <!-- 空状态 -->
       <view v-else-if="!investProjects.length" class="invest-empty">
         <text class="empty-icon">理</text>
@@ -190,6 +215,7 @@ const creditPoints = ref(0)
 const yesterdayProfit = ref(0)
 const loadingAsset = ref(false)
 const loadingProducts = ref(false)
+const loadError = ref(false)
 
 const levelData = ref({
   badge: '级',
@@ -198,7 +224,8 @@ const levelData = ref({
   current: 0,
   target: 5000,
   dailyDividend: '0',
-  nextLevel: null as { name: string; target: number } | null
+  nextLevel: null as { name: string; target: number } | null,
+  progressPct: 0
 })
 
 const investProjects = ref<any[]>([])
@@ -243,7 +270,7 @@ async function loadAssetData() {
     const bal = await walletApi.getBalance()
     ecoPoints.value = Number(bal.ecoPoints || 0)
     creditPoints.value = Number(bal.consumerPoints || 0)
-    yesterdayProfit.value = Number(bal.yesterdayProfit || 0)
+    yesterdayProfit.value = Number(bal?.yesterdayProfit ?? bal?.todayEarnings ?? 0)
   } catch (e) {
     console.error('加载资产失败', e)
   } finally {
@@ -254,16 +281,19 @@ async function loadAssetData() {
 async function loadLevelData() {
   try {
     const data = await levelApi.getMyLevel()
+    const current = Number(data.teamPerformance || 0)
+    const target = Number(data.minPerformance || 5000)
     levelData.value = {
       badge: data.icon || '级',
       name: data.levelName || 'V1',
       title: data.levelName || '普通会员',
-      current: Number(data.teamPerformance || 0),
-      target: Number(data.minPerformance || 5000),
+      current,
+      target,
       dailyDividend: data.dailyBonus || '0',
       nextLevel: data.nextLevelName
         ? { name: data.nextLevelName, target: Number(data.nextMinPerformance || 0) }
         : null,
+      progressPct: target > 0 ? Math.min(100, (current / target) * 100) : 0,
     }
   } catch (e) {
     console.error('加载等级失败', e)
@@ -272,9 +302,10 @@ async function loadLevelData() {
 
 async function loadFinancialProducts() {
   loadingProducts.value = true
+  loadError.value = false
   try {
     const products = await financialApi.getProducts()
-    investProjects.value = (products || []).map((p: any) => ({
+    investProjects.value = ((products || []) as any[]).map((p) => ({
       id: p.id,
       name: p.name,
       icon: p.rateType === 1 ? '活' : p.rateType === 2 ? '稳' : '全',
@@ -288,6 +319,7 @@ async function loadFinancialProducts() {
     }))
   } catch (e) {
     console.error('加载理财项目失败', e)
+    loadError.value = true
   } finally {
     loadingProducts.value = false
   }
@@ -299,14 +331,6 @@ function goAssetDetail() {
 
 function goInvest() {
   uni.navigateTo({ url: '/pages/wealth/invest' })
-}
-
-function goMyInvest() {
-  uni.navigateTo({ url: '/pages/wealth/my-invest' })
-}
-
-function goPointsDetail() {
-  uni.navigateTo({ url: '/pages/user/points-detail' })
 }
 
 function goInvestList() {
@@ -338,6 +362,40 @@ function goProjectDetail(project: any) {
   .page-title {
     @include page-title-text;
   }
+}
+
+// 资产骨架屏
+.asset-card.sk-loading {
+  background: linear-gradient(135deg, rgba(26,36,56,0.4) 0%, rgba(26,36,56,0.3) 100%);
+  border: 1rpx solid rgba(196,165,116,0.2);
+
+  .sk-line {
+    height: 24rpx;
+    background: rgba(255,255,255,0.12);
+    border-radius: 8rpx;
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+
+  .sk-short { width: 40%; }
+  .sk-full { width: 80%; margin-top: 12rpx; }
+
+  .asset-item {
+    text-align: center;
+
+    .sk-value {
+      width: 120rpx;
+      height: 56rpx;
+      background: rgba(255,255,255,0.12);
+      border-radius: 8rpx;
+      margin: 0 auto 12rpx;
+      animation: shimmer 1.4s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
 }
 
 .asset-card {
