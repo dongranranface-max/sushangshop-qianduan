@@ -173,7 +173,7 @@ function goBack() {
 }
 
 function useCoupon(_coupon: Coupon) {
-  uni.switchTab({ url: '/pages/buy/index' })
+  uni.navigateTo({ url: '/pages/buy/index' })
 }
 
 function formatDate(dateStr: string | undefined): string {

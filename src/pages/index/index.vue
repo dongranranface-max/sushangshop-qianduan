@@ -30,8 +30,8 @@
           :interval="4500"
         >
           <swiper-item v-for="(b, i) in banners" :key="i">
-            <view class="banner__slide" @click="onBanner(i)">
-              <image class="banner__img" :src="b.image" mode="aspectFill" :lazy-load="i > 0" />
+            <view class="banner__slide" :class="'banner__slide--' + (b.theme || 'consume')" @click="onBanner(i)">
+              <image v-if="b.image" class="banner__img" :src="b.image" mode="aspectFill" :lazy-load="i > 0" />
               <view class="banner__shade" />
               <view class="banner__content">
                 <text v-if="b.tag" class="banner__tag">{{ b.tag }}</text>
@@ -146,6 +146,7 @@ import type { PortalType } from '@/components/MallPortalGrid.vue'
 import HomeCategoryNav from '@/components/HomeCategoryNav.vue'
 import type { HomeCategory } from '@/utils/category'
 import { normalizeCategoryTree, flattenCategories, HOME_CATEGORY_FALLBACK } from '@/utils/category'
+import { HOME_BANNERS, DEFAULT_PRODUCT_COVER } from '@/utils/media'
 import HomeAssetStrip from '@/components/HomeAssetStrip.vue'
 import HomeProductCard from '@/components/HomeProductCard.vue'
 import HomeProductSkeleton from '@/components/HomeProductSkeleton.vue'
@@ -166,40 +167,13 @@ let categoriesLoadSeq = 0
 const consumeList = ref<any[]>([])
 const exchangeList = ref<any[]>([])
 const redeemList = ref<any[]>([])
-const defaultCover = 'https://picsum.photos/300/300?random=home'
+const defaultCover = DEFAULT_PRODUCT_COVER
+const banners = [...HOME_BANNERS]
 
 const searchHints = ['搜索商品、品牌', '搜索换购好物', '搜索积分兑换礼']
 const searchHintIdx = ref(0)
 let searchTimer: ReturnType<typeof setInterval> | null = null
 const searchHint = computed(() => searchHints[searchHintIdx.value])
-
-/** 16:9 专题图 + 底部文案区（由 API 替换 image 即可） */
-const banners = [
-  {
-    image: 'https://picsum.photos/id/225/1200/675',
-    link: 'consume',
-    tag: '新人专享',
-    title: '悦享消费 · 智蕴资产 · 积分抵现',
-    sub: '消费商城热卖 · 确认收货返生态积分',
-    cta: '去逛逛',
-  },
-  {
-    image: 'https://picsum.photos/id/119/1200/675',
-    link: 'exchange',
-    tag: '省钱换购',
-    title: '积分抵现更划算',
-    sub: '绑定银行卡 · 生态积分换算好物',
-    cta: '去看看',
-  },
-  {
-    image: 'https://picsum.photos/id/164/1200/675',
-    link: 'wealth',
-    tag: '12%+ 年化',
-    title: '增值专区理财',
-    sub: '每日收益 · 等级分红 · 资产稳健增值',
-    cta: '了解详情',
-  },
-]
 
 const feedTabs = [
   { type: 1 as const, label: '精选消费', abbr: '购' },
@@ -477,6 +451,20 @@ function onPortal(type: PortalType) {
   position: relative;
   width: 100%;
   height: 100%;
+  background: linear-gradient(135deg, #f7f3eb 0%, #e8dcc8 45%, #c9a227 100%);
+
+  &--exchange {
+    background: linear-gradient(135deg, #eef1f5 0%, #d4dce8 50%, #9a7b4f 100%);
+  }
+
+  &--wealth {
+    background: linear-gradient(135deg, #1a2438 0%, #2d3a52 55%, #9a7b4f 100%);
+  }
+
+  &--wealth .banner__title,
+  &--wealth .banner__sub {
+    color: #f5f4f1;
+  }
 }
 .banner__img {
   position: absolute;

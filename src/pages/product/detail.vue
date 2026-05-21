@@ -140,8 +140,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { productApi } from '@/utils/api'
-import { requireAuth } from '@/utils/auth'
+import { productApi, cartApi } from '@/utils/api'
+import { requireAuth, checkAuth } from '@/utils/auth'
+import { resolveProductCover } from '@/utils/media'
 
 const statusBarHeight = ref(20)
 const currentTab = ref('detail')
@@ -166,7 +167,7 @@ const productImages = computed(() => {
   if (imgs.length > 0) return imgs
   const cover = product.value.coverImage
   if (cover) return [cover]
-  return ['https://picsum.photos/750/750?random=99']
+  return [resolveProductCover(product.value)]
 })
 
 const modeLabel = computed(() => ({
@@ -195,8 +196,19 @@ onMounted(() => {
 
   if (productId.value) {
     loadProduct()
+    loadCartCount()
   }
 })
+
+async function loadCartCount() {
+  if (!checkAuth()) return
+  try {
+    const res = await cartApi.count()
+    cartCount.value = res.count || 0
+  } catch {
+    cartCount.value = 0
+  }
+}
 
 async function loadProduct() {
   try {
@@ -212,8 +224,17 @@ function goHome() { uni.switchTab({ url: '/pages/index/index' }) }
 function goCart() { uni.switchTab({ url: '/pages/cart/index' }) }
 function share() { uni.showShareMenu() }
 
-function handleAddCart() {
-  showSkuModal.value = true
+async function handleAddCart() {
+  if (!requireAuth()) return
+  if (!productId.value) return
+  try {
+    await cartApi.add({ productId: productId.value, quantity: quantity.value })
+    cartCount.value++
+    uni.showToast({ title: '已加入购物车', icon: 'success' })
+    showSkuModal.value = false
+  } catch (e: any) {
+    uni.showToast({ title: e.message || '加入失败', icon: 'none' })
+  }
 }
 
 function handleBuy() {

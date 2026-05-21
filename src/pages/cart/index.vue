@@ -38,9 +38,9 @@
           <view class="item-select" @click="toggleSelect(item.id)">
             <text :class="item.selected ? 'checkbox-checked' : 'checkbox'">✓</text>
           </view>
-          <image class="item-image" :src="item.image" mode="aspectFill" @click="goProduct(item.id)" />
+          <image class="item-image" :src="item.image" mode="aspectFill" @click="goProduct(item.productId)" />
           <view class="item-info">
-            <text class="item-name" @click="goProduct(item.id)">{{ item.name }}</text>
+            <text class="item-name" @click="goProduct(item.productId)">{{ item.name }}</text>
             <view class="item-tags">
               <text v-if="item.mallType === 'flash'" class="tag tag-green">限时</text>
             </view>
@@ -133,22 +133,20 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { checkAuth } from '@/utils/auth'
+import { checkAuth, requireAuth } from '@/utils/auth'
+import { cartApi } from '@/utils/api'
+import { resolveProductCover } from '@/utils/media'
 import { assetStore } from '@/store/asset'
 import AssetStatusBar from '@/components/AssetStatusBar.vue'
 
 const statusBarHeight = ref(20)
 const loggedIn = ref(checkAuth())
 const isEditMode = ref(false)
-
-onShow(() => {
-  loggedIn.value = checkAuth()
-  statusBarHeight.value = uni.getSystemInfoSync().statusBarHeight || 20
-  if (loggedIn.value) assetStore.fetchBalance()
-})
+const loading = ref(false)
 
 interface CartItem {
-  id: number
+  id: string
+  productId: string
   name: string
   price: number
   points: number
@@ -156,15 +154,45 @@ interface CartItem {
   image: string
   selected: boolean
   mall: 'consume' | 'exchange' | 'redeem'
-  mallType?: 'flash'
+  productType?: number
 }
 
-const cartItems = ref<CartItem[]>([
-  { id: 1, name: 'iPhone 15 Pro Max 256GB 深空黑', price: 9999, points: 500, quantity: 1, image: 'https://picsum.photos/200/200?random=110', selected: false, mall: 'consume' },
-  { id: 2, name: 'AirPods Pro 2 代 MagSafe充电盒', price: 1899, points: 95, quantity: 2, image: 'https://picsum.photos/200/200?random=111', selected: false, mall: 'consume' },
-  { id: 3, name: '戴森吹风机 HD15 紫红色', price: 2999, points: 150, quantity: 1, image: 'https://picsum.photos/200/200?random=112', selected: false, mall: 'exchange' },
-  { id: 4, name: '小米手环 8 Pro 石墨黑', price: 399, points: 20, quantity: 1, image: 'https://picsum.photos/200/200?random=113', selected: false, mall: 'consume', mallType: 'flash' }
-])
+const cartItems = ref<CartItem[]>([])
+
+onShow(() => {
+  loggedIn.value = checkAuth()
+  statusBarHeight.value = uni.getSystemInfoSync().statusBarHeight || 20
+  if (loggedIn.value) {
+    assetStore.fetchBalance()
+    loadCart()
+  } else {
+    cartItems.value = []
+  }
+})
+
+async function loadCart() {
+  if (!checkAuth()) return
+  loading.value = true
+  try {
+    const res = await cartApi.list()
+    cartItems.value = (res.list || []).map((row: any) => ({
+      id: row.id,
+      productId: row.productId,
+      name: row.name,
+      price: Number(row.price),
+      points: Number(row.points || 0),
+      quantity: row.quantity,
+      image: resolveProductCover(row),
+      selected: !!row.selected,
+      mall: row.mall,
+      productType: row.productType,
+    }))
+  } catch (e: any) {
+    uni.showToast({ title: e.message || '加载失败', icon: 'none' })
+  } finally {
+    loading.value = false
+  }
+}
 
 const consumeItems = computed(() => cartItems.value.filter(i => i.mall === 'consume'))
 const exchangeItems = computed(() => cartItems.value.filter(i => i.mall === 'exchange'))
@@ -198,9 +226,15 @@ const totalPoints = computed(() => {
 
 const selectedCount = computed(() => cartItems.value.filter(i => i.selected).length)
 
-function toggleSelect(id: number) {
-  const item = cartItems.value.find(i => i.id === id)
-  if (item) item.selected = !item.selected
+async function toggleSelect(id: string) {
+  const item = cartItems.value.find((i) => i.id === id)
+  if (!item) return
+  item.selected = !item.selected
+  try {
+    await cartApi.updateSelected(id, item.selected)
+  } catch {
+    item.selected = !item.selected
+  }
 }
 
 function isAllSelected(type: 'consume' | 'exchange' | 'all') {
@@ -211,71 +245,97 @@ function isAllSelected(type: 'consume' | 'exchange' | 'all') {
   return items.length > 0 && items.every(i => i.selected)
 }
 
-function toggleSelectAll(type: 'consume' | 'exchange' | 'all') {
-  const items = type === 'all' 
-    ? cartItems.value 
-    : type === 'consume' 
-      ? consumeItems.value 
-      : exchangeItems.value
-  
-  const allSelected = items.every(i => i.selected)
-  items.forEach(i => i.selected = !allSelected)
+async function toggleSelectAll(type: 'consume' | 'exchange' | 'all') {
+  const items =
+    type === 'all' ? cartItems.value : type === 'consume' ? consumeItems.value : exchangeItems.value
+  const allSelected = items.length > 0 && items.every((i) => i.selected)
+  const next = !allSelected
+  try {
+    await cartApi.selectAll(next, type === 'all' ? 'all' : type)
+    await loadCart()
+  } catch (e: any) {
+    uni.showToast({ title: e.message || '操作失败', icon: 'none' })
+  }
 }
 
-function changeQuantity(item: CartItem, delta: number) {
+async function changeQuantity(item: CartItem, delta: number) {
   const newQty = item.quantity + delta
   if (newQty < 1) {
     deleteItem(item.id)
     return
   }
-  item.quantity = newQty
+  try {
+    await cartApi.updateQuantity(item.id, newQty)
+    item.quantity = newQty
+  } catch (e: any) {
+    uni.showToast({ title: e.message || '更新失败', icon: 'none' })
+  }
 }
 
-function deleteItem(id: number) {
+function deleteItem(id: string) {
   uni.showModal({
     title: '提示',
     content: '确定要删除这件商品吗？',
-    success: (res) => {
+    success: async (res) => {
       if (res.confirm) {
-        const index = cartItems.value.findIndex(i => i.id === id)
-        if (index > -1) cartItems.value.splice(index, 1)
+        try {
+          await cartApi.remove(id)
+          await loadCart()
+        } catch (e: any) {
+          uni.showToast({ title: e.message || '删除失败', icon: 'none' })
+        }
       }
-    }
+    },
   })
 }
 
 function deleteSelected() {
-  const selectedIds = cartItems.value.filter(i => i.selected).map(i => i.id)
-  if (selectedIds.length === 0) {
+  const n = cartItems.value.filter((i) => i.selected).length
+  if (n === 0) {
     uni.showToast({ title: '请先选择商品', icon: 'none' })
     return
   }
-  
   uni.showModal({
     title: '提示',
-    content: `确定要删除选中的 ${selectedIds.length} 件商品吗？`,
-    success: (res) => {
+    content: `确定要删除选中的 ${n} 件商品吗？`,
+    success: async (res) => {
       if (res.confirm) {
-        cartItems.value = cartItems.value.filter(i => !i.selected)
+        try {
+          await cartApi.removeSelected()
+          await loadCart()
+        } catch (e: any) {
+          uni.showToast({ title: e.message || '删除失败', icon: 'none' })
+        }
       }
-    }
+    },
   })
 }
 
 function goShop() {
-  uni.switchTab({ url: '/pages/buy/index' })
+  uni.navigateTo({ url: '/pages/buy/index' })
 }
 
-function goProduct(id: number) {
-  uni.navigateTo({ url: `/pages/product/detail?id=${id}` })
+function goProduct(productId: string) {
+  const item = cartItems.value.find((i) => i.productId === productId)
+  const mode = item?.mall === 'exchange' ? 'exchange' : item?.mall === 'redeem' ? 'redeem' : 'consume'
+  uni.navigateTo({ url: `/pages/product/detail?id=${productId}&mode=${mode}` })
 }
 
 function goCheckout() {
-  if (selectedCount.value === 0) {
+  if (!requireAuth()) return
+  const selected = cartItems.value.filter((i) => i.selected)
+  if (!selected.length) {
     uni.showToast({ title: '请先选择商品', icon: 'none' })
     return
   }
-  uni.navigateTo({ url: '/pages/order/confirm' })
+  const malls = new Set(selected.map((i) => i.mall))
+  if (malls.size > 1) {
+    uni.showToast({ title: '请按商城分开结算', icon: 'none' })
+    return
+  }
+  const first = selected[0]
+  const mode = first.mall === 'redeem' ? 'redeem' : first.mall === 'exchange' ? 'exchange' : 'consume'
+  uni.navigateTo({ url: `/pages/order/confirm?productId=${first.productId}&mode=${mode}` })
 }
 </script>
 

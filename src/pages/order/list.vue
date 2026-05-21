@@ -189,8 +189,17 @@ function payOrder(order: any) {
   }
 }
 
-function applyRefund(order: any) {
-  uni.navigateTo({ url: `/pages/order/confirm?orderNo=${order.orderNo}&refund=1` })
+async function applyRefund(order: any) {
+  try {
+    await orderApi.applyRefund(order.orderNo, { reason: 1, description: '用户申请退款' })
+    uni.showToast({ title: '已提交退款申请', icon: 'success' })
+    orders.value = []
+    page.value = 1
+    hasMore.value = true
+    loadOrders()
+  } catch (e: any) {
+    uni.showToast({ title: e.message || '申请失败', icon: 'none' })
+  }
 }
 
 function goHome() {

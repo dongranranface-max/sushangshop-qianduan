@@ -89,7 +89,7 @@
           >
             <image
               class="product-image"
-              :src="p.coverImage || p.image || 'https://picsum.photos/300/300?random=goods'"
+              :src="productCover(p)"
               mode="aspectFill"
             />
             <view class="product-info">
@@ -128,6 +128,12 @@ import { ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { productApi } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
+import { HOME_CATEGORY_FALLBACK, normalizeCategoryTree, flattenCategories } from '@/utils/category'
+import { resolveProductCover } from '@/utils/media'
+
+function productCover(p: any) {
+  return resolveProductCover(p)
+}
 import { assetStore } from '@/store/asset'
 import AssetStatusBar from '@/components/AssetStatusBar.vue'
 
@@ -142,15 +148,6 @@ const loading = ref(false)
 const page = ref(1)
 const limit = 20
 const hasMore = ref(true)
-
-// 静态模拟分类（API 未接通时兜底）
-const mockCategories = [
-  { id: 'cat-1', name: '数码电子' },
-  { id: 'cat-2', name: '生活用品' },
-  { id: 'cat-3', name: '食品生鲜' },
-  { id: 'cat-4', name: '服饰箱包' },
-  { id: 'cat-5', name: '美妆护肤' },
-]
 
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
@@ -167,13 +164,11 @@ onShow(() => {
 async function loadCategories() {
   try {
     const res = await productApi.getCategories()
-    if (res && res.length > 0) {
-      categories.value = res
-    } else {
-      categories.value = mockCategories
-    }
+    const tree = normalizeCategoryTree(res)
+    const flat = flattenCategories(tree)
+    categories.value = flat.length > 0 ? flat : HOME_CATEGORY_FALLBACK
   } catch {
-    categories.value = mockCategories
+    categories.value = HOME_CATEGORY_FALLBACK
   }
 }
 

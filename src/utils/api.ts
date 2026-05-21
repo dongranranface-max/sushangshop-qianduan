@@ -348,6 +348,10 @@ export const orderApi = {
   confirm: (orderNo: string) =>
     request<any>({ url: '/orders/confirm', method: 'POST', data: { orderNo } }),
 
+  // 支付回调（换购/消费模拟支付或渠道回调）
+  paymentCallback: (orderNo: string, payType: string) =>
+    request<any>({ url: `/orders/callback/${orderNo}`, method: 'POST', data: { payType } }),
+
   // 物流信息
   getLogistics: (orderNo: string) =>
     request<any>({ url: `/orders/${orderNo}/logistics` }),
@@ -551,9 +555,65 @@ export const marketingApi = {
 }
 
 // --------------------------------------------
+//  购物车 /cart
+// --------------------------------------------
+export const cartApi = {
+  list: () => request<{ list: any[]; totalCount: number }>({ url: '/cart' }),
+
+  count: () => request<{ count: number }>({ url: '/cart/count' }),
+
+  add: (data: { productId: string; quantity?: number; skuId?: string }) =>
+    request<{ id: string; cartCount: number }>({ url: '/cart', method: 'POST', data }),
+
+  updateQuantity: (id: string, quantity: number) =>
+    request<any>({ url: `/cart/${id}`, method: 'PUT', data: { quantity } }),
+
+  updateSelected: (id: string, selected: boolean) =>
+    request<any>({ url: `/cart/${id}/selected`, method: 'PUT', data: { selected } }),
+
+  selectAll: (selected: boolean, mall?: string) =>
+    request<any>({ url: '/cart/select-all', method: 'POST', data: { selected, mall } }),
+
+  remove: (id: string) => request<any>({ url: `/cart/${id}`, method: 'DELETE' }),
+
+  removeSelected: () => request<any>({ url: '/cart/selected', method: 'DELETE' }),
+}
+
+// --------------------------------------------
+//  收藏 /favorites
+// --------------------------------------------
+export const favoriteApi = {
+  list: (params?: { page?: number; limit?: number }) => {
+    const q = new URLSearchParams()
+    if (params?.page) q.append('page', String(params.page))
+    if (params?.limit) q.append('limit', String(params.limit))
+    const qs = q.toString()
+    return request<{ list: any[]; total: number }>({
+      url: `/favorites${qs ? `?${qs}` : ''}`,
+    })
+  },
+
+  check: (productId: string) =>
+    request<{ favorited: boolean; favoriteId: string | null }>({
+      url: `/favorites/check/${productId}`,
+    }),
+
+  add: (productId: string) =>
+    request<any>({ url: `/favorites/${productId}`, method: 'POST' }),
+
+  remove: (productId: string) =>
+    request<any>({ url: `/favorites/${productId}`, method: 'DELETE' }),
+}
+
+// --------------------------------------------
 //  工单模块 /tickets
 // --------------------------------------------
 export const ticketApi = {
+  getOnline: () =>
+    request<{ online: boolean; workTime: string; hotline?: string; tip: string }>({
+      url: '/tickets/online',
+    }),
+
   // 提交工单
   create: (data: {
     type: number
@@ -619,6 +679,8 @@ export const api = {
   level: levelApi,
   referral: referralApi,
   marketing: marketingApi,
+  cart: cartApi,
+  favorite: favoriteApi,
   ticket: ticketApi,
   signIn: signInApi,
 }

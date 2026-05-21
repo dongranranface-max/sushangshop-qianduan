@@ -10,7 +10,7 @@
         <view class="avatar-wrap" :class="levelClass">
           <image
             class="avatar-img"
-            :src="userInfo.avatar || 'https://picsum.photos/200/200?random=avatar'"
+            :src="avatarSrc"
             mode="aspectFill"
           />
           <view class="avatar-ring"></view>
@@ -181,6 +181,7 @@ import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { userApi, walletApi, levelApi, orderApi } from '@/utils/api'
 import { checkAuth, requireAuth } from '@/utils/auth'
+import { resolveAvatar } from '@/utils/media'
 
 const statusBarHeight = ref(20)
 const loggedIn = ref(checkAuth())
@@ -192,24 +193,24 @@ const yesterdayProfit = ref('0.00')
 const vipProgress = ref(0)
 const remainingPerformance = ref(0)
 const levelName = ref('')
-const orderCounts = ref<any>({ pending: 0, shipped: 0, received: 0, completed: 0 })
+const orderCounts = ref<Record<string, number>>({ '1': 0, '2': 0, '3': 0, '4': 0 })
 
 const orderTabs = [
-  { key: 'pending', label: '待付款', icon: '付' },
-  { key: 'shipped', label: '待发货', icon: '发' },
-  { key: 'received', label: '待收货', icon: '收' },
-  { key: 'completed', label: '已完成', icon: '完' },
+  { key: '1', label: '待付款', icon: '付' },
+  { key: '2', label: '待发货', icon: '发' },
+  { key: '3', label: '待收货', icon: '收' },
+  { key: '4', label: '已完成', icon: '完' },
 ]
 
 const toolItems = [
   { id: 1, icon: '卡', label: '银行卡', bg: '#F7F3EB', action: () => goPage('/pages/user/bank-card') },
   { id: 2, icon: '址', label: '收货地址', bg: '#EEF1F5', action: () => goPage('/pages/address/list') },
   { id: 3, icon: '券', label: '优惠券', bg: '#F5F0EB', action: () => goPage('/pages/coupon/list') },
-  { id: 4, icon: '藏', label: '我的收藏', bg: '#F7F3EB', action: () => showComing() },
+  { id: 4, icon: '藏', label: '我的收藏', bg: '#F7F3EB', action: () => goPage('/pages/user/favorites') },
   { id: 5, icon: '签', label: '签到中心', bg: '#F5F0EB', tag: '+10', action: () => goPage('/pages/user/sign-in') },
   { id: 6, icon: '邀', label: '邀请分享', bg: '#EEF1F5', action: () => goPage('/pages/user/invite') },
-  { id: 7, icon: '服', label: '客服中心', bg: '#EEF1F5', action: () => showComing() },
-  { id: 8, icon: '设', label: '设置', bg: '#EEF1F5', action: () => showComing() },
+  { id: 7, icon: '服', label: '客服中心', bg: '#EEF1F5', action: () => goPage('/pages/user/service') },
+  { id: 8, icon: '设', label: '设置', bg: '#EEF1F5', action: () => goPage('/pages/user/settings') },
 ]
 
 const menuItems = [
@@ -218,6 +219,8 @@ const menuItems = [
   { id: 3, icon: '兑', label: '兑换记录', action: () => goPage('/pages/exchange/list') },
   { id: 4, icon: '退', label: '退换货', action: () => showComing() },
 ]
+
+const avatarSrc = computed(() => resolveAvatar(userInfo.value.avatar))
 
 const shortId = computed(() => {
   const id = userInfo.value.id || ''
@@ -268,9 +271,9 @@ async function loadUserData() {
 
 async function loadOrderCounts() {
   try {
-    const statuses = ['pending', 'shipped', 'received', 'completed']
+    const statuses = ['1', '2', '3', '4']
     const results = await Promise.all(
-      statuses.map(s => orderApi.getList({ status: getStatusCode(s), limit: 1 }))
+      statuses.map((s) => orderApi.getList({ status: Number(s), limit: 1 }))
     )
     results.forEach((res: any, i) => {
       orderCounts.value[statuses[i]] = res.total || 0
@@ -278,11 +281,6 @@ async function loadOrderCounts() {
   } catch (e) {
     console.error('订单计数失败', e)
   }
-}
-
-function getStatusCode(key: string): number {
-  const map: Record<string, number> = { pending: 1, shipped: 2, received: 3, completed: 4 }
-  return map[key] || 1
 }
 
 function goPage(url: string) {

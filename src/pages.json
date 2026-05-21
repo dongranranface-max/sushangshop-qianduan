@@ -36,6 +36,12 @@
     { "path": "pages/user/bank-card", "style": { "navigationStyle": "custom" } },
     { "path": "pages/user/points-detail", "style": { "navigationStyle": "custom" } },
     { "path": "pages/user/sign-in", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/user/profile", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/user/favorites", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/user/service", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/user/service-create", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/user/service-detail", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/user/settings", "style": { "navigationStyle": "custom" } },
     { "path": "pages/coupon/list", "style": { "navigationStyle": "custom" } },
     { "path": "pages/address/list", "style": { "navigationStyle": "custom" } },
     { "path": "pages/address/edit", "style": { "navigationStyle": "custom" } }
