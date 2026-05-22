@@ -21,6 +21,7 @@
           <view class="divider-line divider-line--right" />
         </view>
 
+        <!-- 底部文案（两行语义断行）-->
         <view class="brand-footer">
           <text class="brand-footer-text">想起密码了？</text>
         </view>
@@ -511,7 +512,7 @@ async function doReset() {
   opacity: 0.7;
 }
 
-// 品牌栏底部：两行语义化断行，左对齐
+// 品牌栏底部：两行语义断行，左对齐（和登录/注册页统一）
 .brand-footer {
   display: flex;
   flex-direction: column;
@@ -776,36 +777,37 @@ async function doReset() {
   }
 }
 
-// 验证码行：独立按钮右对齐，彻底解决文字重叠
-.code-row {
+// 验证码按钮：独立成行，水平居中，不遮挡输入框
+.code-btn-row {
   display: flex;
-  align-items: center;
-  gap: 0;
-  margin-bottom: 40rpx;
+  justify-content: center;
+  margin-top: 24rpx;
 }
 
-.code-input-wrap {
-  flex: 1;
-  margin-bottom: 0;
-}
-
-// 验证码按钮：独立于输入框，垂直居中对齐
+// 验证码按钮
 .code-btn {
-  flex-shrink: 0;
-  height: 64rpx;
-  padding: 0 28rpx;
+  height: 72rpx;
+  padding: 0 48rpx;
   display: flex;
   align-items: center;
-  border-left: 1rpx solid rgba(20, 20, 20, 0.08);
-  font-size: 25rpx;
+  justify-content: center;
+  background: rgba(142, 116, 89, 0.08);
+  border: 1rpx solid rgba(142, 116, 89, 0.3);
+  border-radius: 9999rpx;
+  font-size: 26rpx;
   color: $accent-dark;
   font-weight: 600;
-  white-space: nowrap;
-  transition: color 0.3s ease;
-  align-self: center;
+  transition: all 0.3s ease;
+
+  &:active {
+    background: rgba(142, 116, 89, 0.15);
+    transform: scale(0.98);
+  }
 
   &.is-counting {
     color: $text-muted;
+    background: transparent;
+    border-color: rgba(20, 20, 20, 0.08);
   }
 }
 

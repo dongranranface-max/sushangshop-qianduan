@@ -21,8 +21,11 @@
           <view class="divider-line divider-line--right" />
         </view>
 
+        <!-- 底部文案（两行语义断行）-->
         <view class="brand-footer">
           <text class="brand-footer-text">已有账号？</text>
+        </view>
+        <view class="brand-footer-row">
           <text class="brand-footer-link" @click="goLogin">立即登录</text>
         </view>
 
@@ -413,22 +416,32 @@ async function doRegister() {
   opacity: 0.7;
 }
 
+// 底部：已有账号？立即登录（两行语义断行）
 .brand-footer {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6rpx;
-  margin-bottom: 28rpx;
+  gap: 4rpx;
+  margin-bottom: 12rpx;
 }
 
 .brand-footer-text {
   font-size: 24rpx;
   color: rgba(255, 255, 255, 0.4);
+  line-height: 1.5;
+}
+
+.brand-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .brand-footer-link {
   font-size: 24rpx;
   color: $accent-dark;
   font-weight: 600;
+  line-height: 1.5;
 }
 
 .brand-privacy {
