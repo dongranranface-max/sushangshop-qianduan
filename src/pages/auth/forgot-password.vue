@@ -23,6 +23,8 @@
 
         <view class="brand-footer">
           <text class="brand-footer-text">想起密码了？</text>
+        </view>
+        <view class="brand-footer-row">
           <text class="brand-footer-link" @click="goLogin">返回登录</text>
         </view>
 
@@ -71,7 +73,10 @@
           <template v-if="step === 1">
             <view class="panel-header">
               <text class="panel-title">短信验证</text>
-              <text class="panel-subtitle">验证注册手机号后设置新密码</text>
+              <view class="subtitle-block">
+                <text class="panel-subtitle">验证注册手机号后</text>
+                <text class="panel-subtitle">设置新密码</text>
+              </view>
             </view>
 
             <view class="panel-form">
@@ -92,8 +97,12 @@
                 <view class="input-glow" />
               </view>
 
-              <!-- 验证码 -->
-              <view class="input-wrap input-field-wrap" :class="{ 'is-focused': focusState.code, 'is-filled': form.code.length === 6 }">
+            <!-- 验证码 -->
+            <view class="code-row">
+              <view
+                class="input-wrap input-field-wrap code-input-wrap"
+                :class="{ 'is-focused': focusState.code, 'is-filled': form.code.length === 6 }"
+              >
                 <input
                   class="input-native"
                   v-model="form.code"
@@ -106,14 +115,15 @@
                 />
                 <view class="input-gold-line" />
                 <view class="input-glow" />
-                <view
-                  class="code-btn"
-                  :class="{ 'is-counting': countdown > 0 || sending }"
-                  @click="sendCode"
-                >
-                  <text>{{ codeBtnText }}</text>
-                </view>
               </view>
+              <view
+                class="code-btn"
+                :class="{ 'is-counting': countdown > 0 || sending }"
+                @click="sendCode"
+              >
+                <text>{{ codeBtnText }}</text>
+              </view>
+            </view>
 
             </view>
 
@@ -501,22 +511,32 @@ async function doReset() {
   opacity: 0.7;
 }
 
+// 品牌栏底部：两行语义化断行，左对齐
 .brand-footer {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6rpx;
-  margin-bottom: 28rpx;
+  gap: 4rpx;
+  margin-bottom: 12rpx;
 }
 
 .brand-footer-text {
   font-size: 24rpx;
   color: rgba(255, 255, 255, 0.4);
+  line-height: 1.5;
+}
+
+.brand-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .brand-footer-link {
   font-size: 24rpx;
   color: $accent-dark;
   font-weight: 600;
+  line-height: 1.5;
 }
 
 .brand-privacy {
@@ -675,10 +695,18 @@ async function doReset() {
   margin-bottom: 12rpx;
 }
 
+// 副标题双行语义化断行
+.subtitle-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
 .panel-subtitle {
   display: block;
   font-size: 25rpx;
   color: $text-muted;
+  line-height: 1.5;
 }
 
 .highlight-phone {
@@ -748,21 +776,33 @@ async function doReset() {
   }
 }
 
-// 验证码按钮
+// 验证码行：独立按钮右对齐，彻底解决文字重叠
+.code-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 40rpx;
+}
+
+.code-input-wrap {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+// 验证码按钮：独立于输入框，垂直居中对齐
 .code-btn {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  flex-shrink: 0;
   height: 64rpx;
-  padding: 0 24rpx;
+  padding: 0 28rpx;
   display: flex;
   align-items: center;
   border-left: 1rpx solid rgba(20, 20, 20, 0.08);
-  font-size: 24rpx;
+  font-size: 25rpx;
   color: $accent-dark;
   font-weight: 600;
+  white-space: nowrap;
   transition: color 0.3s ease;
+  align-self: center;
 
   &.is-counting {
     color: $text-muted;
