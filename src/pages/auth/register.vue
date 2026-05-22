@@ -283,7 +283,7 @@ async function doRegister() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: $navy;
+  background: $mineral-gray;
   box-shadow: inset -24rpx 0 80rpx rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
@@ -300,7 +300,7 @@ async function doRegister() {
     height: 400rpx;
     top: -100rpx;
     right: -80rpx;
-    background: radial-gradient(circle, rgba(196, 165, 116, 0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(184, 152, 118, 0.15) 0%, transparent 70%);
     animation: glow-float 8s ease-in-out infinite;
   }
 
@@ -309,7 +309,7 @@ async function doRegister() {
     height: 350rpx;
     bottom: -80rpx;
     left: -100rpx;
-    background: radial-gradient(circle, rgba(45, 58, 82, 0.4) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(47, 53, 66, 0.4) 0%, transparent 70%);
     animation: glow-float 10s ease-in-out infinite reverse;
   }
 }
@@ -334,8 +334,8 @@ async function doRegister() {
   width: 144rpx;
   height: 144rpx;
   border-radius: 40rpx;
-  background: rgba(196, 165, 116, 0.1);
-  border: 1rpx solid rgba(196, 165, 116, 0.2);
+  background: rgba(184, 152, 118, 0.1);
+  border: 1rpx solid rgba(184, 152, 118, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -375,11 +375,11 @@ async function doRegister() {
   height: 1rpx;
 
   &--left {
-    background: linear-gradient(90deg, transparent 0%, rgba(196, 165, 116, 0.45) 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(184, 152, 118, 0.45) 100%);
   }
 
   &--right {
-    background: linear-gradient(90deg, rgba(196, 165, 116, 0.45) 0%, transparent 100%);
+    background: linear-gradient(90deg, rgba(184, 152, 118, 0.45) 0%, transparent 100%);
   }
 }
 
@@ -504,7 +504,7 @@ async function doRegister() {
     transform: translateX(-50%);
     width: 70%;
     height: 32rpx;
-    background: radial-gradient(ellipse at center, rgba(196, 165, 116, 0.18) 0%, transparent 70%);
+    background: radial-gradient(ellipse at center, rgba(184, 152, 118, 0.18) 0%, transparent 70%);
     opacity: 0;
     transition: opacity 0.4s ease;
     pointer-events: none;
@@ -567,12 +567,12 @@ async function doRegister() {
   border-radius: 9999rpx;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 16rpx 40rpx rgba(26, 36, 56, 0.22);
+  box-shadow: 0 16rpx 40rpx rgba(47, 53, 66, 0.22);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   &:active {
     transform: scale(0.98);
-    box-shadow: 0 8rpx 24rpx rgba(26, 36, 56, 0.18);
+    box-shadow: 0 8rpx 24rpx rgba(47, 53, 66, 0.18);
   }
 }
 
@@ -583,7 +583,7 @@ async function doRegister() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: $navy;
+  background: $mineral-gray;
 }
 
 .submit-inner::before {

@@ -244,7 +244,7 @@ async function doLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: $navy;
+  background: $mineral-gray;
   // 右侧内阴影，制造左右层次感
   box-shadow: inset -24rpx 0 80rpx rgba(0, 0, 0, 0.3);
   position: relative;
@@ -265,7 +265,7 @@ async function doLogin() {
     right: -80rpx;
     background: radial-gradient(
       circle,
-      rgba(196, 165, 116, 0.15) 0%,
+      rgba(184, 152, 118, 0.15) 0%,
       transparent 70%
     );
     animation: glow-float 8s ease-in-out infinite;
@@ -278,7 +278,7 @@ async function doLogin() {
     left: -100rpx;
     background: radial-gradient(
       circle,
-      rgba(45, 58, 82, 0.4) 0%,
+      rgba(47, 53, 66, 0.4) 0%,
       transparent 70%
     );
     animation: glow-float 10s ease-in-out infinite reverse;
@@ -307,13 +307,13 @@ async function doLogin() {
   width: 144rpx;
   height: 144rpx;
   border-radius: 40rpx;
-  background: rgba(196, 165, 116, 0.1);
-  border: 1rpx solid rgba(196, 165, 116, 0.2);
+  background: rgba(184, 152, 118, 0.1);
+  border: 1rpx solid rgba(184, 152, 118, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 40rpx;
-  box-shadow: 0 8rpx 32rpx rgba(196, 165, 116, 0.15);
+  box-shadow: 0 8rpx 32rpx rgba(184, 152, 118, 0.15);
 }
 
 .brand-logo-img {
@@ -355,14 +355,14 @@ async function doLogin() {
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(196, 165, 116, 0.45) 100%
+      rgba(184, 152, 118, 0.45) 100%
     );
   }
 
   &--right {
     background: linear-gradient(
       90deg,
-      rgba(196, 165, 116, 0.45) 0%,
+      rgba(184, 152, 118, 0.45) 0%,
       transparent 100%
     );
   }
@@ -508,7 +508,7 @@ async function doLogin() {
     height: 32rpx;
     background: radial-gradient(
       ellipse at center,
-      rgba(196, 165, 116, 0.18) 0%,
+      rgba(184, 152, 118, 0.18) 0%,
       transparent 70%
     );
     opacity: 0;
@@ -569,11 +569,11 @@ async function doLogin() {
   border-radius: 9999rpx;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 16rpx 40rpx rgba(26, 36, 56, 0.22);
+  box-shadow: 0 16rpx 40rpx rgba(47, 53, 66, 0.22);
 
   &:active {
     transform: scale(0.98);
-    box-shadow: 0 8rpx 24rpx rgba(26, 36, 56, 0.18);
+    box-shadow: 0 8rpx 24rpx rgba(47, 53, 66, 0.18);
   }
 }
 
@@ -585,7 +585,7 @@ async function doLogin() {
   align-items: center;
   justify-content: center;
   gap: 12rpx;
-  background: $navy;
+  background: $mineral-gray;
 }
 
 // 光泽扫过动画
@@ -688,7 +688,7 @@ async function doLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4rpx 16rpx rgba(26, 36, 56, 0.05);
+  box-shadow: 0 4rpx 16rpx rgba(47, 53, 66, 0.05);
 }
 
 .third-icon-img {
