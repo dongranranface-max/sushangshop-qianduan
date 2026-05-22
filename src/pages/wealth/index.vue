@@ -58,49 +58,11 @@
       </view>
     </view>
     
-    <!-- 会员等级卡片 · Fitness+ 风格 -->
-    <view class="level-card">
-      <view class="level-card__glow" />
-      <view class="level-card__glow level-card__glow--2" />
-      <view class="level-header">
-        <view class="level-hero">
-          <view class="level-hero__tier">
-            <text class="level-tier-label">VIP</text>
-            <text class="level-tier-num">{{ levelNum }}</text>
-          </view>
-          <view class="level-hero__meta">
-            <text class="level-name-upper">{{ levelTitleUpper }}</text>
-            <text class="level-subtitle">{{ levelData.title }}</text>
-          </view>
-        </view>
-        <view class="level-dividend">
-          <text class="dividend-label">每日分红</text>
-          <text class="dividend-value">+{{ levelData.dailyDividend }}</text>
-          <text class="dividend-unit">积分</text>
-        </view>
-      </view>
-
-      <view class="level-progress">
-        <view class="progress-info">
-          <text class="progress-current">{{ levelData.current.toLocaleString() }}</text>
-          <text class="progress-separator">/</text>
-          <text class="progress-target">{{ levelData.target.toLocaleString() }}</text>
-          <text class="progress-unit">业绩</text>
-        </view>
-        <view class="progress-bar">
-          <view
-            class="progress-fill"
-            :style="{ width: (levelData.progressPct || levelProgressPct) + '%' }"
-          />
-        </view>
-        <view class="progress-tip">
-          <text v-if="levelData.nextLevel">
-            距离 {{ levelData.nextLevel.name }} 还差 {{ (levelData.target - levelData.current).toLocaleString() }} 业绩
-          </text>
-          <text v-else>已是最高等级</text>
-        </view>
-      </view>
-    </view>
+    <!-- 会员等级卡片（已抽取为独立组件） -->
+    <WealthLevelCard
+      :level-data="levelData"
+      @click="goLevelDetail"
+    />
     
     <!-- 理财专区 -->
     <view class="section">
@@ -131,52 +93,13 @@
       </view>
       <!-- 理财列表 -->
       <view v-else class="invest-list">
-        <view
-          class="invest-card"
+        <WealthInvestCard
           v-for="project in investProjects"
           :key="project.id"
-          @click="goProjectDetail(project)"
-        >
-          <view class="invest-header">
-            <view class="invest-type">
-              <text class="type-icon">{{ project.icon }}</text>
-              <text class="type-name">{{ project.name }}</text>
-            </view>
-            <view class="invest-tag" :class="'tag-' + project.level">
-              {{ project.level === 'high' ? '热门' : project.level === 'new' ? '新品' : '稳健' }}
-            </view>
-          </view>
-          
-          <view class="invest-stats">
-            <view class="stat-item">
-              <text class="stat-value profit">{{ project.yield }}%</text>
-              <text class="stat-label">年化收益</text>
-            </view>
-            <view class="stat-item">
-              <text class="stat-value">{{ project.cycle }}天</text>
-              <text class="stat-label">投资周期</text>
-            </view>
-            <view class="stat-item">
-              <text class="stat-value">{{ project.minAmount.toLocaleString() }}</text>
-              <text class="stat-label">最低申购</text>
-            </view>
-          </view>
-          
-          <view class="invest-footer">
-            <view class="invest-progress">
-              <view class="progress-bar-small">
-                <view 
-                  class="progress-fill-small" 
-                  :style="{ width: project.progress + '%' }"
-                ></view>
-              </view>
-              <text class="progress-text">已申购 {{ project.progress }}%</text>
-            </view>
-            <view class="invest-btn">
-              <text>立即申购</text>
-            </view>
-          </view>
-        </view>
+          :project="project"
+          @click="goProjectDetail"
+          @invest="goProjectDetail"
+        />
       </view>
     </view>
     
@@ -207,6 +130,8 @@ import { walletApi, levelApi, financialApi } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
 import AssetStatusBar from '@/components/AssetStatusBar.vue'
 import HomeProductSkeleton from '@/components/HomeProductSkeleton.vue'
+import WealthLevelCard from '@/components/wealth/WealthLevelCard.vue'
+import WealthInvestCard from '@/components/wealth/WealthInvestCard.vue'
 
 const statusBarHeight = ref(20)
 const loggedIn = ref(checkAuth())
@@ -335,6 +260,10 @@ function goInvest() {
 
 function goInvestList() {
   uni.navigateTo({ url: '/pages/wealth/invest' })
+}
+
+function goLevelDetail() {
+  uni.navigateTo({ url: '/pages/user/level-detail' })
 }
 
 function goProjectDetail(project: any) {

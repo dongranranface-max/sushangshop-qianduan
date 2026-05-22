@@ -4,6 +4,7 @@
 //  认证方式: Bearer Token（从本地存储获取）
 // ============================================
 import { API_BASE_URL } from '@/config'
+import { sanitizeKeyword, sanitizeOrderNo, sanitizeId, escapeHtml } from './security'
 
 const BASE_URL = API_BASE_URL
 
@@ -44,7 +45,7 @@ interface RequestOptions {
   header?: Record<string, string>
 }
 
-function request<T = any>(options: RequestOptions): Promise<T> {
+function request<T = unknown>(options: RequestOptions): Promise<T> {
   return new Promise((resolve, reject) => {
     const header: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -55,15 +56,18 @@ function request<T = any>(options: RequestOptions): Promise<T> {
       header['Authorization'] = `Bearer ${token}`
     }
 
+    // 安全增强：清理请求 URL 中的特殊字符（防 XSS）
+    const cleanUrl = options.url.replace(/[<>'"`;]/g, '')
+
     uni.request({
-      url: `${BASE_URL}${options.url}`,
+      url: `${BASE_URL}${cleanUrl}`,
       method: options.method || 'GET',
       data: options.data,
       header,
       success: (res: any) => {
         // 业务错误码：{ code, message, data }（API_SPEC v1.2）
-        const body = res.data
-        const errMsg = body?.message || body?.msg || '请求失败'
+        const body = res.data as any
+        const errMsg = escapeHtml(body?.message || body?.msg || '请求失败')
         if (body && typeof body.code !== 'undefined') {
           if (body.code === 0 || body.code === 200) {
             resolve(body.data as T)
