@@ -1,139 +1,109 @@
 // ============================================
-//  useCountdown.ts - 倒计时 composable
-//  用于：获取验证码倒计时、限时抢购等场景
+//  useCountdown.ts - 倒计时 Hook
 // ============================================
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, onUnmounted } from 'vue'
 
 export interface UseCountdownOptions {
-  /** 总秒数（默认 60s） */
-  totalSeconds?: number
-  /** 倒计时结束时回调 */
+  /** 初始秒数 */
+  seconds: number
+  /** 立即开始 */
+  immediate?: boolean
+  /** 每秒回调 */
+  onTick?: (remaining: number) => void
+  /** 结束回调 */
   onComplete?: () => void
 }
 
 export interface UseCountdownReturn {
-  /** 剩余秒数 */
-  seconds: typeof _seconds
-  /** 是否正在倒计时 */
-  isRunning: typeof _isRunning
-  /** 格式化显示 "60s" */
-  display: ReturnType<typeof computed<string>>
-  /** 显示文本（可自定义后缀） */
-  displayText: (suffix?: string) => string
-  /** 开始倒计时 */
-  start: (seconds?: number) => void
+  remaining: number
+  /** 格式化 mm:ss */
+  formatted: string
+  /** 重置倒计时 */
+  reset: (seconds?: number) => void
   /** 暂停 */
   pause: () => void
-  /** 重置 */
-  reset: () => void
-  /** 停止 */
-  stop: () => void
+  /** 继续 */
+  resume: () => void
+  /** 是否运行中 */
+  isRunning: boolean
 }
 
-const _seconds = ref(0)
-const _isRunning = ref(false)
-let _timer: ReturnType<typeof setInterval> | null = null
-let _onCompleteCallback: (() => void) | null = null
+export function useCountdown(options: UseCountdownOptions): UseCountdownReturn {
+  const { seconds: initialSeconds, immediate = true, onTick, onComplete } = options
 
-export function useCountdown(options: UseCountdownOptions = {}): UseCountdownReturn {
-  const { totalSeconds = 60, onComplete } = options
-  _onCompleteCallback = onComplete || null
+  const remaining = ref(initialSeconds)
+  const isRunning = ref(false)
+  let timer: ReturnType<typeof setInterval> | null = null
+
+  function pad(n: number): string {
+    return n < 10 ? `0${n}` : String(n)
+  }
+
+  const formatted = (): string => {
+    const m = Math.floor(remaining.value / 60)
+    const s = remaining.value % 60
+    return `${pad(m)}:${pad(s)}`
+  }
 
   function clearTimer() {
-    if (_timer) {
-      clearInterval(_timer)
-      _timer = null
+    if (timer) {
+      clearInterval(timer)
+      timer = null
     }
   }
 
-  function start(seconds: number = totalSeconds) {
-    clearTimer()
-    _seconds.value = seconds
-    _isRunning.value = true
+  function start() {
+    if (isRunning.value) return
+    isRunning.value = true
 
-    _timer = setInterval(() => {
-      _seconds.value--
-      if (_seconds.value <= 0) {
-        _seconds.value = 0
-        _isRunning.value = false
+    timer = setInterval(() => {
+      if (remaining.value > 0) {
+        remaining.value--
+        onTick?.(remaining.value)
+      } else {
         clearTimer()
-        _onCompleteCallback?.()
+        isRunning.value = false
+        onComplete?.()
       }
     }, 1000)
   }
 
   function pause() {
     clearTimer()
-    _isRunning.value = false
+    isRunning.value = false
   }
 
-  function reset() {
+  function resume() {
+    if (remaining.value <= 0) return
+    start()
+  }
+
+  function reset(seconds = initialSeconds) {
     clearTimer()
-    _seconds.value = 0
-    _isRunning.value = false
-  }
-
-  function stop() {
-    reset()
-  }
-
-  const display = computed(() =>
-    _seconds.value > 0 ? `${_seconds.value}s` : ''
-  )
-
-  function displayText(suffix = 's'): string {
-    if (!_isRunning.value || _seconds.value <= 0) return ''
-    return `${_seconds.value}${suffix}`
+    remaining.value = seconds
+    isRunning.value = false
   }
 
   onUnmounted(() => {
     clearTimer()
   })
 
+  if (immediate) {
+    start()
+  }
+
   return {
-    seconds: _seconds,
-    isRunning: _isRunning,
-    display,
-    displayText,
-    start,
-    pause,
+    get remaining() {
+      return remaining.value
+    },
+    get formatted() {
+      return formatted()
+    },
     reset,
-    stop,
-  }
-}
-
-/**
- * 简洁版 useCountdown（多实例支持）
- * 每个调用独立，不共享状态
- */
-export function useCountdownSimple(defaultSeconds = 60) {
-  const seconds = ref(0)
-  const isRunning = ref(false)
-  let timer: ReturnType<typeof setInterval> | null = null
-
-  function start(s = defaultSeconds) {
-    stop()
-    seconds.value = s
-    isRunning.value = true
-    timer = setInterval(() => {
-      seconds.value--
-      if (seconds.value <= 0) {
-        seconds.value = 0
-        isRunning.value = false
-        clearInterval(timer!)
-      }
-    }, 1000)
-  }
-
-  function stop() {
-    if (timer) {
-      clearInterval(timer)
-      timer = null
-    }
-    isRunning.value = false
-  }
-
-  onUnmounted(stop)
-
-  return { seconds, isRunning, start, stop }
+    pause,
+    resume,
+    get isRunning() {
+      return isRunning.value
+    },
+  } as any
 }

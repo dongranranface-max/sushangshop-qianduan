@@ -11,7 +11,10 @@
     "preview:h5": "npm run preview:mall",
     "verify:h5": "node scripts/verify-h5-build.mjs",
     "dev:mp-weixin": "uni -p mp-weixin",
-    "build:mp-weixin": "uni build -p mp-weixin"
+    "build:mp-weixin": "uni build -p mp-weixin",
+    "lint": "eslint src --ext .vue,.ts,.tsx --fix",
+    "lint:check": "eslint src --ext .vue,.ts,.tsx",
+    "format": "prettier --write \"src/**/*.{vue,ts,tsx,scss,json}\""
   },
   "dependencies": {
     "@dcloudio/uni-app": "3.0.0-3060520221121001",
@@ -27,8 +30,14 @@
     "@dcloudio/uni-cli-shared": "3.0.0-3060520221121001",
     "@dcloudio/vite-plugin-uni": "3.0.0-3060520221121001",
     "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vue/eslint-config-typescript": "^13.0.0",
     "autoprefixer": "^10.5.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.24.0",
     "postcss": "^8.5.15",
+    "prettier": "^3.2.0",
     "sass": "1.77.0",
     "typescript": "^5.4.5",
     "vite": "5.2.8"

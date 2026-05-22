@@ -1,0 +1,84 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "rules": {
+    // ========== 严重 ==========
+    "@typescript-eslint/no-explicit-any": "warn",
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-debugger": "error",
+    "no-empty": ["error", { "allowEmptyCatch": true }],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["warn", {
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_"
+    }],
+    // ========== 最佳实践 ==========
+    "prefer-const": "error",
+    "no-var": "error",
+    "eqeqeq": ["error", "always"],
+    "no-param-reassign": "error",
+    "no-new-object": "error",
+    "no-array-instanceof": "error",
+    "prefer-template": "error",
+    "prefer-arrow-callback": "error",
+    "object-shorthand": "error",
+    "array-callback-return": ["error", { "allowImplicit": true }],
+    // ========== Airbnb 风格 ==========
+    "max-len": ["error", {
+      "code": 100,
+      "ignoreStrings": true,
+      "ignoreTemplateLiterals": true,
+      "ignoreComments": true
+    }],
+    "comma-dangle": ["error", {
+      "arrays": "always-multiline",
+      "objects": "always-multiline",
+      "imports": "never",
+      "exports": "never",
+      "functions": "never"
+    }],
+    "semi": ["error", "never"],
+    "quotes": ["error", "single", { "avoidEscape": true }],
+    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "key-spacing": ["error", { "mode": "minimum" }],
+    "no-multiple-empty-lines": ["error", { "max": 1, "maxBOF": 0, "maxEOF": 0 }],
+    "space-before-function-paren": ["error", {
+      "anonymous": "always",
+      "named": "never",
+      "asyncArrow": "always"
+    }],
+    "keyword-spacing": ["error", { "before": true, after: true }],
+    "vue/multi-word-component-names": "off",
+    "vue/comment-directive": "off",
+    "vue/no-v-html": "warn",
+    "vue/require-default-prop": "off",
+    "vue/component-name-in-template-casing": ["warn", "PascalCase", {
+      "ignores": ["ion-", "k-", "t-"]
+    }]
+  },
+  "overrides": [
+    {
+      "files": ["*.vue"],
+      "parser": "vue-eslint-parser",
+      "parserOptions": {
+        "parser": "@typescript-eslint/parser",
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+      }
+    }
+  ]
+}

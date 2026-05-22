@@ -2,80 +2,20 @@
   <view class="page-container">
     <view class="safe-area-top" :style="{ height: statusBarHeight + 'px' }"></view>
 
-    <!-- ========== 1. 用户信息卡片 ========== -->
-    <view class="user-card" @click="goProfile">
-      <view class="card-glow"></view>
-      <view class="user-inner">
-        <!-- 头像 -->
-        <view class="avatar-wrap" :class="levelClass">
-          <image
-            class="avatar-img"
-            :src="avatarSrc"
-            mode="aspectFill"
-          />
-          <view class="avatar-ring"></view>
-        </view>
-
-        <!-- 用户信息 -->
-        <view class="user-info">
-          <view class="user-name-row">
-            <text class="user-name">{{ userInfo.name || '游客' }}</text>
-            <!-- 会员能量徽章 -->
-            <view class="member-badge" :class="'v' + (userInfo.level || 1)">
-              <text class="badge-text">V{{ userInfo.level || 1 }}</text>
-            </view>
-          </view>
-          <text class="user-id">ID: {{ shortId }}</text>
-          <view class="vip-progress-mini">
-            <text class="vip-label">V{{ userInfo.level || 1 }}</text>
-            <view class="mini-bar">
-              <view class="mini-fill" :style="{ width: vipProgress + '%' }"></view>
-            </view>
-            <text class="vip-label">V{{ Math.min((userInfo.level || 1) + 1, 9) }}</text>
-          </view>
-        </view>
-
-        <!-- 推广按钮 -->
-        <view class="invite-btn" @click.stop="goInvite">
-          <text class="invite-icon">邀</text>
-          <text class="invite-text">邀请</text>
-        </view>
-      </view>
-
-      <!-- 资产摘要行 -->
-      <view class="asset-row">
-        <view class="asset-mini">
-          <text class="asset-mini-value">{{ ecoPointsDisplay }}</text>
-          <text class="asset-mini-label">生态积分</text>
-        </view>
-        <view class="asset-divider"></view>
-        <view class="asset-mini">
-          <text class="asset-mini-value accent">{{ consumerPointsDisplay }}</text>
-          <text class="asset-mini-label">消费积分</text>
-        </view>
-        <view class="asset-divider"></view>
-        <view class="asset-mini">
-          <text class="asset-mini-value gold">¥{{ balanceDisplay }}</text>
-          <text class="asset-mini-label">账户余额</text>
-        </view>
-      </view>
-    </view>
-
-    <!-- ========== 2. 每日分红 Banner ========== -->
-    <view class="dividend-banner" v-if="loggedIn">
-      <view class="dividend-inner">
-        <view class="dividend-left">
-          <text class="dividend-icon">红</text>
-          <view class="dividend-info">
-            <text class="dividend-title">昨日分红</text>
-            <text class="dividend-value">+{{ yesterdayProfit }}积分</text>
-          </view>
-        </view>
-        <view class="dividend-btn" @click="goSignIn">
-          <text class="dividend-btn-text">签到领积分</text>
-        </view>
-      </view>
-    </view>
+    <!-- ========== 1. 用户信息卡片（已抽取为独立组件） ========== -->
+    <UserStatsCard
+      :user-info="userInfo"
+      :eco-points-display="ecoPointsDisplay"
+      :consumer-points-display="consumerPointsDisplay"
+      :balance-display="balanceDisplay"
+      :yesterday-profit="yesterdayProfit"
+      :vip-progress="vipProgress"
+      :remaining-performance="String(remainingPerformance)"
+      :level-name="levelName"
+      @profile="goProfile"
+      @invite="goInvite"
+      @signin="goSignIn"
+    />
 
     <!-- ========== 3. 订单入口 ========== -->
     <view class="order-section glass-card">
@@ -111,54 +51,7 @@
       </view>
     </view>
 
-    <!-- ========== 5. 会员成长体系 ========== -->
-    <view class="vip-section glass-card" @click="goLevelDetail">
-      <view class="vip-section__glow" />
-      <view class="vip-header">
-        <view class="vip-hero">
-          <view class="vip-hero__tier">
-            <text class="vip-tier-label">VIP</text>
-            <text class="vip-tier-num">{{ userInfo.level || 1 }}</text>
-          </view>
-          <text class="vip-tier-name">{{ (levelName || 'V1').toUpperCase() }}</text>
-        </view>
-        <view class="vip-level-badge" :class="'v' + (userInfo.level || 1)">
-          <text class="vip-badge-text">会员成长</text>
-        </view>
-      </view>
-
-      <!-- 9级能量球展示 -->
-      <view class="energy-orbs">
-        <view
-          class="energy-orb"
-          v-for="i in 9"
-          :key="i"
-          :class="[
-            'orb-' + i,
-            { active: (userInfo.level || 1) >= i },
-            'v' + Math.ceil(i / 3)
-          ]"
-        >
-          <text class="orb-label">V{{ i }}</text>
-        </view>
-      </view>
-
-      <view class="vip-progress-row">
-        <text class="progress-label">距离 V{{ Math.min((userInfo.level || 1) + 1, 9) }} 还差</text>
-        <text class="progress-value">{{ remainingPerformance }}业绩</text>
-      </view>
-      <view class="progress-bar">
-        <view class="progress-fill" :style="{ width: vipProgress + '%' }"></view>
-      </view>
-      <view class="vip-perks">
-        <text class="perk-tag" v-if="userInfo.level >= 3">③ 每日分红</text>
-        <text class="perk-tag" v-if="userInfo.level >= 5">⑤ 专属客服</text>
-        <text class="perk-tag" v-if="userInfo.level >= 7">⑦ 优先发货</text>
-        <text class="perk-tag" v-if="userInfo.level >= 9">⑨ 最高权益</text>
-      </view>
-    </view>
-
-    <!-- ========== 6. 其他功能 ========== -->
+<!-- ========== 6. 其他功能 ========== -->
     <view class="menu-section glass-card">
       <view class="menu-item" v-for="item in menuItems" :key="item.id" @click="item.action">
         <view class="menu-left">
@@ -182,6 +75,7 @@ import { onShow } from '@dcloudio/uni-app'
 import { userApi, walletApi, levelApi, orderApi } from '@/utils/api'
 import { checkAuth, requireAuth } from '@/utils/auth'
 import { resolveAvatar } from '@/utils/media'
+import UserStatsCard from '@/components/user/UserStatsCard.vue'
 
 const statusBarHeight = ref(20)
 const loggedIn = ref(checkAuth())

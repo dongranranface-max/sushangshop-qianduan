@@ -11,12 +11,8 @@
       <view class="nav-share" @click="share"><text>⋮</text></view>
     </view>
 
-    <!-- 商品图片 -->
-    <swiper class="product-swiper" :indicator-dots="true" indicator-color="rgba(255,255,255,0.35)" indicator-active-color="#C4A574">
-      <swiper-item v-for="(img, index) in productImages" :key="index">
-        <image class="product-image" :src="img" mode="aspectFill" />
-      </swiper-item>
-    </swiper>
+    <!-- 商品图片（懒加载轮播） -->
+    <ProductGallery :images="productImages" />
 
     <!-- 商品信息 -->
     <view class="product-info">
@@ -73,7 +69,7 @@
     <view class="detail-section" v-if="currentTab === 'detail'">
       <view class="section-title"><text>商品详情</text></view>
       <view class="detail-content">
-        <image v-for="(img, index) in productImages" :key="'d' + index" class="detail-image" :src="img" mode="widthFix" />
+        <LaxImage v-for="(img, index) in productImages" :key="'d' + index" class="detail-image" :src="img" mode="widthFix" aspect-ratio="0" />
       </view>
     </view>
 
@@ -143,6 +139,9 @@ import { ref, computed, onMounted } from 'vue'
 import { productApi, cartApi } from '@/utils/api'
 import { requireAuth, checkAuth } from '@/utils/auth'
 import { resolveProductCover } from '@/utils/media'
+import type { Product, MallType } from '@/types/api'
+import ProductGallery from '@/components/product/ProductGallery.vue'
+import LaxImage from '@/components/lazy/LaxImage.vue'
 
 const statusBarHeight = ref(20)
 const currentTab = ref('detail')
@@ -152,7 +151,7 @@ const cartCount = ref(0)
 const productId = ref('')
 const mode = ref<'consume' | 'exchange' | 'redeem'>('consume')
 
-const product = ref<any>({
+const product = ref<Partial<Product>>({
   name: '',
   price: 0,
   originalPrice: 0,

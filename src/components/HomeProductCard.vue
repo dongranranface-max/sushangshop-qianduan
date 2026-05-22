@@ -2,7 +2,7 @@
   <view class="p-card clay-card-hover" @click="emit('click')">
     <view class="p-card__media">
       <view class="p-card__badge" :class="`p-card__badge--t${type}`">{{ badge }}</view>
-      <image class="p-card__img" :src="cover" mode="aspectFill" />
+      <LaxImage class="p-card__img" :src="cover" aspect-ratio="100%" mode="aspectFill" />
     </view>
     <view class="p-card__body">
       <text class="p-card__name">{{ product.name }}</text>
@@ -24,6 +24,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import LaxImage from '@/components/lazy/LaxImage.vue'
 
 const props = defineProps<{
   product: Record<string, any>
@@ -76,8 +77,8 @@ const salesText = computed(() => {
 
 .p-card__img {
   width: 100%;
-  height: 100%;
   display: block;
+  // 高度由 LaxImage 的 padding-bottom: 100% 控制（1:1）
 }
 
 .p-card__badge {

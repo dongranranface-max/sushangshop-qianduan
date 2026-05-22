@@ -1,0 +1,265 @@
+// ============================================
+//  animations.scss - 全局动画系统
+//  集享公社 · 轻奢金融风 · 高端动效
+// ============================================
+@import './theme.scss';
+
+// ---------- CSS Custom Properties ----------
+:root {
+  // 基础时间
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
+
+  // 缓动曲线
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  // 透传
+  --transition-default: all var(--duration-base) var(--ease-default);
+  --transition-fast: all var(--duration-fast) var(--ease-out);
+  --transition-spring: all var(--duration-slow) var(--ease-spring);
+}
+
+// ---------- 通用过渡 Mixin ----------
+@mixin transition($properties: all, $duration: var(--duration-base), $ease: var(--ease-default)) {
+  transition: $properties $duration $ease;
+}
+
+@mixin hover-lift($scale: 1.02, $shadow: $shadow-glow) {
+  @include transition(transform box-shadow);
+  &:hover {
+    transform: translateY(-2px) scale($scale);
+    box-shadow: $shadow;
+  }
+  &:active {
+    transform: scale(0.99);
+    box-shadow: 0 4rpx 16rpx rgba(26, 36, 56, 0.04);
+  }
+}
+
+@mixin press-feedback {
+  @include transition(transform, var(--duration-fast), var(--ease-out));
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+@mixin fade-in($duration: var(--duration-slow)) {
+  animation: fadeIn $duration var(--ease-out) both;
+}
+
+@mixin slide-up($duration: var(--duration-slow), $delay: 0ms) {
+  animation: slideUp $duration var(--ease-out) $delay both;
+}
+
+// ---------- 骨架屏 shimmer ----------
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    $bg-tertiary 25%,
+    rgba(255, 255, 255, 0.6) 50%,
+    $bg-tertiary 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+// ---------- 关键帧 ----------
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8rpx); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmerWave {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+// ---------- 页面进入动画 ----------
+.page-enter {
+  @include fade-in;
+}
+
+.page-enter-up {
+  @include slide-up;
+}
+
+// ---------- 卡片 hover 效果 ----------
+.card-hover {
+  @include hover-lift;
+}
+
+// ---------- 按钮点击反馈 ----------
+.btn-press {
+  @include press-feedback;
+}
+
+// ---------- 涟漪效果 ----------
+.ripple {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
+    opacity: 0;
+  }
+  &:active::after {
+    width: 200%;
+    height: 200%;
+    opacity: 1;
+    transition: width 0s, height 0s, opacity 0s;
+  }
+}
+
+// ---------- 加载状态 ----------
+.loading-spinner {
+  display: inline-block;
+  width: 32rpx;
+  height: 32rpx;
+  border: 3rpx solid rgba($accent, 0.3);
+  border-top-color: $accent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+// ---------- 数字滚动动画 ----------
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.count-animate {
+  animation: countUp var(--duration-base) var(--ease-out) both;
+}
+
+// ---------- 渐变文字 ----------
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-text {
+  background: $gold-gradient;
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 3s ease infinite;
+}
+
+// ---------- 豪华卡片光效 ----------
+@keyframes premiumGlow {
+  0%, 100% { box-shadow: $shadow-gold; }
+  50% { box-shadow: $shadow-fire-strong; }
+}
+
+.premium-glow {
+  animation: premiumGlow 4s ease-in-out infinite;
+}
+
+// ---------- 列表项交错进入 ----------
+@for $i from 1 through 12 {
+  .stagger-item:nth-child(#{$i}) {
+    animation: slideUp var(--duration-slow) var(--ease-out) #{$i * 60}ms both;
+  }
+}
+
+// ---------- 安全区域 ----------
+.safe-area-top {
+  height: constant(safe-area-inset-top);
+  height: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  height: constant(safe-area-inset-bottom);
+  height: env(safe-area-inset-bottom);
+}

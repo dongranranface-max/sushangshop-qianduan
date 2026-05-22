@@ -93,9 +93,10 @@
             :key="p.id"
             @click="goProduct(p)"
           >
-            <image
+            <LaxImage
               class="product-image"
               :src="productCover(p)"
+              aspect-ratio="100%"
               mode="aspectFill"
             />
             <view class="product-info">
@@ -136,6 +137,7 @@ import { productApi } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
 import { HOME_CATEGORY_FALLBACK, normalizeCategoryTree, flattenCategories } from '@/utils/category'
 import { resolveProductCover } from '@/utils/media'
+import LaxImage from '@/components/lazy/LaxImage.vue'
 
 function productCover(p: any) {
   return resolveProductCover(p)
@@ -442,8 +444,7 @@ function goProduct(p: any) {
 
   .product-image {
     width: 100%;
-    aspect-ratio: 1 / 1;
-    background: linear-gradient(135deg, $warm-blue 0%, $bg-tertiary 100%);
+    // 高度由 LaxImage 的 padding-bottom: 100% 控制
   }
 
   .product-info {

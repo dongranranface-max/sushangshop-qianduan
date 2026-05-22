@@ -1,8 +1,32 @@
+# Dependencies
 node_modules/
-unpackage/
+
+# Build outputs
 dist/
+uni-app/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
 .env
 .env.local
 .env.*.local
-*.log
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cache
+.cache/
+.eslintcache/
+.prettiercache/
+
+# Lock files (optional, but good to keep)
+# package-lock.json
+# yarn.lock
