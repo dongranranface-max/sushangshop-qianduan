@@ -68,9 +68,15 @@
 
       <!-- 右侧商品列表 -->
       <scroll-view class="product-list" scroll-y @scrolltolower="loadMore">
-        <!-- 加载中 -->
-        <view v-if="loading" class="loading-wrap">
-          <text class="loading-text">加载中...</text>
+        <!-- 骨架屏 -->
+        <view v-if="loading" class="product-grid">
+          <view class="sk-card" v-for="i in 6" :key="i">
+            <view class="sk-img shimmer"></view>
+            <view class="sk-info">
+              <view class="sk-line sk-long shimmer"></view>
+              <view class="sk-line sk-short shimmer"></view>
+            </view>
+          </view>
         </view>
 
         <!-- 空状态 -->
@@ -381,6 +387,45 @@ function goProduct(p: any) {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing-base);
+}
+
+// 骨架屏
+.sk-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1rpx solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+
+  .sk-img {
+    width: 100%;
+    height: 300rpx;
+    background: $bg-tertiary;
+  }
+
+  .sk-info {
+    padding: var(--spacing-base);
+    display: flex;
+    flex-direction: column;
+    gap: 12rpx;
+  }
+
+  .sk-line {
+    height: 22rpx;
+    border-radius: 8rpx;
+    background: $bg-tertiary;
+    &.sk-long { width: 85%; }
+    &.sk-short { width: 45%; }
+  }
+}
+
+.shimmer {
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
 }
 
 .product-card {

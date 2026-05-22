@@ -82,8 +82,19 @@
       </view>
     </view>
     
+    <!-- 搜索骨架 -->
+    <view class="sk-result" v-if="keyword && searching">
+      <view class="sk-item" v-for="i in 4" :key="i">
+        <view class="sk-img shimmer"></view>
+        <view class="sk-info">
+          <view class="sk-line sk-long shimmer"></view>
+          <view class="sk-line sk-short shimmer"></view>
+        </view>
+      </view>
+    </view>
+
     <!-- 无结果 -->
-    <view class="empty-section" v-if="keyword && searchResult.length === 0 && searching">
+    <view class="empty-section" v-else-if="keyword && searchResult.length === 0 && searching">
       <text class="empty-icon">搜</text>
       <text class="empty-text">没有找到相关商品</text>
       <text class="empty-hint">试试其他关键词</text>
@@ -390,6 +401,56 @@ watch(keyword, (newVal) => {
       }
     }
   }
+}
+
+// 搜索骨架屏
+.sk-result {
+  margin-top: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-base);
+
+  .sk-item {
+    display: flex;
+    @include premium-surface($bg-secondary);
+    border-radius: $radius-lg;
+    overflow: hidden;
+    padding: var(--spacing-base);
+
+    .sk-img {
+      width: 180rpx;
+      height: 180rpx;
+      border-radius: $radius-sm;
+      background: $bg-tertiary;
+      flex-shrink: 0;
+    }
+
+    .sk-info {
+      flex: 1;
+      margin-left: var(--spacing-base);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16rpx;
+    }
+
+    .sk-line {
+      height: 24rpx;
+      border-radius: 8rpx;
+      background: $bg-tertiary;
+      &.sk-long { width: 80%; }
+      &.sk-short { width: 45%; }
+    }
+  }
+}
+
+.shimmer {
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
 }
 
 .empty-section {

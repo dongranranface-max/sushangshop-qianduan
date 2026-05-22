@@ -55,7 +55,31 @@
         </view>
       </view>
 
-      <view v-if="loading" class="hint">加载中...</view>
+      <!-- 骨架屏 -->
+      <view v-if="loading && !orders.length" class="order-skeleton">
+        <view class="sk-card glass-card" v-for="i in 3" :key="i">
+          <view class="sk-head">
+            <view class="sk-tag shimmer"></view>
+            <view class="sk-status shimmer"></view>
+          </view>
+          <view class="sk-line shimmer"></view>
+          <view class="sk-items">
+            <view class="sk-product">
+              <view class="sk-img shimmer"></view>
+              <view class="sk-prod-info">
+                <view class="sk-line sk-long shimmer"></view>
+                <view class="sk-line sk-short shimmer"></view>
+              </view>
+              <view class="sk-price shimmer"></view>
+            </view>
+          </view>
+          <view class="sk-foot">
+            <view class="sk-line shimmer"></view>
+            <view class="sk-btn shimmer"></view>
+          </view>
+        </view>
+      </view>
+
       <view v-if="!loading && !orders.length" class="empty">
         <text class="empty__icon">📦</text>
         <text class="empty__text">暂无订单</text>
@@ -263,6 +287,104 @@ function goHome() {
   &__name { font-size: 26rpx; color: $text-primary; @include line-clamp(2); }
   &__spec { font-size: 22rpx; color: $text-muted; }
   &__price { font-size: 28rpx; color: $text-primary; }
+}
+
+.order-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-base;
+  padding: 0;
+
+  .sk-card {
+    padding: $spacing-base;
+    border-radius: $radius-lg;
+
+    .sk-head {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16rpx;
+    }
+
+    .sk-tag {
+      width: 100rpx;
+      height: 28rpx;
+      border-radius: 8rpx;
+      background: $bg-tertiary;
+    }
+
+    .sk-status {
+      width: 80rpx;
+      height: 28rpx;
+      border-radius: 8rpx;
+      background: $bg-tertiary;
+    }
+
+    .sk-line {
+      height: 20rpx;
+      border-radius: 8rpx;
+      background: $bg-tertiary;
+      margin-bottom: 12rpx;
+      &.sk-long { width: 60%; }
+      &.sk-short { width: 35%; }
+    }
+
+    .sk-items {
+      margin: 16rpx 0;
+    }
+
+    .sk-product {
+      display: flex;
+      align-items: center;
+      gap: 16rpx;
+    }
+
+    .sk-img {
+      width: 120rpx;
+      height: 120rpx;
+      border-radius: 12rpx;
+      background: $bg-tertiary;
+      flex-shrink: 0;
+    }
+
+    .sk-prod-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12rpx;
+    }
+
+    .sk-price {
+      width: 80rpx;
+      height: 28rpx;
+      border-radius: 8rpx;
+      background: $bg-tertiary;
+    }
+
+    .sk-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16rpx;
+      padding-top: 16rpx;
+      border-top: 1rpx solid $border-light;
+    }
+
+    .sk-btn {
+      width: 120rpx;
+      height: 56rpx;
+      border-radius: 28rpx;
+      background: $bg-tertiary;
+    }
+  }
+}
+
+.shimmer {
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
 }
 
 .hint, .empty { text-align: center; padding: 80rpx 0; color: $text-muted; }
