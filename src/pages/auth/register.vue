@@ -1,196 +1,261 @@
 <template>
-  <view class="page-container">
-    <view class="safe-area-top" :style="{ height: statusBarHeight + 'px' }"></view>
+  <view class="auth-split">
 
-    <!-- ========== 背景特效 ========== -->
-    <view class="bg-scene">
-      <view class="orb orb-1"></view>
-      <view class="orb orb-2"></view>
-    </view>
+    <!-- ============================================
+      左侧品牌空间（40%）
+    ============================================ -->
+    <view class="brand-space">
+      <view class="brand-glow brand-glow--top" />
+      <view class="brand-glow brand-glow--bottom" />
 
-    <!-- ========== 页面头部 ========== -->
-    <view class="page-header">
-      <view class="back-btn" @click="goBack">
-        <text class="back-icon">←</text>
-      </view>
-      <text class="page-title">创建账户</text>
-      <view class="header-spacer"></view>
-    </view>
-
-    <!-- ========== Logo 区 ========== -->
-    <view class="logo-section">
-      <view class="logo-wrap">
-        <image class="logo-img" src="/static/logo/logo.png" mode="aspectFit" />
-      </view>
-      <text class="app-name">集享公社</text>
-      <text class="app-slogan">加入我们 · 共享生态红利</text>
-    </view>
-
-    <!-- ========== 注册表单 ========== -->
-    <view class="register-form">
-      <!-- 手机号 -->
-      <view class="input-wrap" :class="{ focused: focus.phone }">
-        <text class="input-label">📱 手机号</text>
-        <input
-          class="input-field"
-          v-model="form.phone"
-          type="number"
-          maxlength="11"
-          placeholder="请输入手机号"
-          placeholder-class="input-placeholder"
-          @focus="focus.phone = true"
-          @blur="focus.phone = false"
-        />
-      </view>
-
-      <!-- 密码 -->
-      <view class="input-wrap" :class="{ focused: focus.password }">
-        <text class="input-label">🔐 登录密码</text>
-        <input
-          class="input-field"
-          v-model="form.password"
-          :password="!showPwd"
-          placeholder="设置6位以上登录密码"
-          placeholder-class="input-placeholder"
-          @focus="focus.password = true"
-          @blur="focus.password = false"
-        />
-        <view class="eye-btn" @click="showPwd = !showPwd">
-          <text>{{ showPwd ? '👁' : '👁‍🗨' }}</text>
+      <view class="brand-content">
+        <view class="brand-logo-wrap stagger-1">
+          <image class="brand-logo-img" src="/static/logo/logo.png" mode="aspectFit" />
         </view>
-      </view>
+        <text class="brand-name stagger-2">集享公社</text>
+        <text class="brand-slogan stagger-3">注册账号 · 共享生态价值</text>
 
-      <!-- 邀请码（必填） -->
-      <view
-        class="input-wrap invite-wrap"
-        :class="{
-          focused: focus.invite,
-          'invite-alert': inviteAlert,
-        }"
-      >
-        <text class="input-label">🎁 邀请码（必填）</text>
-        <input
-          class="input-field"
-          v-model="form.inviteCode"
-          placeholder="输入邀请码开启理财之旅"
-          placeholder-class="input-placeholder"
-          maxlength="6"
-          @focus="focus.invite = true"
-          @blur="onInviteBlur"
-        />
-        <text v-if="inviteAlert" class="invite-error">请输入有效邀请码（6位）</text>
-      </view>
-
-      <!-- 注册按钮 -->
-      <view
-        class="register-btn btn-fire"
-        :class="{ loading: submitting }"
-        @click="doRegister"
-      >
-        <view class="btn-inner">
-          <text class="btn-text">立即注册</text>
+        <view class="brand-divider stagger-4">
+          <view class="divider-line divider-line--left" />
+          <view class="divider-diamond" />
+          <view class="divider-line divider-line--right" />
         </view>
-      </view>
 
-      <!-- 协议 -->
-      <view class="agreement">
-        <text class="agreement-text">
-          注册即表示同意
-          <text class="link" @click.stop="openAgreement('user')">《用户协议》</text>
-          和
-          <text class="link" @click.stop="openAgreement('privacy')">《隐私政策》</text>
+        <view class="brand-footer stagger-5">
+          <text class="brand-footer-text">已有账号？</text>
+          <text class="brand-footer-link" @click="goLogin">立即登录</text>
+        </view>
+
+        <text class="brand-privacy stagger-6">
+          注册即表示同意《用户协议》和《隐私政策》
         </text>
       </view>
-
-      <!-- 已有账号 -->
-      <view class="login-row">
-        <text class="login-hint">已有账号？</text>
-        <text class="login-link" @click="goLogin">立即登录 →</text>
-      </view>
     </view>
 
-    <!-- ========== 底部装饰 ========== -->
-    <view class="footer-deco">
-      <text class="footer-text">智蓝火炼 · 安全加密</text>
+    <!-- ============================================
+      右侧操作空间（60%）
+    ============================================ -->
+    <view class="panel-space">
+      <view class="panel-safe-top" :style="{ height: statusBarHeight + 'px' }" />
+
+      <scroll-view class="panel-scroll" scroll-y :show-scrollbar="false" enhanced>
+        <view class="panel-inner">
+
+          <view class="panel-header stagger-3">
+            <text class="panel-title">创建账号</text>
+            <text class="panel-subtitle">开启您的生态积分之旅</text>
+          </view>
+
+          <view class="panel-form stagger-4">
+
+            <!-- 手机号 -->
+            <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.phone.length === 11 }">
+              <input
+                class="input-native"
+                v-model="form.phone"
+                type="number"
+                maxlength="11"
+                placeholder="手机号"
+                placeholder-class="input-plh"
+                @focus="focusState.phone = true"
+                @blur="focusState.phone = false"
+              />
+              <view class="input-gold-line" />
+              <view class="input-glow" />
+            </view>
+
+            <!-- 验证码 -->
+            <view class="input-wrap input-field-wrap code-field" :class="{ 'is-filled': form.code.length === 6 }">
+              <input
+                class="input-native"
+                v-model="form.code"
+                type="number"
+                maxlength="6"
+                placeholder="短信验证码"
+                placeholder-class="input-plh"
+                @focus="focusState.code = true"
+                @blur="focusState.code = false"
+              />
+              <view class="input-gold-line" />
+              <view class="input-glow" />
+              <view
+                class="code-btn"
+                :class="{ 'is-counting': countdown > 0 || sending }"
+                @click="sendCode"
+              >
+                <text>{{ codeBtnText }}</text>
+              </view>
+            </view>
+
+            <!-- 密码 -->
+            <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.password.length >= 6 }">
+              <input
+                class="input-native"
+                v-model="form.password"
+                :type="showPwd ? 'text' : 'password'"
+                placeholder="设置登录密码（6位以上）"
+                placeholder-class="input-plh"
+                @focus="focusState.pwd = true"
+                @blur="focusState.pwd = false"
+              />
+              <view class="input-gold-line" />
+              <view class="input-glow" />
+              <view class="input-toggle" @click="showPwd = !showPwd">
+                <text class="toggle-icon">{{ showPwd ? '⊙' : '◉' }}</text>
+              </view>
+            </view>
+
+            <!-- 邀请码（可选）-->
+            <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.inviteCode.length > 0 }">
+              <input
+                class="input-native"
+                v-model="form.inviteCode"
+                placeholder="邀请码（选填）"
+                placeholder-class="input-plh"
+                @focus="focusState.invite = true"
+                @blur="focusState.invite = false"
+              />
+              <view class="input-gold-line" />
+              <view class="input-glow" />
+            </view>
+
+          </view>
+
+          <!-- 提交按钮 -->
+          <view class="panel-submit stagger-5">
+            <view
+              class="submit-btn"
+              :class="{ 'is-loading': submitting }"
+              @click="doRegister"
+            >
+              <view v-if="!submitting" class="submit-inner">
+                <text class="submit-text">注 册</text>
+              </view>
+              <view v-else class="submit-loading">
+                <view class="loading-spinner" />
+                <text class="loading-text">注册中...</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 服务条款说明 -->
+          <view class="panel-terms stagger-6">
+            <view class="terms-check" @click="agreed = !agreed">
+              <view class="check-box" :class="{ 'is-checked': agreed }">
+                <text v-if="agreed" class="check-icon">✓</text>
+              </view>
+              <text class="terms-text">
+                我已阅读并同意
+                <text class="terms-link">《用户协议》</text>
+                和
+                <text class="terms-link">《隐私政策》</text>
+              </text>
+            </view>
+          </view>
+
+        </view>
+      </scroll-view>
+
+      <view class="panel-safe-bottom" />
     </view>
 
-    <view class="safe-area-bottom"></view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { authApi } from '@/utils/api'
 
 const statusBarHeight = ref(20)
 const submitting = ref(false)
+const sending = ref(false)
 const showPwd = ref(false)
+const agreed = ref(false)
+const countdown = ref(0)
+let countdownTimer: ReturnType<typeof setInterval> | null = null
+
+const focusState = reactive({
+  phone: false,
+  code: false,
+  pwd: false,
+  invite: false,
+})
 
 const form = ref({
   phone: '',
+  code: '',
   password: '',
   inviteCode: '',
 })
 
-const focus = reactive({
-  phone: false,
-  password: false,
-  invite: false,
+// #ifdef MP-WEIXIN
+const app = getApp()
+statusBarHeight.value = app.globalData?.statusBarHeight || 20
+// #endif
+// #ifdef H5
+statusBarHeight.value = (uni as any).getSystemInfoSync()?.statusBarHeight || 20
+// #endif
+
+const codeBtnText = computed(() => {
+  if (sending.value) return '发送中'
+  if (countdown.value > 0) return `${countdown.value}s`
+  return '获取验证码'
 })
-const inviteAlert = ref(false)
-const inviteTouched = ref(false)
 
-// #ifdef H5
-const sys = uni.getSystemInfoSync()
-statusBarHeight.value = sys.statusBarHeight || 20
-// #endif
-
-// 如果从邀请链接进来，自动填入邀请码
-// #ifdef H5
-const pages = getCurrentPages()
-const current = pages[pages.length - 1]
-const opts = (current as any)?.options || {}
-if (opts.code) {
-  form.value.inviteCode = opts.code
-}
-// #endif
-
-function goBack() { uni.navigateBack() }
-function goLogin() { uni.navigateTo({ url: '/pages/auth/login' }) }
-
-function openAgreement(type: string) {
-  uni.showToast({ title: `《${type === 'user' ? '用户协议' : '隐私政策'}》`, icon: 'none' })
+function goLogin() {
+  uni.redirectTo({ url: '/pages/auth/login' })
 }
 
-function onInviteBlur() {
-  focus.invite = false
-  inviteTouched.value = true
-  inviteAlert.value = !form.value.inviteCode.trim()
+async function sendCode() {
+  if (countdown.value > 0 || sending.value) return
+  if (!/^1\d{10}$/.test(form.value.phone)) {
+    return uni.showToast({ title: '请输入正确手机号', icon: 'none' })
+  }
+  sending.value = true
+  try {
+    await authApi.sendResetSmsCode(form.value.phone)
+    uni.showToast({ title: '验证码已发送', icon: 'success' })
+    countdown.value = 60
+    countdownTimer = setInterval(() => {
+      countdown.value -= 1
+      if (countdown.value <= 0 && countdownTimer) {
+        clearInterval(countdownTimer)
+        countdownTimer = null
+      }
+    }, 1000)
+  } catch (e: any) {
+    uni.showToast({ title: e.message || '发送失败', icon: 'none' })
+  } finally {
+    sending.value = false
+  }
 }
 
 async function doRegister() {
   if (submitting.value) return
-  if (!form.value.phone || form.value.phone.length !== 11) {
-    return uni.showToast({ title: '请输入正确的11位手机号', icon: 'none' })
+  if (!/^1\d{10}$/.test(form.value.phone)) {
+    return uni.showToast({ title: '请输入手机号', icon: 'none' })
   }
-  if (!form.value.password || form.value.password.length < 6) {
+  if (!/^\d{6}$/.test(form.value.code)) {
+    return uni.showToast({ title: '请输入6位验证码', icon: 'none' })
+  }
+  if (form.value.password.length < 6) {
     return uni.showToast({ title: '密码至少6位', icon: 'none' })
   }
-  const code = form.value.inviteCode.trim()
-  if (!code || code.length < 4) {
-    inviteTouched.value = true
-    inviteAlert.value = true
-    return uni.showToast({ title: '请输入邀请码开启理财之旅', icon: 'none' })
+  if (!agreed.value) {
+    return uni.showToast({ title: '请先阅读并同意用户协议', icon: 'none' })
   }
 
   submitting.value = true
   uni.showLoading({ title: '注册中...' })
   try {
-    await authApi.register(form.value.phone, form.value.password, code)
-    const { assetStore } = await import('@/store/asset')
-    await assetStore.fetchBalance()
+    await authApi.register(
+      form.value.phone,
+      form.value.password,
+      form.value.inviteCode || undefined,
+      form.value.code
+    )
     uni.showToast({ title: '注册成功', icon: 'success' })
-    setTimeout(() => uni.switchTab({ url: '/pages/index/index' }), 1200)
+    setTimeout(() => uni.redirectTo({ url: '/pages/auth/login' }), 1200)
   } catch (e: any) {
     uni.showToast({ title: e.message || '注册失败', icon: 'none' })
   } finally {
@@ -203,293 +268,448 @@ async function doRegister() {
 <style lang="scss" scoped>
 @import '@/styles/theme.scss';
 
-.page-container {
+// ============================================
+//  沉浸式分屏（与登录页一致）
+// ============================================
+.auth-split {
+  display: flex;
+  width: 100vw;
   min-height: 100vh;
-  background: linear-gradient(165deg, #FFFFFF 0%, #F5F4F1 38%, #EFEEEB 100%);
-  padding: 0 var(--spacing-xl);
+  background: $bg-primary;
+}
+
+.brand-space {
+  flex: 0 0 40%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $navy;
+  box-shadow: inset -24rpx 0 80rpx rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
 }
 
-// ========== 背景特效 ==========
-.bg-scene {
+.brand-glow {
   position: absolute;
-  inset: 0;
-  overflow: hidden;
+  border-radius: 50%;
   pointer-events: none;
-}
-
-.orb {
-  position: absolute;
-  border-radius: 50%;
   filter: blur(80rpx);
-}
 
-.orb-1 {
-  width: 400rpx; height: 400rpx;
-  background: radial-gradient(circle at 40% 40%, rgba(232, 213, 181, 0.45) 0%, rgba(196, 165, 116, 0.18) 42%, transparent 72%);
-  top: -100rpx; left: -100rpx;
-  animation: orb-float 9s ease-in-out infinite;
-}
+  &--top {
+    width: 400rpx;
+    height: 400rpx;
+    top: -100rpx;
+    right: -80rpx;
+    background: radial-gradient(circle, rgba(196, 165, 116, 0.15) 0%, transparent 70%);
+    animation: glow-float 8s ease-in-out infinite;
+  }
 
-.orb-2 {
-  width: 350rpx; height: 350rpx;
-  background: radial-gradient(circle at 55% 55%, rgba(45, 58, 82, 0.14) 0%, rgba(26, 36, 56, 0.06) 45%, transparent 70%);
-  bottom: 150rpx; right: -100rpx;
-  animation: orb-float 7s ease-in-out infinite reverse;
-}
-
-@keyframes orb-float {
-  0%, 100% { transform: translate(0, 0); }
-  33% { transform: translate(15rpx, -15rpx); }
-  66% { transform: translate(-10rpx, 10rpx); }
-}
-
-// ========== 页面头部 ==========
-.page-header {
-  display: flex;
-  align-items: center;
-  padding: var(--spacing-base) 0;
-  position: relative;
-  z-index: 1;
-}
-
-.back-btn {
-  width: 72rpx; height: 72rpx;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  border: 1rpx solid var(--glass-border);
-  border-radius: 50%;
-
-  .back-icon {
-    font-size: 36rpx;
-    color: var(--text-primary);
+  &--bottom {
+    width: 350rpx;
+    height: 350rpx;
+    bottom: -80rpx;
+    left: -100rpx;
+    background: radial-gradient(circle, rgba(45, 58, 82, 0.4) 0%, transparent 70%);
+    animation: glow-float 10s ease-in-out infinite reverse;
   }
 }
 
-.page-title {
-  flex: 1;
-  text-align: center;
-  font-size: 36rpx;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: 4rpx;
+@keyframes glow-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(16rpx, -16rpx) scale(1.08); }
 }
 
-.header-spacer { width: 72rpx; }
-
-// ========== Logo 区 ==========
-.logo-section {
+.brand-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 48rpx 0 40rpx;
+  padding: 80rpx 48rpx;
   position: relative;
   z-index: 1;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.logo-wrap {
-  width: 160rpx; height: 160rpx;
+.brand-logo-wrap {
+  width: 144rpx;
+  height: 144rpx;
   border-radius: 40rpx;
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  border: 1rpx solid $border-primary;
-  box-shadow: $shadow-gold;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 24rpx;
-  animation: logo-glow 4s ease-in-out infinite;
+  background: rgba(196, 165, 116, 0.1);
+  border: 1rpx solid rgba(196, 165, 116, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40rpx;
 }
 
-@keyframes logo-glow {
-  0%, 100% { box-shadow: $shadow-gold; }
-  50% { box-shadow: $shadow-fire-strong; }
+.brand-logo-img {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 28rpx;
 }
 
-.logo-img {
-  width: 120rpx; height: 120rpx;
-  border-radius: 32rpx;
+.brand-name {
+  font-size: 48rpx;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 8rpx;
+  margin-bottom: 16rpx;
 }
 
-.app-name {
-  font-size: 48rpx; font-weight: 800;
-  color: $navy;
+.brand-slogan {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.5);
   letter-spacing: 4rpx;
-  margin-bottom: 8rpx;
+  margin-bottom: 56rpx;
 }
 
-.app-slogan {
-  font-size: 26rpx;
-  color: var(--text-secondary);
-  letter-spacing: 1rpx;
+.brand-divider {
+  display: flex;
+  align-items: center;
+  width: 180rpx;
+  margin-bottom: 56rpx;
 }
 
-// ========== 注册表单 ==========
-.register-form {
-  position: relative;
-  z-index: 1;
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+
+  &--left {
+    background: linear-gradient(90deg, transparent 0%, rgba(196, 165, 116, 0.45) 100%);
+  }
+
+  &--right {
+    background: linear-gradient(90deg, rgba(196, 165, 116, 0.45) 0%, transparent 100%);
+  }
+}
+
+.divider-diamond {
+  width: 8rpx;
+  height: 8rpx;
+  background: $gold;
+  transform: rotate(45deg);
+  margin: 0 16rpx;
+  opacity: 0.7;
+}
+
+.brand-footer {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  margin-bottom: 28rpx;
+}
+
+.brand-footer-text {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.brand-footer-link {
+  font-size: 24rpx;
+  color: $gold;
+  font-weight: 600;
+}
+
+.brand-privacy {
+  font-size: 18rpx;
+  color: rgba(255, 255, 255, 0.28);
+  text-align: center;
+  line-height: 1.7;
+  padding: 0 16rpx;
+}
+
+// ============================================
+//  右侧操作空间
+// ============================================
+.panel-space {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
+  background: $bg-primary;
+  min-height: 100vh;
 }
 
-.input-wrap {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  border: 1rpx solid var(--glass-border);
-  border-radius: var(--radius-xl);
-  padding: 24rpx 28rpx;
-  transition: all 0.3s ease;
+.panel-safe-top { flex-shrink: 0; }
 
-  &.focused {
-    border-color: $border-primary;
-    box-shadow: 0 0 0 4rpx rgba(196, 165, 116, 0.10), var(--shadow-glow);
-  }
-
-  &.has-value {
-    border-color: $border-primary;
-  }
+.panel-scroll {
+  flex: 1;
+  height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
 }
 
-.input-label {
+.panel-inner {
+  padding: 80rpx 64rpx 120rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  margin-bottom: 60rpx;
+}
+
+.panel-title {
   display: block;
-  font-size: 22rpx;
-  color: $accent-dark;
-  font-weight: 600;
-  letter-spacing: 2rpx;
+  font-size: 48rpx;
+  font-weight: 700;
+  color: $text-primary;
+  letter-spacing: -0.01em;
   margin-bottom: 12rpx;
 }
 
-.input-field {
-  width: 100%;
-  font-size: 30rpx;
-  color: var(--text-primary);
-  letter-spacing: 2rpx;
-
-  &::placeholder { color: var(--text-muted); }
-}
-
-.eye-btn {
-  position: absolute;
-  right: 28rpx;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 36rpx;
-  opacity: 0.6;
-}
-
-.invite-wrap.invite-alert {
-  border-color: rgba(255, 61, 61, 0.65) !important;
-  animation: invite-breathe 1.5s ease-in-out infinite;
-  box-shadow: 0 0 0 0 rgba(255, 61, 61, 0.35);
-}
-@keyframes invite-breathe {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 61, 61, 0.4); }
-  50% { box-shadow: 0 0 0 14rpx rgba(255, 61, 61, 0); }
-}
-.invite-error {
+.panel-subtitle {
   display: block;
-  font-size: 22rpx;
-  color: #ff3d3d;
-  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: $text-muted;
 }
-.invite-tip-legacy {
+
+// ============================================
+//  输入框：金线延伸
+// ============================================
+.input-field-wrap {
+  position: relative;
+  margin-bottom: 40rpx;
+
+  .input-native {
+    width: 100%;
+    height: 96rpx;
+    padding: 0 40rpx;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    font-size: 30rpx;
+    font-weight: 500;
+    color: $text-primary;
+    letter-spacing: 1rpx;
+    transition: background 0.3s ease;
+    box-sizing: border-box;
+
+    &::placeholder { color: $text-muted; font-weight: 400; }
+    &:focus { outline: none; background: rgba(255, 255, 255, 0.8); }
+  }
+
+  .input-gold-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3rpx;
+    background: linear-gradient(90deg, $accent 0%, $gold-light 50%, $accent 100%);
+    border-radius: 3rpx 3rpx 0 0;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .input-glow {
+    position: absolute;
+    bottom: -6rpx;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 32rpx;
+    background: radial-gradient(ellipse at center, rgba(196, 165, 116, 0.18) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  &.is-focused {
+    .input-gold-line { width: 100%; }
+    .input-glow { opacity: 1; }
+  }
+
+  &.is-filled {
+    .input-gold-line { width: 100%; }
+  }
+}
+
+// 验证码按钮
+.code-field .code-btn {
   position: absolute;
-  right: 28rpx;
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
+  height: 64rpx;
+  padding: 0 24rpx;
+  display: flex;
+  align-items: center;
+  border-left: 1rpx solid rgba(20, 20, 20, 0.08);
+  font-size: 24rpx;
+  color: $accent-dark;
+  font-weight: 600;
+  transition: color 0.3s ease;
 
-  .tip-text {
-    font-size: 20rpx;
-    color: var(--text-muted);
-    background: rgba(255,140,0,0.1);
-    padding: 4rpx 12rpx;
-    border-radius: 999rpx;
-    border: 1rpx solid rgba(255,140,0,0.2);
+  &.is-counting {
+    color: $text-muted;
   }
 }
 
-// ========== 注册按钮 ==========
-.register-btn {
-  height: 100rpx;
-  border-radius: var(--radius-xl);
+// 密码显示切换
+.input-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .toggle-icon {
+    font-size: 32rpx;
+    color: $text-muted;
+  }
+}
+
+// ============================================
+//  提交按钮
+// ============================================
+.submit-btn {
+  height: 96rpx;
+  border-radius: 9999rpx;
   overflow: hidden;
-  margin-top: 8rpx;
+  position: relative;
+  box-shadow: 0 16rpx 40rpx rgba(26, 36, 56, 0.22);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 
-  &.loading { opacity: 0.7; }
-}
-
-.btn-inner {
-  width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--accent-fire);
-  box-shadow: var(--shadow-fire);
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    animation: btn-shine 3s ease-in-out infinite;
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 8rpx 24rpx rgba(26, 36, 56, 0.18);
   }
 }
 
-@keyframes btn-shine {
+.submit-inner,
+.submit-loading {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $navy;
+}
+
+.submit-inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.12) 50%, transparent 100%);
+  animation: btn-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes btn-shimmer {
   0% { left: -100%; }
   50%, 100% { left: 100%; }
 }
 
-.btn-text {
-  font-size: 34rpx; font-weight: 700;
+.submit-text {
+  font-size: 30rpx;
+  font-weight: 700;
   color: #FFFFFF;
-  letter-spacing: 4rpx;
+  letter-spacing: 8rpx;
 }
 
-// ========== 协议 ==========
-.agreement {
-  text-align: center;
-  margin-top: 4rpx;
+.submit-btn.is-loading { opacity: 0.75; }
 
-  .agreement-text {
-    font-size: 22rpx;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
-
-  .link {
-    color: $accent-dark;
-    font-weight: 500;
-  }
+.loading-spinner {
+  width: 32rpx;
+  height: 32rpx;
+  border: 3rpx solid rgba(255, 255, 255, 0.3);
+  border-top-color: #FFFFFF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 12rpx;
 }
 
-// ========== 登录入口 ==========
-.login-row {
+.loading-text {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 2rpx;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// ============================================
+//  协议勾选
+// ============================================
+.panel-terms {
+  margin-top: 40rpx;
+}
+
+.terms-check {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  cursor: pointer;
+}
+
+.check-box {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 10rpx;
+  border: 2rpx solid rgba(20, 20, 20, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8rpx;
-  margin-top: 4rpx;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+
+  &.is-checked {
+    background: $gold;
+    border-color: $gold;
+    animation: checkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
 }
 
-.login-hint { font-size: 26rpx; color: var(--text-muted); }
-.login-link {
-  font-size: 26rpx;
+.check-icon {
+  font-size: 22rpx;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+@keyframes checkPop {
+  0% { transform: scale(0); }
+  70% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.terms-text {
+  font-size: 22rpx;
+  color: $text-muted;
+  line-height: 1.5;
+}
+
+.terms-link {
   color: $accent-dark;
   font-weight: 600;
 }
 
-// ========== 底部 ==========
-.footer-deco {
-  text-align: center;
-  padding: 40rpx 0 32rpx;
-  position: relative;
-  z-index: 1;
+// ============================================
+//  入场动画
+// ============================================
+.stagger-1 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 0ms both; }
+.stagger-2 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 120ms both; }
+.stagger-3 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 240ms both; }
+.stagger-4 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 360ms both; }
+.stagger-5 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 480ms both; }
+.stagger-6 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 600ms both; }
 
-  .footer-text {
-    font-size: 22rpx;
-    color: var(--text-muted);
-    letter-spacing: 2rpx;
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24rpx);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.panel-safe-bottom {
+  height: constant(safe-area-inset-bottom);
+  height: env(safe-area-inset-bottom);
 }
 </style>

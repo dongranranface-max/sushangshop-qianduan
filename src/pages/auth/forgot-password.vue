@@ -1,270 +1,287 @@
 <template>
-  <view class="auth-page auth-page--luxury">
-    <view class="auth-safe safe-area-top" :style="{ height: statusBarHeight + 'px' }" />
+  <view class="auth-split">
 
-    <view class="auth-bg">
-      <view class="auth-orb auth-orb--1" />
-      <view class="auth-orb auth-orb--2" />
-    </view>
+    <!-- ============================================
+      左侧品牌空间（40%）
+    ============================================ -->
+    <view class="brand-space">
+      <view class="brand-glow brand-glow--top" />
+      <view class="brand-glow brand-glow--bottom" />
 
-    <view class="auth-top-bar">
-      <view class="auth-back" @click="goBack"><text>←</text></view>
-      <text class="auth-top-title">忘记密码</text>
-      <view class="auth-top-spacer" />
-    </view>
-
-    <scroll-view class="auth-scroll" scroll-y :show-scrollbar="false" enhanced>
-      <view class="auth-brand auth-brand--inline">
-        <view class="auth-brand__logo-wrap auth-brand__logo-wrap--sm">
-          <BrandLogo size="md" :show-text="false" />
+      <view class="brand-content">
+        <view class="brand-logo-wrap stagger-1">
+          <image class="brand-logo-img" src="/static/logo/logo.png" mode="aspectFit" />
         </view>
-        <view class="auth-brand__info">
-          <text class="auth-brand__name auth-brand__name--sm">找回密码</text>
-          <text class="auth-brand__slogan">验证手机号后设置新密码</text>
+        <text class="brand-name stagger-2">集享公社</text>
+        <text class="brand-slogan stagger-3">找回密码 · 重新启程</text>
+
+        <view class="brand-divider stagger-4">
+          <view class="divider-line divider-line--left" />
+          <view class="divider-diamond" />
+          <view class="divider-line divider-line--right" />
+        </view>
+
+        <view class="brand-footer stagger-5">
+          <text class="brand-footer-text">想起密码了？</text>
+          <text class="brand-footer-link" @click="goLogin">返回登录</text>
+        </view>
+
+        <text class="brand-privacy stagger-6">
+          找回过程中有任何问题，请联系平台客服
+        </text>
+      </view>
+    </view>
+
+    <!-- ============================================
+      右侧操作空间（60%）
+      两步流程：① 验证手机 → ② 设置新密码
+    ============================================ -->
+    <view class="panel-space">
+      <view class="panel-safe-top" :style="{ height: statusBarHeight + 'px' }" />
+
+      <!-- 顶部返回栏 -->
+      <view class="panel-topbar stagger-2">
+        <view class="back-btn" @click="goBack">
+          <text class="back-icon">←</text>
         </view>
       </view>
 
-      <view class="auth-steps">
-        <view class="auth-step" :class="{ 'auth-step--active': step === 1, 'auth-step--done': step > 1 }">
-          <text class="auth-step__num">1</text>
-          <text>验证手机</text>
-        </view>
-        <view class="auth-step-line" />
-        <view class="auth-step" :class="{ 'auth-step--active': step === 2 }">
-          <text class="auth-step__num">2</text>
-          <text>设置密码</text>
-        </view>
-      </view>
+      <scroll-view class="panel-scroll" scroll-y :show-scrollbar="false" enhanced>
+        <view class="panel-inner">
 
-      <view class="auth-card auth-card--luxury">
-        <text class="auth-card__title">{{ step === 1 ? '短信验证' : '设置新密码' }}</text>
-
-        <template v-if="step === 1">
-          <AuthField
-            v-model="form.phone"
-            variant="underline"
-            label="手机号"
-            icon="phone"
-            input-type="number"
-            :maxlength="11"
-            placeholder="注册时使用的手机号"
-            :focused="focus.phone"
-            :error="errors.phone"
-            :ok="phoneOk"
-            error-text="请输入正确的11位手机号"
-            clearable
-            @focus="focus.phone = true"
-            @blur="onPhoneBlur"
-          />
-
-          <AuthField
-            v-model="form.verifyCode"
-            variant="underline"
-            label="短信验证码"
-            icon="lock"
-            input-type="number"
-            :maxlength="6"
-            placeholder="请输入6位验证码"
-            :focused="focus.code"
-            :error="errors.code"
-            :ok="codeOk"
-            error-text="请输入6位验证码"
-            @focus="focus.code = true"
-            @blur="onCodeBlur"
-          >
-            <template #suffix>
-              <view
-                class="auth-code-btn"
-                :class="{ 'auth-code-btn--disabled': !canSendCode || countdown > 0 || sendingCode }"
-                @click.stop="sendCode"
-              >
-                <text>{{ codeBtnText }}</text>
+          <!-- 步骤指示器 -->
+          <view class="step-indicator stagger-3">
+            <view class="step-item" :class="{ 'is-active': step === 1, 'is-done': step > 1 }">
+              <view class="step-circle">
+                <text v-if="step > 1" class="step-check">✓</text>
+                <text v-else>1</text>
               </view>
-            </template>
-          </AuthField>
-
-          <view class="auth-hint-box">
-            <text>验证码将发送至上述手机号，有效期约 5 分钟</text>
+              <text class="step-label">验证手机</text>
+            </view>
+            <view class="step-connector" :class="{ 'is-done': step > 1 }" />
+            <view class="step-item" :class="{ 'is-active': step === 2 }">
+              <view class="step-circle">
+                <text>2</text>
+              </view>
+              <text class="step-label">设置密码</text>
+            </view>
           </view>
 
-          <view
-            class="auth-btn"
-            :class="{ 'auth-btn--disabled': !canGoStep2 }"
-            @click="goStep2"
-          >
-            <text>下一步</text>
-          </view>
-        </template>
+          <!-- ========== Step 1: 验证手机 ========== -->
+          <template v-if="step === 1">
+            <view class="panel-header">
+              <text class="panel-title">短信验证</text>
+              <text class="panel-subtitle">验证注册手机号后设置新密码</text>
+            </view>
 
-        <template v-else>
-          <view class="auth-hint-box auth-hint-box--compact">
-            <text>已为 {{ maskedPhone }} 验证通过</text>
-          </view>
+            <view class="panel-form stagger-4">
 
-          <AuthField
-            v-model="form.password"
-            variant="underline"
-            label="新密码"
-            icon="lock"
-            :password="!showPwd"
-            placeholder="6–20位，建议字母+数字"
-            :focused="focus.password"
-            :error="errors.password"
-            :ok="pwdOk"
-            error-text="密码至少6位"
-            password-toggle
-            @focus="focus.password = true"
-            @blur="onPwdBlur"
-            @input="onPwdInput"
-            @toggle-pwd="showPwd = !showPwd"
-          >
-            <template v-if="form.password" #hint>
-              <view class="auth-pwd-bar">
-                <view class="auth-pwd-track">
+              <!-- 手机号 -->
+              <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.phone.length === 11 }">
+                <input
+                  class="input-native"
+                  v-model="form.phone"
+                  type="number"
+                  maxlength="11"
+                  placeholder="注册时的手机号"
+                  placeholder-class="input-plh"
+                  @focus="focusState.phone = true"
+                  @blur="focusState.phone = false"
+                />
+                <view class="input-gold-line" />
+                <view class="input-glow" />
+              </view>
+
+              <!-- 验证码 -->
+              <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.code.length === 6 }">
+                <input
+                  class="input-native"
+                  v-model="form.code"
+                  type="number"
+                  maxlength="6"
+                  placeholder="请输入6位验证码"
+                  placeholder-class="input-plh"
+                  @focus="focusState.code = true"
+                  @blur="focusState.code = false"
+                />
+                <view class="input-gold-line" />
+                <view class="input-glow" />
+                <view
+                  class="code-btn"
+                  :class="{ 'is-counting': countdown > 0 || sending }"
+                  @click="sendCode"
+                >
+                  <text>{{ codeBtnText }}</text>
+                </view>
+              </view>
+
+            </view>
+
+            <view class="panel-submit stagger-5">
+              <view
+                class="submit-btn"
+                :class="{ 'is-disabled': !canGoStep2 }"
+                @click="goStep2"
+              >
+                <text class="submit-text">下一步</text>
+              </view>
+            </view>
+          </template>
+
+          <!-- ========== Step 2: 设置密码 ========== -->
+          <template v-else>
+            <view class="panel-header">
+              <text class="panel-title">设置新密码</text>
+              <text class="panel-subtitle">
+                已为 <text class="highlight-phone">{{ maskedPhone }}</text> 验证通过
+              </text>
+            </view>
+
+            <view class="panel-form stagger-4">
+
+              <!-- 新密码 -->
+              <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.password.length >= 6 }">
+                <input
+                  class="input-native"
+                  v-model="form.password"
+                  :type="showPwd ? 'text' : 'password'"
+                  placeholder="新密码（6位以上）"
+                  placeholder-class="input-plh"
+                  @focus="focusState.pwd = true"
+                  @blur="focusState.pwd = false"
+                />
+                <view class="input-gold-line" />
+                <view class="input-glow" />
+                <view class="input-toggle" @click="showPwd = !showPwd">
+                  <text class="toggle-icon">{{ showPwd ? '⊙' : '◉' }}</text>
+                </view>
+              </view>
+
+              <!-- 密码强度指示 -->
+              <view v-if="form.password" class="pwd-strength">
+                <view class="pwd-track">
                   <view
-                    class="auth-pwd-fill"
-                    :class="pwdLevel ? `auth-pwd-fill--${pwdLevel}` : ''"
+                    class="pwd-fill"
+                    :class="`pwd-fill--${pwdLevel}`"
                     :style="{ width: pwdPercent + '%' }"
                   />
                 </view>
-                <text class="auth-pwd-label">{{ pwdHint }}</text>
+                <text class="pwd-hint">{{ pwdHint }}</text>
               </view>
-            </template>
-          </AuthField>
 
-          <AuthField
-            v-model="form.confirmPassword"
-            variant="underline"
-            label="确认新密码"
-            icon="lock"
-            :password="!showConfirm"
-            placeholder="再次输入新密码"
-            :focused="focus.confirm"
-            :error="errors.confirm"
-            :ok="confirmOk"
-            error-text="两次密码不一致"
-            confirm-type="done"
-            password-toggle
-            @focus="focus.confirm = true"
-            @blur="onConfirmBlur"
-            @toggle-pwd="showConfirm = !showConfirm"
-            @confirm="doReset"
-          />
+              <!-- 确认新密码 -->
+              <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.confirm.length >= 6 }">
+                <input
+                  class="input-native"
+                  v-model="form.confirm"
+                  :type="showConfirm ? 'text' : 'password'"
+                  placeholder="再次输入新密码"
+                  placeholder-class="input-plh"
+                  @focus="focusState.confirm = true"
+                  @blur="focusState.confirm = false"
+                />
+                <view class="input-gold-line" />
+                <view class="input-glow" />
+                <view class="input-toggle" @click="showConfirm = !showConfirm">
+                  <text class="toggle-icon">{{ showConfirm ? '⊙' : '◉' }}</text>
+                </view>
+              </view>
 
-          <view
-            class="auth-btn"
-            :class="{
-              'auth-btn--disabled': !canSubmit || submitting,
-              'auth-btn--loading': submitting,
-            }"
-            @click="doReset"
-          >
-            <view v-if="submitting" class="auth-btn__dot" />
-            <text>{{ submitting ? '提交中' : '确认重置' }}</text>
-          </view>
+              <!-- 确认密码错误提示 -->
+              <text v-if="confirmDirty && form.confirm !== form.password" class="confirm-error">
+                两次密码不一致
+              </text>
 
-          <view class="auth-secondary-row">
-            <text class="auth-link auth-link--muted" @click="step = 1">返回上一步</text>
-          </view>
-        </template>
+            </view>
 
-        <view class="auth-secondary-row">
-          <text class="auth-link auth-link--muted">想起密码了？</text>
-          <text class="auth-link" @click="goLogin">返回登录</text>
+            <view class="panel-submit stagger-5">
+              <view
+                class="submit-btn"
+                :class="{ 'is-disabled': !canSubmit || submitting, 'is-loading': submitting }"
+                @click="doReset"
+              >
+                <view v-if="!submitting" class="submit-inner">
+                  <text class="submit-text">确认重置</text>
+                </view>
+                <view v-else class="submit-loading">
+                  <view class="loading-spinner" />
+                  <text class="loading-text">提交中...</text>
+                </view>
+              </view>
+            </view>
+
+            <view class="panel-back-link stagger-6">
+              <text class="back-link-text" @click="step = 1">← 返回上一步</text>
+            </view>
+          </template>
+
         </view>
-      </view>
-    </scroll-view>
+      </scroll-view>
 
-    <view class="auth-footer">
-      <text>如无法接收验证码，请联系平台客服协助找回</text>
+      <view class="panel-safe-bottom" />
     </view>
-    <view class="auth-safe safe-area-bottom" />
+
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { ref, reactive, computed } from 'vue'
 import { authApi } from '@/utils/api'
-import BrandLogo from '@/components/BrandLogo.vue'
-import AuthField from '@/components/auth/AuthField.vue'
-
-const STORAGE_PHONE = 'saved_phone'
-const COUNTDOWN_SEC = 60
 
 const statusBarHeight = ref(20)
 const step = ref(1)
 const submitting = ref(false)
-const sendingCode = ref(false)
-const countdown = ref(0)
+const sending = ref(false)
 const showPwd = ref(false)
 const showConfirm = ref(false)
+const countdown = ref(0)
+const confirmDirty = ref(false)
 let countdownTimer: ReturnType<typeof setInterval> | null = null
+
+const focusState = reactive({
+  phone: false,
+  code: false,
+  pwd: false,
+  confirm: false,
+})
 
 const form = ref({
   phone: '',
-  verifyCode: '',
+  code: '',
   password: '',
-  confirmPassword: '',
+  confirm: '',
 })
 
-const focus = reactive({
-  phone: false,
-  code: false,
-  password: false,
-  confirm: false,
-})
-
-const errors = reactive({
-  phone: false,
-  code: false,
-  password: false,
-  confirm: false,
-})
-
-const phoneOk = computed(() => /^1\d{10}$/.test(form.value.phone))
-const codeOk = computed(() => /^\d{6}$/.test(form.value.verifyCode))
-const pwdOk = computed(() => form.value.password.length >= 6)
-const confirmOk = computed(
-  () => form.value.confirmPassword.length >= 6 && form.value.confirmPassword === form.value.password
-)
-
-const canSendCode = computed(() => phoneOk.value)
-const canGoStep2 = computed(() => phoneOk.value && codeOk.value)
-const canSubmit = computed(() => pwdOk.value && confirmOk.value)
+// #ifdef MP-WEIXIN
+const app = getApp()
+statusBarHeight.value = app.globalData?.statusBarHeight || 20
+// #endif
+// #ifdef H5
+statusBarHeight.value = (uni as any).getSystemInfoSync()?.statusBarHeight || 20
+// #endif
 
 const maskedPhone = computed(() => {
   const p = form.value.phone
-  if (p.length !== 11) return p
-  return `${p.slice(0, 3)}****${p.slice(7)}`
+  return p.length === 11 ? `${p.slice(0, 3)}****${p.slice(7)}` : p
 })
 
 const codeBtnText = computed(() => {
-  if (sendingCode.value) return '发送中'
+  if (sending.value) return '发送中'
   if (countdown.value > 0) return `${countdown.value}s`
   return '获取验证码'
 })
+
+const canGoStep2 = computed(() =>
+  /^1\d{10}$/.test(form.value.phone) && /^\d{6}$/.test(form.value.code)
+)
 
 const pwdLevel = ref(0)
 const pwdPercent = ref(0)
 const pwdHint = ref('')
 
-onLoad((opts) => {
-  if (opts?.phone) form.value.phone = String(opts.phone)
-  if (opts?.redirect) uni.setStorageSync('_forgot_redirect', decodeURIComponent(opts.redirect as string))
-})
-
-onMounted(() => {
-  statusBarHeight.value = uni.getSystemInfoSync().statusBarHeight || 20
-  if (!form.value.phone) {
-    const saved = uni.getStorageSync(STORAGE_PHONE)
-    if (saved) form.value.phone = String(saved)
-  }
-})
-
-onUnmounted(() => {
-  if (countdownTimer) clearInterval(countdownTimer)
-})
+const canSubmit = computed(() =>
+  form.value.password.length >= 6 && form.value.confirm === form.value.password
+)
 
 function goBack() {
   if (step.value === 2) {
@@ -278,25 +295,35 @@ function goLogin() {
   uni.redirectTo({ url: '/pages/auth/login' })
 }
 
-function onPhoneBlur() {
-  focus.phone = false
-  errors.phone = form.value.phone.length > 0 && !phoneOk.value
+async function sendCode() {
+  if (countdown.value > 0 || sending.value) return
+  if (!/^1\d{10}$/.test(form.value.phone)) {
+    return uni.showToast({ title: '请输入正确手机号', icon: 'none' })
+  }
+  sending.value = true
+  try {
+    await authApi.sendResetSmsCode(form.value.phone)
+    uni.showToast({ title: '验证码已发送', icon: 'success' })
+    countdown.value = 60
+    countdownTimer = setInterval(() => {
+      countdown.value -= 1
+      if (countdown.value <= 0 && countdownTimer) {
+        clearInterval(countdownTimer)
+        countdownTimer = null
+      }
+    }, 1000)
+  } catch (e: any) {
+    uni.showToast({ title: e.message || '发送失败', icon: 'none' })
+  } finally {
+    sending.value = false
+  }
 }
 
-function onCodeBlur() {
-  focus.code = false
-  errors.code = form.value.verifyCode.length > 0 && !codeOk.value
-}
-
-function onPwdBlur() {
-  focus.password = false
-  errors.password = form.value.password.length > 0 && !pwdOk.value
-}
-
-function onConfirmBlur() {
-  focus.confirm = false
-  errors.confirm =
-    form.value.confirmPassword.length > 0 && form.value.confirmPassword !== form.value.password
+function goStep2() {
+  if (!canGoStep2.value) {
+    return uni.showToast({ title: '请完成手机号与验证码', icon: 'none' })
+  }
+  step.value = 2
 }
 
 function onPwdInput() {
@@ -306,78 +333,32 @@ function onPwdInput() {
   if (p.length >= 8 && /[A-Za-z]/.test(p) && /\d/.test(p)) level = 2
   if (p.length >= 10 && /[A-Za-z]/.test(p) && /\d/.test(p) && /[^A-Za-z0-9]/.test(p)) level = 3
   pwdLevel.value = level
-  pwdPercent.value = p.length === 0 ? 0 : level === 0 ? Math.min(33, (p.length / 6) * 33) : level * 33
+  pwdPercent.value = level === 0 ? Math.min(33, (p.length / 6) * 33) : level * 33
   const hints = ['', '强度一般', '强度良好', '强度优秀']
   pwdHint.value = p.length ? hints[level] || '' : ''
 }
 
-function startCountdown(sec = COUNTDOWN_SEC) {
-  countdown.value = sec
-  if (countdownTimer) clearInterval(countdownTimer)
-  countdownTimer = setInterval(() => {
-    countdown.value -= 1
-    if (countdown.value <= 0 && countdownTimer) {
-      clearInterval(countdownTimer)
-      countdownTimer = null
-    }
-  }, 1000)
-}
-
-async function sendCode() {
-  if (!canSendCode.value || countdown.value > 0 || sendingCode.value) return
-
-  sendingCode.value = true
-  try {
-    await authApi.sendResetSmsCode(form.value.phone)
-    uni.showToast({ title: '验证码已发送', icon: 'success' })
-    startCountdown()
-  } catch (e: any) {
-    uni.showToast({
-      title: e.message || '发送失败，请稍后重试',
-      icon: 'none',
-      duration: 2500,
-    })
-  } finally {
-    sendingCode.value = false
-  }
-}
-
-function goStep2() {
-  errors.phone = !phoneOk.value
-  errors.code = !codeOk.value
-  if (!canGoStep2.value) {
-    return uni.showToast({ title: '请先完成手机号与验证码填写', icon: 'none' })
-  }
-  step.value = 2
-}
-
 async function doReset() {
-  if (submitting.value) return
-  errors.password = !pwdOk.value
-  errors.confirm = !confirmOk.value
+  if (submitting.value || !canSubmit.value) return
 
-  if (!canSubmit.value) {
-    return uni.showToast({ title: '请设置并确认新密码', icon: 'none' })
+  confirmDirty.value = true
+
+  if (form.value.confirm !== form.value.password) {
+    return uni.showToast({ title: '两次密码不一致', icon: 'none' })
   }
 
   submitting.value = true
-  uni.showLoading({ title: '重置中', mask: true })
+  uni.showLoading({ title: '重置中...', mask: true })
   try {
     await authApi.resetPassword(
       form.value.phone,
-      form.value.verifyCode.trim(),
+      form.value.code.trim(),
       form.value.password
     )
-    uni.setStorageSync(STORAGE_PHONE, form.value.phone)
     uni.showToast({ title: '密码已重置', icon: 'success' })
-    setTimeout(() => {
-      const redirect = uni.getStorageSync('_forgot_redirect') || ''
-      uni.removeStorageSync('_forgot_redirect')
-      const q = redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''
-      uni.redirectTo({ url: `/pages/auth/login${q}` })
-    }, 900)
+    setTimeout(() => uni.redirectTo({ url: '/pages/auth/login' }), 1200)
   } catch (e: any) {
-    uni.showToast({ title: e.message || '重置失败，请重试', icon: 'none' })
+    uni.showToast({ title: e.message || '重置失败', icon: 'none' })
   } finally {
     submitting.value = false
     uni.hideLoading()
@@ -386,43 +367,566 @@ async function doReset() {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/auth.scss';
+@import '@/styles/theme.scss';
 
-.auth-scroll {
-  padding-top: 0;
+// ============================================
+//  沉浸式分屏（与登录/注册页一致）
+// ============================================
+.auth-split {
+  display: flex;
+  width: 100vw;
+  min-height: 100vh;
+  background: $bg-primary;
 }
 
-.auth-hint-box--compact {
-  margin-bottom: 20rpx;
-}
-
-.auth-pwd-bar {
-  margin-top: 12rpx;
+.brand-space {
+  flex: 0 0 40%;
   display: flex;
   align-items: center;
-  gap: 12rpx;
-}
-
-.auth-pwd-track {
-  flex: 1;
-  height: 8rpx;
-  background: $bg-tertiary;
-  border-radius: $radius-full;
+  justify-content: center;
+  background: $navy;
+  box-shadow: inset -24rpx 0 80rpx rgba(0, 0, 0, 0.3);
+  position: relative;
   overflow: hidden;
 }
 
-.auth-pwd-fill {
+.brand-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80rpx);
+
+  &--top {
+    width: 400rpx;
+    height: 400rpx;
+    top: -100rpx;
+    right: -80rpx;
+    background: radial-gradient(circle, rgba(196, 165, 116, 0.15) 0%, transparent 70%);
+    animation: glow-float 8s ease-in-out infinite;
+  }
+
+  &--bottom {
+    width: 350rpx;
+    height: 350rpx;
+    bottom: -80rpx;
+    left: -100rpx;
+    background: radial-gradient(circle, rgba(45, 58, 82, 0.4) 0%, transparent 70%);
+    animation: glow-float 10s ease-in-out infinite reverse;
+  }
+}
+
+@keyframes glow-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(16rpx, -16rpx) scale(1.08); }
+}
+
+.brand-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 48rpx;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.brand-logo-wrap {
+  width: 144rpx;
+  height: 144rpx;
+  border-radius: 40rpx;
+  background: rgba(196, 165, 116, 0.1);
+  border: 1rpx solid rgba(196, 165, 116, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40rpx;
+}
+
+.brand-logo-img {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 28rpx;
+}
+
+.brand-name {
+  font-size: 48rpx;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 8rpx;
+  margin-bottom: 16rpx;
+}
+
+.brand-slogan {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 4rpx;
+  margin-bottom: 56rpx;
+}
+
+.brand-divider {
+  display: flex;
+  align-items: center;
+  width: 180rpx;
+  margin-bottom: 56rpx;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+
+  &--left {
+    background: linear-gradient(90deg, transparent 0%, rgba(196, 165, 116, 0.45) 100%);
+  }
+
+  &--right {
+    background: linear-gradient(90deg, rgba(196, 165, 116, 0.45) 0%, transparent 100%);
+  }
+}
+
+.divider-diamond {
+  width: 8rpx;
+  height: 8rpx;
+  background: $gold;
+  transform: rotate(45deg);
+  margin: 0 16rpx;
+  opacity: 0.7;
+}
+
+.brand-footer {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  margin-bottom: 28rpx;
+}
+
+.brand-footer-text {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.brand-footer-link {
+  font-size: 24rpx;
+  color: $gold;
+  font-weight: 600;
+}
+
+.brand-privacy {
+  font-size: 18rpx;
+  color: rgba(255, 255, 255, 0.28);
+  text-align: center;
+  line-height: 1.7;
+  padding: 0 16rpx;
+}
+
+// ============================================
+//  右侧操作空间
+// ============================================
+.panel-space {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: $bg-primary;
+  min-height: 100vh;
+}
+
+.panel-safe-top { flex-shrink: 0; }
+
+// 返回栏
+.panel-topbar {
+  display: flex;
+  align-items: center;
+  padding: 0 24rpx;
+  height: 88rpx;
+}
+
+.back-btn {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(26, 36, 56, 0.06);
+
+  .back-icon {
+    font-size: 36rpx;
+    color: $navy;
+  }
+}
+
+.panel-scroll {
+  flex: 1;
+  height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 88rpx);
+}
+
+.panel-inner {
+  padding: 40rpx 64rpx 120rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+// ============================================
+//  步骤指示器
+// ============================================
+.step-indicator {
+  display: flex;
+  align-items: center;
+  margin-bottom: 56rpx;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+
+  .step-circle {
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 50%;
+    border: 2rpx solid rgba(20, 20, 20, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24rpx;
+    font-weight: 700;
+    color: $text-muted;
+    background: $bg-secondary;
+    transition: all 0.4s ease;
+
+    .step-check {
+      font-size: 24rpx;
+      color: $success;
+    }
+  }
+
+  .step-label {
+    font-size: 22rpx;
+    color: $text-muted;
+    font-weight: 500;
+  }
+
+  &.is-active .step-circle {
+    border-color: $gold;
+    background: $gold;
+    color: #FFFFFF;
+  }
+
+  &.is-active .step-label {
+    color: $text-primary;
+    font-weight: 600;
+  }
+
+  &.is-done .step-circle {
+    border-color: $success;
+    background: $success;
+    color: #FFFFFF;
+  }
+
+  &.is-done .step-label {
+    color: $success;
+  }
+}
+
+.step-connector {
+  flex: 1;
+  height: 2rpx;
+  background: rgba(20, 20, 20, 0.1);
+  margin: 0 16rpx;
+  margin-bottom: 36rpx;
+  transition: background 0.4s ease;
+
+  &.is-done {
+    background: $success;
+  }
+}
+
+// ============================================
+//  页面标题
+// ============================================
+.panel-header {
+  margin-bottom: 56rpx;
+}
+
+.panel-title {
+  display: block;
+  font-size: 44rpx;
+  font-weight: 700;
+  color: $text-primary;
+  letter-spacing: -0.01em;
+  margin-bottom: 12rpx;
+}
+
+.panel-subtitle {
+  display: block;
+  font-size: 25rpx;
+  color: $text-muted;
+}
+
+.highlight-phone {
+  color: $accent-dark;
+  font-weight: 600;
+}
+
+// ============================================
+//  输入框：金线延伸
+// ============================================
+.input-field-wrap {
+  position: relative;
+  margin-bottom: 40rpx;
+
+  .input-native {
+    width: 100%;
+    height: 96rpx;
+    padding: 0 40rpx;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    font-size: 30rpx;
+    font-weight: 500;
+    color: $text-primary;
+    letter-spacing: 1rpx;
+    transition: background 0.3s ease;
+    box-sizing: border-box;
+
+    &::placeholder { color: $text-muted; font-weight: 400; }
+    &:focus { outline: none; background: rgba(255, 255, 255, 0.8); }
+  }
+
+  .input-gold-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3rpx;
+    background: linear-gradient(90deg, $accent 0%, $gold-light 50%, $accent 100%);
+    border-radius: 3rpx 3rpx 0 0;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .input-glow {
+    position: absolute;
+    bottom: -6rpx;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 32rpx;
+    background: radial-gradient(ellipse at center, rgba(196, 165, 116, 0.18) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  &.is-focused {
+    .input-gold-line { width: 100%; }
+    .input-glow { opacity: 1; }
+  }
+
+  &.is-filled {
+    .input-gold-line { width: 100%; }
+  }
+}
+
+// 验证码按钮
+.code-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 64rpx;
+  padding: 0 24rpx;
+  display: flex;
+  align-items: center;
+  border-left: 1rpx solid rgba(20, 20, 20, 0.08);
+  font-size: 24rpx;
+  color: $accent-dark;
+  font-weight: 600;
+  transition: color 0.3s ease;
+
+  &.is-counting {
+    color: $text-muted;
+  }
+}
+
+// 密码显示切换
+.input-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .toggle-icon {
+    font-size: 32rpx;
+    color: $text-muted;
+  }
+}
+
+// ============================================
+//  密码强度指示
+// ============================================
+.pwd-strength {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 40rpx;
+}
+
+.pwd-track {
+  flex: 1;
+  height: 8rpx;
+  background: $bg-tertiary;
+  border-radius: 9999rpx;
+  overflow: hidden;
+}
+
+.pwd-fill {
   height: 100%;
-  border-radius: $radius-full;
-  transition: width 0.25s ease;
+  border-radius: 9999rpx;
+  transition: width 0.25s ease, background 0.25s ease;
+
   &--1 { background: $warning; }
   &--2 { background: $primary; }
   &--3 { background: $success; }
 }
 
-.auth-pwd-label {
-  font-size: var(--font-xs);
+.pwd-hint {
+  font-size: 22rpx;
   color: $text-muted;
   flex-shrink: 0;
+}
+
+// ============================================
+//  确认密码错误
+// ============================================
+.confirm-error {
+  display: block;
+  font-size: 22rpx;
+  color: $danger;
+  margin-top: -28rpx;
+  margin-bottom: 40rpx;
+}
+
+// ============================================
+//  提交按钮
+// ============================================
+.submit-btn {
+  height: 96rpx;
+  border-radius: 9999rpx;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 16rpx 40rpx rgba(26, 36, 56, 0.22);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 8rpx 24rpx rgba(26, 36, 56, 0.18);
+  }
+
+  &.is-disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+}
+
+.submit-inner,
+.submit-loading {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $navy;
+}
+
+.submit-inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.12) 50%, transparent 100%);
+  animation: btn-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes btn-shimmer {
+  0% { left: -100%; }
+  50%, 100% { left: 100%; }
+}
+
+.submit-text {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 8rpx;
+}
+
+.submit-btn.is-loading { opacity: 0.75; }
+
+.loading-spinner {
+  width: 32rpx;
+  height: 32rpx;
+  border: 3rpx solid rgba(255, 255, 255, 0.3);
+  border-top-color: #FFFFFF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 12rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 2rpx;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// ============================================
+//  返回上一步
+// ============================================
+.panel-back-link {
+  margin-top: 32rpx;
+  text-align: center;
+}
+
+.back-link-text {
+  font-size: 24rpx;
+  color: $text-muted;
+  font-weight: 500;
+}
+
+// ============================================
+//  入场动画
+// ============================================
+.stagger-1 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 0ms both; }
+.stagger-2 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 120ms both; }
+.stagger-3 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 240ms both; }
+.stagger-4 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 360ms both; }
+.stagger-5 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 480ms both; }
+.stagger-6 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 600ms both; }
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.panel-safe-bottom {
+  height: constant(safe-area-inset-bottom);
+  height: env(safe-area-inset-bottom);
 }
 </style>
