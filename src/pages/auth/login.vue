@@ -160,7 +160,7 @@ async function doLogin() {
 // =============================================
 .page-container {
   min-height: 100vh;
-  background: radial-gradient(ellipse at 50% 0%, #0A1628 0%, #060B28 40%, #020510 100%);
+  background: linear-gradient(165deg, #FFFFFF 0%, #F5F4F1 38%, #EFEEEB 100%);
   padding: 0 var(--spacing-xl);
   position: relative;
   overflow: hidden;
@@ -184,14 +184,14 @@ async function doLogin() {
 
 .orb-1 {
   width: 500rpx; height: 500rpx;
-  background: radial-gradient(circle, rgba(0,212,255,0.15) 0%, transparent 70%);
+  background: radial-gradient(circle at 40% 40%, rgba(232, 213, 181, 0.45) 0%, rgba(196, 165, 116, 0.18) 42%, transparent 72%);
   top: -150rpx; right: -150rpx;
   animation: orb-float 8s ease-in-out infinite;
 }
 
 .orb-2 {
   width: 400rpx; height: 400rpx;
-  background: radial-gradient(circle, rgba(255,107,53,0.10) 0%, transparent 70%);
+  background: radial-gradient(circle at 55% 55%, rgba(45, 58, 82, 0.14) 0%, rgba(26, 36, 56, 0.06) 45%, transparent 70%);
   bottom: 100rpx; left: -120rpx;
   animation: orb-float 10s ease-in-out infinite reverse;
 }
@@ -210,8 +210,8 @@ async function doLogin() {
   height: 1rpx;
   background: linear-gradient(90deg,
     transparent 0%,
-    rgba(0,212,255,0.15) 20%,
-    rgba(0,212,255,0.15) 80%,
+    rgba(196, 165, 116, 0.25) 20%,
+    rgba(196, 165, 116, 0.25) 80%,
     transparent 100%);
   animation: circuit-pulse 4s ease-in-out infinite;
 }
@@ -223,8 +223,8 @@ async function doLogin() {
   height: 1rpx;
   background: linear-gradient(90deg,
     transparent 0%,
-    rgba(0,212,255,0.10) 30%,
-    rgba(0,212,255,0.10) 70%,
+    rgba(26, 36, 56, 0.08) 30%,
+    rgba(26, 36, 56, 0.08) 70%,
     transparent 100%);
   animation: circuit-pulse 6s ease-in-out infinite reverse;
 }
@@ -242,8 +242,8 @@ async function doLogin() {
   width: 1rpx;
   background: linear-gradient(180deg,
     transparent 0%,
-    rgba(0,212,255,0.08) 40%,
-    rgba(0,212,255,0.08) 60%,
+    rgba(196, 165, 116, 0.12) 40%,
+    rgba(196, 165, 116, 0.12) 60%,
     transparent 100%);
 }
 
@@ -266,8 +266,8 @@ async function doLogin() {
   border-radius: 44rpx;
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
-  border: 1rpx solid rgba(77,142,255,0.25);
-  box-shadow: 0 0 60rpx rgba(0,212,255,0.2), inset 0 0 40rpx rgba(0,212,255,0.05);
+  border: 1rpx solid $border-primary;
+  box-shadow: $shadow-gold;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -276,8 +276,8 @@ async function doLogin() {
 }
 
 @keyframes logo-glow {
-  0%, 100% { box-shadow: 0 0 40rpx rgba(0,212,255,0.2), inset 0 0 40rpx rgba(0,212,255,0.05); }
-  50% { box-shadow: 0 0 80rpx rgba(0,212,255,0.35), inset 0 0 60rpx rgba(0,212,255,0.1); }
+  0%, 100% { box-shadow: $shadow-gold; }
+  50% { box-shadow: $shadow-fire-strong; }
 }
 
 .logo-img {
@@ -289,9 +289,8 @@ async function doLogin() {
 .app-name {
   font-size: 56rpx;
   font-weight: 800;
-  color: #FFFFFF;
+  color: $navy;
   letter-spacing: 6rpx;
-  text-shadow: 0 0 30rpx rgba(0,212,255,0.4);
   margin-bottom: 12rpx;
 }
 
@@ -319,15 +318,15 @@ async function doLogin() {
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
   border: 1rpx solid var(--glass-border);
-  border-radius: var(--radius)-xl;
+  border-radius: var(--radius-xl);
   padding: 0 28rpx;
   height: 100rpx;
   transition: all 0.3s ease;
 
   &.focused {
-    border-color: rgba(0,212,255,0.5);
-    box-shadow: 0 0 0 4rpx rgba(0,212,255,0.12), var(--shadow-glow);
-    background: rgba(30,41,59,0.70);
+    border-color: $border-primary;
+    box-shadow: 0 0 0 4rpx rgba(196, 165, 116, 0.12), var(--shadow-glow);
+    background: $glass-bg-hover;
   }
 }
 
@@ -370,7 +369,7 @@ async function doLogin() {
 // =============================================
 .login-btn {
   height: 100rpx;
-  border-radius: var(--radius)-xl;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   position: relative;
   margin-top: 8rpx;
@@ -435,9 +434,8 @@ async function doLogin() {
 
 .register-link {
   font-size: 26rpx;
-  color: var(--primary)-light;
+  color: $accent-dark;
   font-weight: 600;
-  text-shadow: 0 0 10rpx rgba(0,212,255,0.3);
 }
 
 // =============================================

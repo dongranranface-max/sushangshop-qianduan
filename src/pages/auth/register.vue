@@ -205,7 +205,7 @@ async function doRegister() {
 
 .page-container {
   min-height: 100vh;
-  background: radial-gradient(ellipse at 50% 0%, #0A1628 0%, #060B28 40%, #020510 100%);
+  background: linear-gradient(165deg, #FFFFFF 0%, #F5F4F1 38%, #EFEEEB 100%);
   padding: 0 var(--spacing-xl);
   position: relative;
   overflow: hidden;
@@ -227,14 +227,14 @@ async function doRegister() {
 
 .orb-1 {
   width: 400rpx; height: 400rpx;
-  background: radial-gradient(circle, rgba(0,242,254,0.1) 0%, transparent 70%);
+  background: radial-gradient(circle at 40% 40%, rgba(232, 213, 181, 0.45) 0%, rgba(196, 165, 116, 0.18) 42%, transparent 72%);
   top: -100rpx; left: -100rpx;
   animation: orb-float 9s ease-in-out infinite;
 }
 
 .orb-2 {
   width: 350rpx; height: 350rpx;
-  background: radial-gradient(circle, rgba(77,142,255,0.15) 0%, transparent 70%);
+  background: radial-gradient(circle at 55% 55%, rgba(45, 58, 82, 0.14) 0%, rgba(26, 36, 56, 0.06) 45%, transparent 70%);
   bottom: 150rpx; right: -100rpx;
   animation: orb-float 7s ease-in-out infinite reverse;
 }
@@ -294,16 +294,16 @@ async function doRegister() {
   border-radius: 40rpx;
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
-  border: 1rpx solid rgba(77,142,255,0.25);
-  box-shadow: 0 0 60rpx rgba(77,142,255,0.15);
+  border: 1rpx solid $border-primary;
+  box-shadow: $shadow-gold;
   display: flex; align-items: center; justify-content: center;
   margin-bottom: 24rpx;
   animation: logo-glow 4s ease-in-out infinite;
 }
 
 @keyframes logo-glow {
-  0%, 100% { box-shadow: 0 0 40rpx rgba(77,142,255,0.15); }
-  50% { box-shadow: 0 0 80rpx rgba(77,142,255,0.3); }
+  0%, 100% { box-shadow: $shadow-gold; }
+  50% { box-shadow: $shadow-fire-strong; }
 }
 
 .logo-img {
@@ -313,9 +313,8 @@ async function doRegister() {
 
 .app-name {
   font-size: 48rpx; font-weight: 800;
-  color: #FFFFFF;
+  color: $navy;
   letter-spacing: 4rpx;
-  text-shadow: 0 0 30rpx rgba(77,142,255,0.4);
   margin-bottom: 8rpx;
 }
 
@@ -338,24 +337,24 @@ async function doRegister() {
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
   border: 1rpx solid var(--glass-border);
-  border-radius: var(--radius)-xl;
+  border-radius: var(--radius-xl);
   padding: 24rpx 28rpx;
   transition: all 0.3s ease;
 
   &.focused {
-    border-color: rgba(77,142,255,0.5);
-    box-shadow: 0 0 0 4rpx rgba(77,142,255,0.10), var(--shadow-glow);
+    border-color: $border-primary;
+    box-shadow: 0 0 0 4rpx rgba(196, 165, 116, 0.10), var(--shadow-glow);
   }
 
   &.has-value {
-    border-color: rgba(77,142,255,0.3);
+    border-color: $border-primary;
   }
 }
 
 .input-label {
   display: block;
   font-size: 22rpx;
-  color: var(--primary)-light;
+  color: $accent-dark;
   font-weight: 600;
   letter-spacing: 2rpx;
   margin-bottom: 12rpx;
@@ -413,7 +412,7 @@ async function doRegister() {
 // ========== 注册按钮 ==========
 .register-btn {
   height: 100rpx;
-  border-radius: var(--radius)-xl;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   margin-top: 8rpx;
 
@@ -459,7 +458,7 @@ async function doRegister() {
   }
 
   .link {
-    color: var(--primary)-light;
+    color: $accent-dark;
     font-weight: 500;
   }
 }
@@ -476,9 +475,8 @@ async function doRegister() {
 .login-hint { font-size: 26rpx; color: var(--text-muted); }
 .login-link {
   font-size: 26rpx;
-  color: var(--primary)-light;
+  color: $accent-dark;
   font-weight: 600;
-  text-shadow: 0 0 10rpx rgba(0,242,254,0.3);
 }
 
 // ========== 底部 ==========

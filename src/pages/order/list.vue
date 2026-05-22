@@ -228,9 +228,9 @@ function goHome() {
     border-radius: $radius-full;
     border: 1rpx solid transparent;
     &.active {
-      color: $primary;
-      background: rgba(0, 212, 255, 0.1);
-      border-color: rgba(0, 212, 255, 0.35);
+      color: $accent-dark;
+      background: $warm-yellow;
+      border-color: $border-primary;
     }
   }
 }

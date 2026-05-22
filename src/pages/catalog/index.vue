@@ -294,9 +294,9 @@ function goProduct(p: any) {
     transition: all 0.3s;
 
     &.active {
-      border-color: var(--primary);
-      background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,212,255,0.08));
-      box-shadow: var(--shadow-glow);
+      border-color: var(--border-primary);
+      background: $warm-yellow;
+      box-shadow: var(--shadow-gold);
     }
 
     .mall-tab-icon {
@@ -325,7 +325,7 @@ function goProduct(p: any) {
 .category-nav {
   width: 160rpx;
   height: calc(100vh - 300rpx);
-  background: rgba(10, 22, 40, 0.8);
+  background: $bg-tertiary;
   border-right: 1rpx solid var(--border-light);
 
   .category-item {
@@ -391,14 +391,14 @@ function goProduct(p: any) {
   overflow: hidden;
 
   &:active {
-    border-color: rgba(0,212,255,0.4);
-    box-shadow: var(--shadow-glow);
+    border-color: $border-primary;
+    box-shadow: var(--shadow-gold);
   }
 
   .product-image {
     width: 100%;
     height: 300rpx;
-    background: linear-gradient(135deg, #0A1628 0%, #1E293B 100%);
+    background: linear-gradient(135deg, $warm-blue 0%, $bg-tertiary 100%);
   }
 
   .product-info {
