@@ -9,24 +9,24 @@
       <view class="brand-glow brand-glow--bottom" />
 
       <view class="brand-content">
-        <view class="brand-logo-wrap stagger-1">
+        <view class="brand-logo-wrap">
           <image class="brand-logo-img" src="/static/jxgs.png" mode="aspectFit" />
         </view>
-        <text class="brand-name stagger-2">集享公社</text>
-        <text class="brand-slogan stagger-3">找回密码 · 重新启程</text>
+        <text class="brand-name">集享公社</text>
+        <text class="brand-slogan">找回密码 · 重新启程</text>
 
-        <view class="brand-divider stagger-4">
+        <view class="brand-divider">
           <view class="divider-line divider-line--left" />
           <view class="divider-diamond" />
           <view class="divider-line divider-line--right" />
         </view>
 
-        <view class="brand-footer stagger-5">
+        <view class="brand-footer">
           <text class="brand-footer-text">想起密码了？</text>
           <text class="brand-footer-link" @click="goLogin">返回登录</text>
         </view>
 
-        <text class="brand-privacy stagger-6">
+        <text class="brand-privacy">
           找回过程中有任何问题，请联系平台客服
         </text>
       </view>
@@ -40,7 +40,7 @@
       <view class="panel-safe-top" :style="{ height: statusBarHeight + 'px' }" />
 
       <!-- 顶部返回栏 -->
-      <view class="panel-topbar stagger-2">
+      <view class="panel-topbar">
         <view class="back-btn" @click="goBack">
           <text class="back-icon">←</text>
         </view>
@@ -50,7 +50,7 @@
         <view class="panel-inner">
 
           <!-- 步骤指示器 -->
-          <view class="step-indicator stagger-3">
+          <view class="step-indicator">
             <view class="step-item" :class="{ 'is-active': step === 1, 'is-done': step > 1 }">
               <view class="step-circle">
                 <text v-if="step > 1" class="step-check">✓</text>
@@ -74,10 +74,10 @@
               <text class="panel-subtitle">验证注册手机号后设置新密码</text>
             </view>
 
-            <view class="panel-form stagger-4">
+            <view class="panel-form">
 
               <!-- 手机号 -->
-              <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.phone.length === 11 }">
+              <view class="input-wrap input-field-wrap" :class="{ 'is-focused': focusState.phone, 'is-filled': form.phone.length === 11 }">
                 <input
                   class="input-native"
                   v-model="form.phone"
@@ -93,7 +93,7 @@
               </view>
 
               <!-- 验证码 -->
-              <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.code.length === 6 }">
+              <view class="input-wrap input-field-wrap" :class="{ 'is-focused': focusState.code, 'is-filled': form.code.length === 6 }">
                 <input
                   class="input-native"
                   v-model="form.code"
@@ -117,7 +117,7 @@
 
             </view>
 
-            <view class="panel-submit stagger-5">
+            <view class="panel-submit">
               <view
                 class="submit-btn"
                 :class="{ 'is-disabled': !canGoStep2 }"
@@ -137,10 +137,10 @@
               </text>
             </view>
 
-            <view class="panel-form stagger-4">
+            <view class="panel-form">
 
               <!-- 新密码 -->
-              <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.password.length >= 6 }">
+              <view class="input-wrap input-field-wrap" :class="{ 'is-focused': focusState.pwd, 'is-filled': form.password.length >= 6 }">
                 <input
                   class="input-native"
                   v-model="form.password"
@@ -170,7 +170,7 @@
               </view>
 
               <!-- 确认新密码 -->
-              <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.confirm.length >= 6 }">
+              <view class="input-wrap input-field-wrap" :class="{ 'is-focused': focusState.confirm, 'is-filled': form.confirm.length >= 6 }">
                 <input
                   class="input-native"
                   v-model="form.confirm"
@@ -194,7 +194,7 @@
 
             </view>
 
-            <view class="panel-submit stagger-5">
+            <view class="panel-submit">
               <view
                 class="submit-btn"
                 :class="{ 'is-disabled': !canSubmit || submitting, 'is-loading': submitting }"
@@ -210,7 +210,7 @@
               </view>
             </view>
 
-            <view class="panel-back-link stagger-6">
+            <view class="panel-back-link">
               <text class="back-link-text" @click="step = 1">← 返回上一步</text>
             </view>
           </template>

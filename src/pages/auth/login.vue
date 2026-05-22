@@ -13,31 +13,31 @@
       <!-- 品牌内容 -->
       <view class="brand-content">
         <!-- Logo -->
-        <view class="brand-logo-wrap stagger-1">
+        <view class="brand-logo-wrap">
           <image class="brand-logo-img" src="/static/jxgs.png" mode="aspectFit" />
         </view>
 
         <!-- 品牌名称 -->
-        <text class="brand-name stagger-2">集享公社</text>
+        <text class="brand-name">集享公社</text>
 
         <!-- 品牌宣言 -->
-        <text class="brand-slogan stagger-3">智蓝火炼 · 生态积分商城</text>
+        <text class="brand-slogan">智蓝火炼 · 生态积分商城</text>
 
         <!-- 装饰分隔线 -->
-        <view class="brand-divider stagger-4">
+        <view class="brand-divider">
           <view class="divider-line divider-line--left" />
           <view class="divider-diamond" />
           <view class="divider-line divider-line--right" />
         </view>
 
         <!-- 底部文案 -->
-        <view class="brand-footer stagger-5">
+        <view class="brand-footer">
           <text class="brand-footer-text">已有账号？</text>
           <text class="brand-footer-link" @click="goRegister">立即注册</text>
         </view>
 
         <!-- 隐私条款 -->
-        <text class="brand-privacy stagger-6">
+        <text class="brand-privacy">
           登录即表示同意《用户协议》和《隐私政策》
         </text>
       </view>
@@ -56,16 +56,19 @@
         <view class="panel-inner">
 
           <!-- 页面标题 -->
-          <view class="panel-header stagger-3">
+          <view class="panel-header">
             <text class="panel-title">欢迎回来</text>
             <text class="panel-subtitle">请输入您的账号信息</text>
           </view>
 
           <!-- 表单区 -->
-          <view class="panel-form stagger-4">
+          <view class="panel-form">
 
             <!-- 手机号 -->
-            <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.phone.length === 11 }">
+            <view
+              class="input-wrap input-field-wrap"
+              :class="{ 'is-focused': focusState.phone, 'is-filled': form.phone.length === 11 }"
+            >
               <input
                 class="input-native"
                 v-model="form.phone"
@@ -81,7 +84,10 @@
             </view>
 
             <!-- 密码 -->
-            <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.password.length >= 6 }">
+            <view
+              class="input-wrap input-field-wrap"
+              :class="{ 'is-focused': focusState.pwd, 'is-filled': form.password.length >= 6 }"
+            >
               <input
                 class="input-native"
                 v-model="form.password"
@@ -107,7 +113,7 @@
           </view>
 
           <!-- 提交按钮 -->
-          <view class="panel-submit stagger-5">
+          <view class="panel-submit">
             <view
               class="submit-btn"
               :class="{ 'is-loading': submitting }"
@@ -124,7 +130,7 @@
           </view>
 
           <!-- 第三方登录 -->
-          <view class="panel-third stagger-6">
+          <view class="panel-third">
             <view class="third-divider">
               <view class="third-line" />
               <text class="third-text">其他方式登录</text>

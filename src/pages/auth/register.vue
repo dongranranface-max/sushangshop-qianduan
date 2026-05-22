@@ -9,24 +9,24 @@
       <view class="brand-glow brand-glow--bottom" />
 
       <view class="brand-content">
-        <view class="brand-logo-wrap stagger-1">
+        <view class="brand-logo-wrap">
           <image class="brand-logo-img" src="/static/jxgs.png" mode="aspectFit" />
         </view>
-        <text class="brand-name stagger-2">集享公社</text>
-        <text class="brand-slogan stagger-3">注册账号 · 共享生态价值</text>
+        <text class="brand-name">集享公社</text>
+        <text class="brand-slogan">注册账号 · 共享生态价值</text>
 
-        <view class="brand-divider stagger-4">
+        <view class="brand-divider">
           <view class="divider-line divider-line--left" />
           <view class="divider-diamond" />
           <view class="divider-line divider-line--right" />
         </view>
 
-        <view class="brand-footer stagger-5">
+        <view class="brand-footer">
           <text class="brand-footer-text">已有账号？</text>
           <text class="brand-footer-link" @click="goLogin">立即登录</text>
         </view>
 
-        <text class="brand-privacy stagger-6">
+        <text class="brand-privacy">
           注册即表示同意《用户协议》和《隐私政策》
         </text>
       </view>
@@ -41,15 +41,18 @@
       <scroll-view class="panel-scroll" scroll-y :show-scrollbar="false" enhanced>
         <view class="panel-inner">
 
-          <view class="panel-header stagger-3">
+          <view class="panel-header">
             <text class="panel-title">创建账号</text>
             <text class="panel-subtitle">开启您的生态积分之旅</text>
           </view>
 
-          <view class="panel-form stagger-4">
+          <view class="panel-form">
 
             <!-- 手机号 -->
-            <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.phone.length === 11 }">
+            <view
+              class="input-wrap input-field-wrap"
+              :class="{ 'is-focused': focusState.phone, 'is-filled': form.phone.length === 11 }"
+            >
               <input
                 class="input-native"
                 v-model="form.phone"
@@ -65,7 +68,10 @@
             </view>
 
             <!-- 验证码 -->
-            <view class="input-wrap input-field-wrap code-field" :class="{ 'is-filled': form.code.length === 6 }">
+            <view
+              class="input-wrap input-field-wrap code-field"
+              :class="{ 'is-focused': focusState.code, 'is-filled': form.code.length === 6 }"
+            >
               <input
                 class="input-native"
                 v-model="form.code"
@@ -88,7 +94,10 @@
             </view>
 
             <!-- 密码 -->
-            <view class="input-wrap input-field-wrap" :class="{ 'is-filled': form.password.length >= 6 }">
+            <view
+              class="input-wrap input-field-wrap"
+              :class="{ 'is-focused': focusState.pwd, 'is-filled': form.password.length >= 6 }"
+            >
               <input
                 class="input-native"
                 v-model="form.password"
@@ -106,7 +115,10 @@
             </view>
 
             <!-- 邀请码（必填）-->
-            <view class="input-wrap input-field-wrap invite-field" :class="{ 'is-filled': form.inviteCode.length > 0 }">
+            <view
+              class="input-wrap input-field-wrap invite-field"
+              :class="{ 'is-focused': focusState.invite, 'is-filled': form.inviteCode.length > 0 }"
+            >
               <input
                 class="input-native"
                 v-model="form.inviteCode"
@@ -122,7 +134,7 @@
           </view>
 
           <!-- 提交按钮 -->
-          <view class="panel-submit stagger-5">
+          <view class="panel-submit">
             <view
               class="submit-btn"
               :class="{ 'is-disabled': !agreed || submitting, 'is-loading': submitting }"
@@ -139,7 +151,7 @@
           </view>
 
           <!-- 服务条款说明 -->
-          <view class="panel-terms stagger-6">
+          <view class="panel-terms">
             <view class="terms-check" @click="agreed = !agreed">
               <view class="check-box" :class="{ 'is-checked': agreed }">
                 <text v-if="agreed" class="check-icon">✓</text>
