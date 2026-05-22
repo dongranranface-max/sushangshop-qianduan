@@ -10,7 +10,7 @@
 
       <view class="brand-content">
         <view class="brand-logo-wrap">
-          <image class="brand-logo-img" src="/static/jxgs.png" mode="aspectFit" />
+          <image class="brand-logo-img" src="/static/logo.png" mode="aspectFit" />
         </view>
         <text class="brand-name">集享公社</text>
         <text class="brand-slogan">注册账号 · 共享生态价值</text>
@@ -38,7 +38,7 @@
     <view class="panel-space">
       <view class="panel-safe-top" :style="{ height: statusBarHeight + 'px' }" />
 
-      <scroll-view class="panel-scroll" scroll-y :show-scrollbar="false" enhanced>
+      <scroll-view class="panel-scroll" scroll-y>
         <view class="panel-inner">
 
           <view class="panel-header">
@@ -454,6 +454,12 @@ async function doRegister() {
 .panel-scroll {
   flex: 1;
   height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  // 移动端隐藏滚动条但保持滚动功能
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
 
 .panel-inner {
@@ -676,9 +682,9 @@ async function doRegister() {
 }
 
 .check-box {
-  width: 40rpx;
-  height: 40rpx;
-  border-radius: 10rpx;
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 12rpx;
   border: 2rpx solid rgba(20, 20, 20, 0.15);
   display: flex;
   align-items: center;
@@ -689,20 +695,13 @@ async function doRegister() {
   &.is-checked {
     background: $gold;
     border-color: $gold;
-    animation: checkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 }
 
 .check-icon {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: #FFFFFF;
   font-weight: 700;
-}
-
-@keyframes checkPop {
-  0% { transform: scale(0); }
-  70% { transform: scale(1.2); }
-  100% { transform: scale(1); }
 }
 
 .terms-text {
@@ -714,27 +713,6 @@ async function doRegister() {
 .terms-link {
   color: $accent-dark;
   font-weight: 600;
-}
-
-// ============================================
-//  入场动画
-// ============================================
-.stagger-1 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 0ms both; }
-.stagger-2 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 120ms both; }
-.stagger-3 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 240ms both; }
-.stagger-4 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 360ms both; }
-.stagger-5 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 480ms both; }
-.stagger-6 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 600ms both; }
-
-@keyframes fadeSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(24rpx);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .panel-safe-bottom {

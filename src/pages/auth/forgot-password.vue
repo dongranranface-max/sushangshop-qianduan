@@ -10,7 +10,7 @@
 
       <view class="brand-content">
         <view class="brand-logo-wrap">
-          <image class="brand-logo-img" src="/static/jxgs.png" mode="aspectFit" />
+          <image class="brand-logo-img" src="/static/logo.png" mode="aspectFit" />
         </view>
         <text class="brand-name">集享公社</text>
         <text class="brand-slogan">找回密码 · 重新启程</text>
@@ -46,7 +46,7 @@
         </view>
       </view>
 
-      <scroll-view class="panel-scroll" scroll-y :show-scrollbar="false" enhanced>
+      <scroll-view class="panel-scroll" scroll-y>
         <view class="panel-inner">
 
           <!-- 步骤指示器 -->
@@ -570,6 +570,12 @@ async function doReset() {
 .panel-scroll {
   flex: 1;
   height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 88rpx);
+  // 移动端隐藏滚动条但保持滚动功能
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
 
 .panel-inner {
@@ -905,27 +911,6 @@ async function doReset() {
   font-size: 24rpx;
   color: $text-muted;
   font-weight: 500;
-}
-
-// ============================================
-//  入场动画
-// ============================================
-.stagger-1 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 0ms both; }
-.stagger-2 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 120ms both; }
-.stagger-3 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 240ms both; }
-.stagger-4 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 360ms both; }
-.stagger-5 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 480ms both; }
-.stagger-6 { animation: fadeSlideUp 600ms cubic-bezier(0.4, 0, 0.2, 1) 600ms both; }
-
-@keyframes fadeSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(24rpx);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .panel-safe-bottom {
