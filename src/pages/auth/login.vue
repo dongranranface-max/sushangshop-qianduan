@@ -376,7 +376,7 @@ async function doLogin() {
   opacity: 0.7;
 }
 
-// 底部：已有账号
+// 底部：没有账号？立即注册
 .brand-footer {
   display: flex;
   align-items: center;
