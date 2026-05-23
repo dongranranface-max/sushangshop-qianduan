@@ -166,10 +166,7 @@ function onPwdInput(e: any) {
   const el = e.detail?.element || document.getElementById('pwd-input')
   if (el && showPwd.value) {
     const pos = el.selectionStart ?? form.value.password.length
-    form.value.password = form.value.password
-    nextTick(() => {
-      el.setSelectionRange(pos, pos)
-    })
+    setTimeout(() => { el.setSelectionRange(pos, pos) }, 0)
   }
 }
 
