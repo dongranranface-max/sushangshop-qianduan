@@ -245,7 +245,6 @@
 import { ref, reactive, computed } from 'vue'
 import { authApi } from '@/utils/api'
 
-const statusBarHeight = ref(20)
 const step = ref(1)
 const submitting = ref(false)
 const sending = ref(false)
@@ -271,14 +270,6 @@ const form = ref({
   password: '',
   confirm: '',
 })
-
-// #ifdef MP-WEIXIN
-const app = getApp()
-statusBarHeight.value = app.globalData?.statusBarHeight || 20
-// #endif
-// #ifdef H5
-statusBarHeight.value = (uni as any).getSystemInfoSync()?.statusBarHeight || 20
-// #endif
 
 const maskedPhone = computed(() => {
   const p = form.value.phone
@@ -406,11 +397,11 @@ async function doReset() {
 // ============================================
 .progress-line {
   position: fixed;
-  top: 0;
+  top: env(safe-area-inset-top);
   left: 0;
   right: 0;
   z-index: 20;
-  padding-top: env(safe-area-inset-top);
+  height: 3rpx;
 
   &__track {
     width: 100%;
@@ -654,7 +645,6 @@ async function doReset() {
   height: 2rpx;
   background: rgba(47, 53, 66, 0.08);
   margin: 0 16rpx;
-  margin-bottom: 30rpx;
   border-radius: 2rpx;
   transition: background 0.4s ease;
 

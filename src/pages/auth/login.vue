@@ -5,11 +5,9 @@
       品牌英雄区（大 Logo 视觉锚点）
     ============================================ -->
     <view class="brand-hero">
-      <view class="brand-hero__halo" />
       <view class="brand-hero__logo-card">
         <image class="brand-hero__logo" src="/static/logo.png" mode="aspectFit" />
       </view>
-      <view class="brand-hero__warm-glow" />
     </view>
 
     <!-- ============================================
@@ -156,7 +154,6 @@
 import { ref, reactive } from 'vue'
 import { authApi } from '@/utils/api'
 
-const statusBarHeight = ref(20)
 const submitting = ref(false)
 const showPwd = ref(false)
 
@@ -166,14 +163,6 @@ const form = ref({
   phone: '',
   password: '',
 })
-
-// #ifdef MP-WEIXIN
-const app = getApp()
-statusBarHeight.value = app.globalData?.statusBarHeight || 20
-// #endif
-// #ifdef H5
-statusBarHeight.value = (uni as any).getSystemInfoSync()?.statusBarHeight || 20
-// #endif
 
 const token = uni.getStorageSync('token')
 if (token) {
@@ -320,7 +309,9 @@ async function doLogin() {
   flex-shrink: 0;
   z-index: 1;
 
-  &__halo {
+  // 上方圆晕，用伪元素替代多余 div
+  &::before {
+    content: '';
     position: absolute;
     top: 0;
     left: 50%;
@@ -339,12 +330,11 @@ async function doLogin() {
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: visible;    // 让光晕可以超出圆角
+    overflow: visible;
     position: relative;
     z-index: 2;
     background: transparent;
     box-shadow: none;
-    // 金色外发光
     filter: drop-shadow(0 0 20rpx rgba(184, 152, 118, 0.30))
             drop-shadow(0 0 8rpx rgba(184, 152, 118, 0.15));
     transition: filter 0.3s ease;
@@ -364,13 +354,16 @@ async function doLogin() {
     z-index: 1;
   }
 
-  &__warm-glow {
+  // 下方暖光，用伪元素替代多余 div
+  &::after {
+    content: '';
     width: 200rpx;
     height: 48rpx;
     background: radial-gradient(ellipse at 50% 50%, rgba(184, 152, 118, 0.22) 0%, transparent 68%);
     margin-top: -6rpx;
     position: relative;
     z-index: 1;
+    pointer-events: none;
   }
 }
 

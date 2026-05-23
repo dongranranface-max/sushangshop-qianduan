@@ -175,7 +175,6 @@
 import { ref, reactive, computed } from 'vue'
 import { authApi } from '@/utils/api'
 
-const statusBarHeight = ref(20)
 const submitting = ref(false)
 const sending = ref(false)
 const showPwd = ref(false)
@@ -196,14 +195,6 @@ const form = ref({
   password: '',
   inviteCode: '',
 })
-
-// #ifdef MP-WEIXIN
-const app = getApp()
-statusBarHeight.value = app.globalData?.statusBarHeight || 20
-// #endif
-// #ifdef H5
-statusBarHeight.value = (uni as any).getSystemInfoSync()?.statusBarHeight || 20
-// #endif
 
 const canSubmit = computed(() =>
   form.value.phone.length === 11 &&
@@ -370,6 +361,14 @@ async function doRegister() {
     line-height: 1;
   }
   &__actions { flex-shrink: 0; }
+}
+
+// ============================================
+//  提交按钮禁用态
+// ============================================
+.btn-submit.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 // Ghost Button
