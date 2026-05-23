@@ -1,4 +1,76 @@
-@import './typography.scss';
+// ===========================================
+//  全局字体体系 · 层级对比强化
+// ===========================================
+:root {
+  --font-sans: 'Noto Sans SC', 'HarmonyOS Sans SC', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Source Han Sans SC', system-ui, sans-serif;
+  --font-display: var(--font-sans);
+  --font-caption: 20rpx;
+  --font-body: 24rpx;
+  --font-card-title: 26rpx;
+  --font-page-title: 32rpx;
+  --font-banner: 48rpx;
+  --font-xs: var(--font-caption);
+  --font-sm: var(--font-body);
+  --font-base: var(--font-body);
+  --font-md: var(--font-card-title);
+  --font-lg: var(--font-page-title);
+  --font-xl: var(--font-page-title);
+  --font-2xl: var(--font-banner);
+  --font-3xl: 56rpx;
+  --leading-tight: 1.2;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.7;
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0.02em;
+  --tracking-wide: 0.08em;
+  --tracking-wider: 0.14em;
+  --tracking-banner: 2rpx;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-heavy: 800;
+}
+
+@mixin type-banner-title {
+  font-family: var(--font-display);
+  font-size: var(--font-banner);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-banner);
+  line-height: var(--leading-tight);
+}
+@mixin type-page-title {
+  font-family: var(--font-display);
+  font-size: var(--font-page-title);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-normal);
+  color: var(--text-primary);
+  line-height: var(--leading-tight);
+}
+@mixin type-card-title {
+  font-size: var(--font-card-title);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  line-height: var(--leading-tight);
+}
+@mixin type-body {
+  font-size: var(--font-body);
+  font-weight: var(--weight-regular);
+  color: var(--text-primary);
+  line-height: var(--leading-normal);
+}
+@mixin type-caption {
+  font-size: var(--font-caption);
+  font-weight: var(--weight-regular);
+  color: var(--text-muted);
+  letter-spacing: var(--tracking-normal);
+}
+
+// ===========================================
+//  集享公社 · 轻奢金融主题
+//  象牙白底 · 深藏青 · 香槟金 · 克制留白
+// ===========================================
 
 // ===========================================
 //  集享公社 · 轻奢金融主题

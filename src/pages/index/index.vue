@@ -353,7 +353,6 @@ function onPortal(type: PortalType) {
 
 <style lang="scss" scoped>
 @import '@/styles/theme.scss';
-@import '@/styles/typography.scss';
 @import '@/styles/page-shell.scss';
 
 .page-container {
