@@ -223,7 +223,7 @@ async function doLogin() {
 .auth-page {
   width: 100%;
   min-height: 100dvh;
-  background: $bg-primary;
+  background: radial-gradient(ellipse 120% 100% at 50% 0%, #FFFFFF 0%, #F5F5F5 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -402,8 +402,9 @@ async function doLogin() {
   border: 1rpx solid rgba(184, 152, 118, 0.10);
   border-radius: 40rpx;
   box-shadow:
-    0 24rpx 80rpx rgba(47, 53, 66, 0.06),
-    0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+    0 4rpx 20rpx rgba(47, 53, 66, 0.08),
+    0 24rpx 80rpx rgba(47, 53, 66, 0.12),
+    0 48rpx 100rpx rgba(47, 53, 66, 0.06);
   padding: 52rpx 48rpx 48rpx;
   box-sizing: border-box;
 

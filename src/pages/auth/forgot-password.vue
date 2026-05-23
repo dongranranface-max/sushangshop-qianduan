@@ -2,6 +2,15 @@
   <view class="auth-page">
 
     <!-- ============================================
+      顶部进度线（纤细线性引导）
+    ============================================ -->
+    <view class="progress-line">
+      <view class="progress-line__track">
+        <view class="progress-line__fill" :style="{ width: step === 1 ? '50%' : '100%' }" />
+      </view>
+    </view>
+
+    <!-- ============================================
       顶部导航栏（Header Logo + Ghost Button 登录入口）
     ============================================ -->
     <view class="auth-nav">
@@ -393,6 +402,33 @@ async function doReset() {
 }
 
 // ============================================
+//  顶部纤细进度线
+// ============================================
+.progress-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding-top: env(safe-area-inset-top);
+
+  &__track {
+    width: 100%;
+    height: 3rpx;
+    background: rgba(47, 53, 66, 0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    background: linear-gradient(90deg, $bronze-gold 0%, $bronze-light 100%);
+    border-radius: 0 3rpx 3rpx 0;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+// ============================================
 //  顶部导航栏
 // ============================================
 .auth-nav {
@@ -712,11 +748,11 @@ async function doReset() {
     justify-content: center;
     cursor: pointer;
     padding: 0 4rpx;
-    border-bottom: 1.5rpx solid $bronze-gold;
-    transition: opacity 0.2s ease, color 0.2s ease;
+    background: transparent;
+    transition: opacity 0.2s ease;
 
     text {
-      font-size: 24rpx;
+      font-size: 26rpx;
       color: $bronze-gold;
       font-weight: 600;
       letter-spacing: 0.3rpx;
@@ -724,12 +760,8 @@ async function doReset() {
       white-space: nowrap;
     }
 
-    &.is-counting {
-      border-bottom-color: transparent;
-      text { color: $text-muted; font-weight: 400; }
-    }
-
-    &:active { opacity: 0.6; }
+    &.is-counting text { color: $text-muted; font-weight: 400; }
+    &:active { opacity: 0.55; }
   }
 
   &__eye-wrap {

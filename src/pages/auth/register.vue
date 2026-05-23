@@ -343,6 +343,7 @@ async function doRegister() {
     flex-shrink: 0;
     background: transparent;
     box-shadow: none;
+    aspect-ratio: 1 / 1;
     filter: drop-shadow(0 0 10rpx rgba(184, 152, 118, 0.20));
 
     &-img {
@@ -641,26 +642,25 @@ async function doRegister() {
 .check-square {
   width: 48rpx;
   height: 48rpx;
-  border-radius: 12rpx;
-  border: 1.5rpx solid rgba(47, 53, 66, 0.15);
-  background: rgba(255, 255, 255, 0.80);
+  border-radius: 14rpx;
+  border: 1.5rpx solid rgba(184, 152, 118, 0.50);
+  background: rgba(255, 255, 255, 0.60);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.25s ease;
-  box-shadow: inset 0 2rpx 6rpx rgba(47, 53, 66, 0.04);
   flex-shrink: 0;
   box-sizing: border-box;
 
   &.is-checked {
-    background: $bronze-gold;
+    background: rgba(184, 152, 118, 0.12);
     border-color: $bronze-gold;
-    box-shadow: 0 4rpx 16rpx rgba(184, 152, 118, 0.30);
+    box-shadow: 0 0 0 4rpx rgba(184, 152, 118, 0.12);
   }
 
   &__icon {
     font-size: 22rpx;
-    color: #FFFFFF;
+    color: $bronze-gold;
     font-weight: 700;
     line-height: 1;
   }
