@@ -130,7 +130,7 @@ const hotList = ref([
   { keyword: '戴森吹风机', desc: '热门推荐', isNew: false },
   { keyword: 'AirPods Pro', desc: '苹果耳机', isNew: false },
   { keyword: '小米手环', desc: '智能穿戴', isNew: false },
-  { keyword: 'Switch游戏机', desc: '掌机热卖', isNew: true }
+  { keyword: 'Switch游戏机', desc: '掌机热卖', isNew: true },
 ])
 
 const searchResult = ref<any[]>([])

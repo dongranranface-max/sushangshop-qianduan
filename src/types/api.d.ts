@@ -496,17 +496,17 @@ export type RawQueryString = string
 /** 安全转义后的搜索关键字 */
 export function sanitizeKeyword(kw: string): string {
   return String(kw)
-    .replace(/[<>\"\'\\]/g, '')
+    .replace(/[<>"'\\]/g, '')
     .trim()
     .slice(0, 100)
 }
 
 /** 从 URL 参数获取订单号（防注入） */
 export function sanitizeOrderNo(no: string): string {
-  return String(no).replace(/[^a-zA-Z0-9_\-]/g, '').slice(0, 64)
+  return String(no).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64)
 }
 
 /** 从 URL 参数获取 ID（UUID 格式校验） */
 export function sanitizeId(id: string): string {
-  return String(id).replace(/[^a-fA-F0-9\-]/g, '').slice(0, 36)
+  return String(id).replace(/[^a-fA-F0-9-]/g, '').slice(0, 36)
 }

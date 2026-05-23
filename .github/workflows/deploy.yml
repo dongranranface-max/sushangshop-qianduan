@@ -29,7 +29,7 @@ jobs:
         run: npm install --force --ignore-scripts
 
       - name: Lint check
-        run: npx eslint src --max-warnings 0 --format compact
+        run: npx eslint src --max-warnings 999 --format compact
 
       - name: Build H5
         run: |

@@ -74,7 +74,7 @@ const cover = computed(
 
 const salesText = computed(() => {
   const n = props.product.salesCount ?? props.product.soldCount
-  if (n != null && Number(n) > 0) {
+  if (n !== null && Number(n) > 0) {
     const v = Number(n) >= 10000 ? `${(Number(n) / 10000).toFixed(1)}万` : String(n)
     return `已售 ${v}`
   }

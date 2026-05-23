@@ -306,8 +306,18 @@ function handleBuy() {
   }
 }
 
-.sku-section { display: flex; align-items: center; padding: var(--spacing-base) var(--spacing-lg); background: var(--glass-bg); border-top: 1rpx solid var(--glass-border); border-bottom: 1rpx solid var(--glass-border);
-  .sku-label { font-size: 28rpx; color: var(--text-secondary); margin-right: var(--spacing-base); }
+.sku-section {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-base) var(--spacing-lg);
+  background: var(--glass-bg);
+  border-top: 1rpx solid var(--glass-border);
+  border-bottom: 1rpx solid var(--glass-border);
+  .sku-label {
+    font-size: 28rpx;
+    color: var(--text-secondary);
+    margin-right: var(--spacing-base);
+  }
   .sku-content { flex: 1; font-size: 28rpx; color: var(--text-primary); }
   .sku-arrow { font-size: 32rpx; color: var(--text-muted); }
 }
@@ -376,9 +386,23 @@ function handleBuy() {
       .bar-icon {
         width: 44rpx; height: 44rpx; line-height: 44rpx; text-align: center;
         font-size: 24rpx; font-weight: var(--weight-heavy); color: $navy;
-        background: $bg-tertiary; border-radius: 50%;
+        background: $bg-tertiary;
+        border-radius: 50%;
       }
-      .cart-badge { position: absolute; top: -8rpx; right: -16rpx; min-width: 32rpx; height: 32rpx; background: var(--danger); border-radius: 16rpx; font-size: 20rpx; color: #fff; display: flex; align-items: center; justify-content: center; }
+      .cart-badge {
+        position: absolute;
+        top: -8rpx;
+        right: -16rpx;
+        min-width: 32rpx;
+        height: 32rpx;
+        background: var(--danger);
+        border-radius: 16rpx;
+        font-size: 20rpx;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
       .icon-label { font-size: 20rpx; color: var(--text-secondary); }
     }
   }
@@ -410,8 +434,21 @@ function handleBuy() {
     .sku-content { padding: var(--spacing-base); max-height: 40vh; overflow-y: auto;
       .quantity-row { display: flex; align-items: center; justify-content: space-between;
         .quantity-label { font-size: 28rpx; color: var(--text-secondary); }
-        .quantity-stepper { display: flex; align-items: center; gap: var(--spacing-base);
-          .stepper-btn { width: 56rpx; height: 56rpx; display: flex; align-items: center; justify-content: center; background: var(--bg-tertiary); border-radius: 8rpx; font-size: 32rpx; color: var(--text-primary); }
+        .quantity-stepper {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-base);
+          .stepper-btn {
+            width: 56rpx;
+            height: 56rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border-radius: 8rpx;
+            font-size: 32rpx;
+            color: var(--text-primary);
+          }
           .stepper-value { font-size: 32rpx; color: var(--text-primary); min-width: 60rpx; text-align: center; }
         }
       }

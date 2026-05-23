@@ -92,7 +92,7 @@ function goInvest() {
 async function doRedeem(h: any, early: boolean) {
   uni.showModal({
     title: '确认赎回',
-    content: early ? `提前赎回将收取手续费，确认赎回？` : `确认到期赎回？`,
+    content: early ? '提前赎回将收取手续费，确认赎回？' : '确认到期赎回？',
     success: async (res) => {
       if (!res.confirm) return
       uni.showLoading()

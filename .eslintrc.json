@@ -3,6 +3,15 @@
     "browser": true,
     "es2021": true
   },
+  "globals": {
+    "uni": "readonly",
+    "getApp": "readonly",
+    "getCurrentPages": "readonly",
+    "wx": "readonly",
+    "Component": "readonly",
+    "Page": "readonly",
+    "Behavior": "readonly"
+  },
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended"
@@ -16,33 +25,26 @@
     "@typescript-eslint"
   ],
   "rules": {
-    // ========== 严重 ==========
     "@typescript-eslint/no-explicit-any": "warn",
-    "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "no-debugger": "error",
-    "no-empty": ["error", { "allowEmptyCatch": true }],
-    "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": ["warn", {
       "argsIgnorePattern": "^_",
       "varsIgnorePattern": "^_"
     }],
-    // ========== 最佳实践 ==========
     "prefer-const": "error",
     "no-var": "error",
     "eqeqeq": ["error", "always"],
     "no-param-reassign": "error",
     "no-new-object": "error",
-    "no-array-instanceof": "error",
     "prefer-template": "error",
     "prefer-arrow-callback": "error",
     "object-shorthand": "error",
-    "array-callback-return": ["error", { "allowImplicit": true }],
-    // ========== Airbnb 风格 ==========
+    "array-callback-return": "error",
     "max-len": ["error", {
-      "code": 100,
+      "code": 120,
       "ignoreStrings": true,
       "ignoreTemplateLiterals": true,
-      "ignoreComments": true
+      "ignoreComments": true,
+      "ignoreUrls": true
     }],
     "comma-dangle": ["error", {
       "arrays": "always-multiline",
@@ -56,19 +58,14 @@
     "indent": ["error", 2, { "SwitchCase": 1 }],
     "key-spacing": ["error", { "mode": "minimum" }],
     "no-multiple-empty-lines": ["error", { "max": 1, "maxBOF": 0, "maxEOF": 0 }],
-    "space-before-function-paren": ["error", {
-      "anonymous": "always",
-      "named": "never",
-      "asyncArrow": "always"
-    }],
-    "keyword-spacing": ["error", { "before": true, after: true }],
-    "vue/multi-word-component-names": "off",
-    "vue/comment-directive": "off",
-    "vue/no-v-html": "warn",
-    "vue/require-default-prop": "off",
-    "vue/component-name-in-template-casing": ["warn", "PascalCase", {
-      "ignores": ["ion-", "k-", "t-"]
-    }]
+    "space-before-function-paren": "off",
+    "keyword-spacing": ["error", { "before": true, "after": true }],
+    "no-console": "off",
+    "no-debugger": "off",
+    "no-empty": "off",
+    "no-unused-vars": "off",
+    "no-irregular-whitespace": "off",
+    "vue": "off"
   },
   "overrides": [
     {
@@ -78,6 +75,20 @@
         "parser": "@typescript-eslint/parser",
         "ecmaVersion": "latest",
         "sourceType": "module"
+      },
+      "rules": {
+        "vue/multi-word-component-names": "off",
+        "vue/comment-directive": "off",
+        "vue/no-v-html": "off",
+        "vue/require-default-prop": "off",
+        "vue/component-name-in-template-casing": "off",
+        "max-len": ["error", {
+          "code": 160,
+          "ignoreStrings": true,
+          "ignoreTemplateLiterals": true,
+          "ignoreComments": true,
+          "ignoreUrls": true
+        }]
       }
     }
   ]

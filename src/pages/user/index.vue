@@ -118,10 +118,10 @@ const avatarSrc = computed(() => resolveAvatar(userInfo.value.avatar))
 
 const shortId = computed(() => {
   const id = userInfo.value.id || ''
-  return id.length > 8 ? id.slice(0, 8) + '...' : id
+  return id.length > 8 ? `${id.slice(0, 8)}...` : id
 })
 
-const levelClass = computed(() => 'level-' + (userInfo.value.level || 1))
+const levelClass = computed(() => `level-${userInfo.value.level || 1}`)
 
 onMounted(() => {
   statusBarHeight.value = uni.getSystemInfoSync().statusBarHeight || 20

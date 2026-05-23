@@ -150,7 +150,7 @@ const levelData = ref({
   target: 5000,
   dailyDividend: '0',
   nextLevel: null as { name: string; target: number } | null,
-  progressPct: 0
+  progressPct: 0,
 })
 
 const investProjects = ref<any[]>([])
@@ -174,7 +174,7 @@ const rules = ref([
   { id: 1, icon: '收', title: '收益计算', desc: '每日结算，自动到账' },
   { id: 2, icon: '期', title: '周期灵活', desc: '30/60/90天可选' },
   { id: 3, icon: '本', title: '本金安全', desc: '到期全额返还' },
-  { id: 4, icon: '赎', title: '提前赎回', desc: '收取2-5%手续费' }
+  { id: 4, icon: '赎', title: '提前赎回', desc: '收取2-5%手续费' },
 ])
 
 onMounted(() => {

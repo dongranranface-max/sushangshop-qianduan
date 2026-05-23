@@ -138,7 +138,7 @@ defineEmits<{
   (e: 'signin'): void
 }>()
 
-const levelClass = computed(() => 'level-' + (props.userInfo.level || 1))
+const levelClass = computed(() => `level-${props.userInfo.level || 1}`)
 
 const avatarSrc = computed(() => resolveAvatar(props.userInfo.avatar))
 

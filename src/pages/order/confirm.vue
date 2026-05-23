@@ -225,7 +225,7 @@ async function loadData() {
     ecoPointsData.value = bal
     consumerPoints.value = Number(bal.consumerPoints || 0)
   } catch (e: any) {
-    uni.showToast({ title: '加载失败: ' + e.message, icon: 'none' })
+    uni.showToast({ title: `加载失败: ${e.message}`, icon: 'none' })
   }
 }
 

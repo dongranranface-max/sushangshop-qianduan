@@ -85,7 +85,7 @@ const progressPct = computed(() => {
 function formatPoints(v: string | number): string {
   const num = parseFloat(String(v || '0'))
   if (isNaN(num)) return '0'
-  if (num >= 10000) return (num / 10000).toFixed(1) + '万'
+  if (num >= 10000) return `${(num / 10000).toFixed(1)}万`
   return num.toLocaleString('zh-CN', { maximumFractionDigits: 2 })
 }
 </script>
