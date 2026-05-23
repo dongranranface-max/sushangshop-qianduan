@@ -2,13 +2,10 @@
   <view class="auth-page">
 
     <!-- ============================================
-      顶部导航栏（简洁 Logo + 返回 + 登录入口）
+      顶部导航栏（Header Logo + Ghost Button 登录入口）
     ============================================ -->
     <view class="auth-nav">
-      <view class="auth-nav__left">
-        <view class="back-btn" @click="goBack">
-          <text class="back-btn__icon">←</text>
-        </view>
+      <view class="auth-nav__brand">
         <view class="auth-nav__logo">
           <image class="auth-nav__logo-img" src="/static/logo.png" mode="aspectFit" />
         </view>
@@ -18,22 +15,24 @@
         </view>
       </view>
       <view class="auth-nav__actions">
-        <view class="nav-pill" @click="goLogin">
-          <text class="nav-pill__text">登录</text>
+        <view class="ghost-btn" @click="goLogin">
+          <text class="ghost-btn__text">登录</text>
         </view>
       </view>
     </view>
 
     <!-- ============================================
-      表单区域
+      表单区域（光学居中）
     ============================================ -->
     <view class="auth-body">
       <view class="auth-card">
 
-        <!-- ========== Step 1: 验证手机 ========== -->
+        <!-- ========== Step 1 ========== -->
         <template v-if="step === 1">
           <view class="auth-card__head">
-            <text class="auth-card__title">短信验证</text>
+            <view class="auth-card__title-wrap">
+              <text class="auth-card__title">短信验证</text>
+            </view>
             <text class="auth-card__sub">验证注册手机号后设置新密码</text>
           </view>
 
@@ -66,6 +65,7 @@
                 @focus="onFocus('phone')"
                 @blur="onBlur('phone')"
               />
+              <view class="field-line__glow" />
             </view>
           </view>
 
@@ -85,6 +85,7 @@
                 @focus="onFocus('code')"
                 @blur="onBlur('code')"
               />
+              <view class="field-line__glow" />
               <view
                 class="field-line__code-btn"
                 :class="{ 'is-counting': countdown > 0 || sending }"
@@ -104,6 +105,7 @@
             @click="goStep2"
           >
             <view v-if="!submitting" class="btn-submit__inner">
+              <view class="btn-submit__shimmer" />
               <text class="btn-submit__text">下一步</text>
             </view>
             <view v-else class="btn-submit__flow">
@@ -113,16 +115,17 @@
           </view>
         </template>
 
-        <!-- ========== Step 2: 设置新密码 ========== -->
+        <!-- ========== Step 2 ========== -->
         <template v-else>
           <view class="auth-card__head">
-            <text class="auth-card__title">设置新密码</text>
+            <view class="auth-card__title-wrap">
+              <text class="auth-card__title">设置新密码</text>
+            </view>
             <text class="auth-card__sub">
               已为 <text class="phone-marked">{{ maskedPhone }}</text> 验证通过
             </text>
           </view>
 
-          <!-- 步骤指示器 -->
           <view class="step-bar">
             <view class="step-item is-done">
               <view class="step-item__dot"><text class="step-item__icon">✓</text></view>
@@ -150,18 +153,18 @@
                 @blur="onBlur('pwd')"
                 @input="onPwdInput"
               />
-              <view class="field-line__action" @click="showPwd = !showPwd">
+              <view class="field-line__glow" />
+              <view class="field-line__eye-wrap" @click="showPwd = !showPwd">
                 <svg v-if="showPwd" class="field-line__eye" viewBox="0 0 24 24" fill="none">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1"/>
                 </svg>
                 <svg v-else class="field-line__eye" viewBox="0 0 24 24" fill="none">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                  <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
                 </svg>
               </view>
             </view>
-            <!-- 密码强度 -->
             <view v-if="form.password" class="pwd-strength">
               <view class="pwd-track">
                 <view class="pwd-fill" :class="`pwd-fill--${pwdLevel}`" :style="{ width: pwdPercent + '%' }" />
@@ -184,14 +187,15 @@
                 @focus="onFocus('confirm')"
                 @blur="onBlur('confirm')"
               />
-              <view class="field-line__action" @click="showConfirm = !showConfirm">
+              <view class="field-line__glow" />
+              <view class="field-line__eye-wrap" @click="showConfirm = !showConfirm">
                 <svg v-if="showConfirm" class="field-line__eye" viewBox="0 0 24 24" fill="none">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1"/>
                 </svg>
                 <svg v-else class="field-line__eye" viewBox="0 0 24 24" fill="none">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                  <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
                 </svg>
               </view>
             </view>
@@ -207,6 +211,7 @@
             @click="doReset"
           >
             <view v-if="!submitting" class="btn-submit__inner">
+              <view class="btn-submit__shimmer" />
               <text class="btn-submit__text">确认重置</text>
             </view>
             <view v-else class="btn-submit__flow">
@@ -282,10 +287,6 @@ const canSubmit = computed(() =>
 function onFocus(field: 'phone' | 'code' | 'pwd' | 'confirm') { focusState[field] = true }
 function onBlur(field: 'phone' | 'code' | 'pwd' | 'confirm') { focusState[field] = false }
 
-function goBack() {
-  if (step.value === 2) { step.value = 1; return }
-  uni.navigateBack({ fail: () => uni.redirectTo({ url: '/pages/auth/login' }) })
-}
 function goLogin() { uni.redirectTo({ url: '/pages/auth/login' }) }
 
 async function sendCode() {
@@ -369,7 +370,20 @@ async function doReset() {
     content: '';
     position: fixed;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='55' fill='none' stroke='%23B89876' stroke-width='0.5' opacity='0.08'/%3E%3C/svg%3E");
+    background:
+      radial-gradient(ellipse 60% 50% at 8% 5%, rgba(184, 152, 118, 0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 55% 45% at 92% 95%, rgba(184, 152, 118, 0.05) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 35% at 85% 8%, rgba(212, 196, 174, 0.04) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 40% at 15% 92%, rgba(212, 196, 174, 0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='55' fill='none' stroke='%23B89876' stroke-width='0.5' opacity='0.06'/%3E%3C/svg%3E");
     background-size: 240rpx 240rpx;
     background-position: center 15%;
     background-repeat: no-repeat;
@@ -391,7 +405,7 @@ async function doReset() {
   position: relative;
   z-index: 2;
 
-  &__left { display: flex; align-items: center; gap: 16rpx; }
+  &__brand { display: flex; align-items: center; gap: 16rpx; }
 
   &__logo {
     @include logo-card;
@@ -403,6 +417,9 @@ async function doReset() {
     justify-content: center;
     overflow: hidden;
     flex-shrink: 0;
+    background: transparent;
+    box-shadow: none;
+    filter: drop-shadow(0 0 10rpx rgba(184, 152, 118, 0.20));
 
     &-img { width: 42rpx; height: 42rpx; object-fit: contain; display: block; }
   }
@@ -425,57 +442,57 @@ async function doReset() {
   &__actions { flex-shrink: 0; }
 }
 
-.back-btn {
-  width: 64rpx;
-  height: 64rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(47, 53, 66, 0.05);
-  transition: background 0.2s;
-
-  &:active { background: rgba(47, 53, 66, 0.10); }
-  &__icon { font-size: 32rpx; color: $mineral-gray; font-weight: 500; line-height: 1; }
-}
-
-.nav-pill {
+.ghost-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 56rpx;
-  padding: 0 24rpx;
-  border-radius: 999rpx;
-  background: rgba(184, 152, 118, 0.12);
-  border: 1.5rpx solid rgba(184, 152, 118, 0.28);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: background 0.2s ease, border-color 0.2s ease;
+  padding: 0 4rpx;
   cursor: pointer;
+  position: relative;
 
-  &:active {
-    background: rgba(184, 152, 118, 0.22);
-    border-color: rgba(184, 152, 118, 0.45);
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 6rpx;
+    left: 0;
+    right: 0;
+    height: 1.5rpx;
+    background: repeating-linear-gradient(
+      90deg,
+      rgba(184, 152, 118, 0.5) 0rpx,
+      rgba(184, 152, 118, 0.5) 6rpx,
+      transparent 6rpx,
+      transparent 12rpx
+    );
+    border-radius: 1rpx;
   }
 
+  &:active { opacity: 0.55; }
+
   &__text {
-    font-size: 24rpx;
+    font-size: 26rpx;
     color: $bronze-gold;
-    font-weight: 600;
-    letter-spacing: 0.5rpx;
+    font-weight: 500;
+    letter-spacing: 1rpx;
     line-height: 1;
   }
 }
 
 // ============================================
-//  表单区域
+//  表单区域（光学居中）
 // ============================================
 .auth-body {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24rpx 40rpx 0;
+  justify-content: center;
+  padding-top: 5dvh;
+  padding-left: 40rpx;
+  padding-right: 40rpx;
+  width: 100%;
+  box-sizing: border-box;
   position: relative;
   z-index: 1;
 }
@@ -487,22 +504,27 @@ async function doReset() {
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1rpx solid rgba(184, 152, 118, 0.12);
+  border: 1rpx solid rgba(184, 152, 118, 0.10);
   border-radius: 40rpx;
   box-shadow:
     0 24rpx 80rpx rgba(47, 53, 66, 0.06),
     0 4rpx 16rpx rgba(0, 0, 0, 0.03);
-  padding: 48rpx 48rpx;
+  padding: 52rpx 48rpx;
 
-  &__head { margin-bottom: 40rpx; }
+  &__head { margin-bottom: 44rpx; }
+
+  &__title-wrap {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 12rpx;
+  }
 
   &__title {
     display: block;
     font-size: 52rpx;
-    font-weight: 600;
+    font-weight: 500;
     color: $mineral-gray;
-    letter-spacing: 2rpx;
-    margin-bottom: 12rpx;
+    letter-spacing: 3rpx;
     line-height: 1.1;
   }
 
@@ -526,7 +548,7 @@ async function doReset() {
 .step-bar {
   display: flex;
   align-items: center;
-  margin-bottom: 48rpx;
+  margin-bottom: 44rpx;
   padding: 0 12rpx;
 }
 
@@ -608,7 +630,7 @@ async function doReset() {
 //  字段组
 // ============================================
 .field-group {
-  margin-bottom: 48rpx;
+  margin-bottom: 40rpx;
 
   &__label-row {
     height: 36rpx;
@@ -626,7 +648,7 @@ async function doReset() {
 }
 
 // ============================================
-//  极简输入框
+//  输入框
 // ============================================
 .field-line {
   position: relative;
@@ -634,11 +656,28 @@ async function doReset() {
   display: flex;
   align-items: center;
   border-bottom: 1.5rpx solid rgba(47, 53, 66, 0.12);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
 
-  &.is-focused {
-    border-bottom-color: $bronze-gold;
-    box-shadow: 0 2rpx 0 $bronze-gold;
+  &.is-focused { border-bottom-color: $bronze-gold; }
+
+  &__glow {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(212, 180, 131, 0.12) 40%,
+      rgba(212, 180, 131, 0.20) 60%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  &.is-focused &__glow {
+    animation: light-sweep 0.5s ease-out forwards;
   }
 
   &--with-code { padding-right: 160rpx; }
@@ -693,7 +732,7 @@ async function doReset() {
     &:active { opacity: 0.6; }
   }
 
-  &__action {
+  &__eye-wrap {
     position: absolute;
     right: 0;
     top: 50%;
@@ -716,6 +755,12 @@ async function doReset() {
     transition: color 0.2s ease;
     &:active { color: $bronze-gold; }
   }
+}
+
+@keyframes light-sweep {
+  0%   { width: 0; left: 0; opacity: 0.8; }
+  60%  { width: 100%; left: 0; opacity: 0.4; }
+  100% { width: 0; left: 100%; opacity: 0; }
 }
 
 // ============================================
@@ -798,9 +843,24 @@ async function doReset() {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+      background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, transparent 50%);
       pointer-events: none;
     }
+  }
+
+  &__shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.50) 40%,
+      rgba(255, 255, 255, 0.70) 50%,
+      rgba(255, 255, 255, 0.50) 60%,
+      transparent 80%
+    );
+    background-size: 200% 100%;
+    animation: btn-shimmer 2.8s ease-in-out infinite;
   }
 
   &__flow { background: $btn-gold-gradient; }
@@ -837,6 +897,12 @@ async function doReset() {
     position: relative;
     z-index: 1;
   }
+}
+
+@keyframes btn-shimmer {
+  0%   { background-position: -200% 0; }
+  60%  { background-position: 150% 0; }
+  100% { background-position: 150% 0; }
 }
 
 @keyframes btn-flow-load {

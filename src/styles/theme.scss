@@ -513,8 +513,8 @@ $btn-flow-duration: 1.4s;
 $btn-flow-timing: ease-in-out;
 
 // ──── 品牌线性渐变按钮（浮起感）────
-$btn-gold-gradient: linear-gradient(135deg, #C9A96E 0%, #D4B483 40%, #E8CD9A 70%, #C9A96E 100%);
-$btn-gold-shadow: 0 10rpx 32rpx rgba(212, 180, 131, 0.28);
+$btn-gold-gradient: linear-gradient(135deg, #D4B483 0%, #B5935E 100%);
+$btn-gold-shadow: 0 8rpx 20rpx rgba(212, 180, 131, 0.3);
 $btn-gold-shadow-hover: 0 16rpx 44rpx rgba(212, 180, 131, 0.38);
 
 // ──── 输入框无边框风格 ────

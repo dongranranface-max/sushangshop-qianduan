@@ -2,7 +2,7 @@
   <view class="auth-page">
 
     <!-- ============================================
-      顶部导航栏（简洁引导，仅 Logo + 登录入口）
+      顶部导航栏（Header Logo + Ghost Button）
     ============================================ -->
     <view class="auth-nav">
       <view class="auth-nav__brand">
@@ -15,14 +15,14 @@
         </view>
       </view>
       <view class="auth-nav__actions">
-        <view class="nav-pill" @click="goLogin">
-          <text class="nav-pill__text">登录</text>
+        <view class="ghost-btn" @click="goLogin">
+          <text class="ghost-btn__text">登录</text>
         </view>
       </view>
     </view>
 
     <!-- ============================================
-      表单区域（4:6 视觉比例，垂直居中）
+      表单区域（光学居中）
     ============================================ -->
     <view class="auth-body">
       <scroll-view scroll-y class="auth-scroll" :show-scrollbar="false">
@@ -30,7 +30,9 @@
 
           <!-- 标题 -->
           <view class="auth-card__head">
-            <text class="auth-card__title">创建账号</text>
+            <view class="auth-card__title-wrap">
+              <text class="auth-card__title">创建账号</text>
+            </view>
             <text class="auth-card__sub">开启您的生态积分财富之旅</text>
           </view>
 
@@ -50,10 +52,11 @@
                 @focus="onFocus('phone')"
                 @blur="onBlur('phone')"
               />
+              <view class="field-line__glow" />
             </view>
           </view>
 
-          <!-- 验证码 ─ 文字链接获取 -->
+          <!-- 验证码 -->
           <view class="field-group">
             <view class="field-group__label-row">
               <text class="field-group__label">短信验证码</text>
@@ -69,7 +72,7 @@
                 @focus="onFocus('code')"
                 @blur="onBlur('code')"
               />
-              <!-- 文字链接式获取 -->
+              <view class="field-line__glow" />
               <view
                 class="field-line__code-btn"
                 :class="{ 'is-counting': countdown > 0 || sending }"
@@ -96,14 +99,15 @@
                 @focus="onFocus('pwd')"
                 @blur="onBlur('pwd')"
               />
-              <view class="field-line__action" @click="showPwd = !showPwd">
+              <view class="field-line__glow" />
+              <view class="field-line__eye-wrap" @click="showPwd = !showPwd">
                 <svg v-if="showPwd" class="field-line__eye" viewBox="0 0 24 24" fill="none">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1"/>
                 </svg>
                 <svg v-else class="field-line__eye" viewBox="0 0 24 24" fill="none">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                  <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
                 </svg>
               </view>
             </view>
@@ -124,10 +128,11 @@
                 @focus="onFocus('invite')"
                 @blur="onBlur('invite')"
               />
+              <view class="field-line__glow" />
             </view>
           </view>
 
-          <!-- 协议勾选（整行可点击） -->
+          <!-- 协议勾选 -->
           <view class="terms-row" @click="agreed = !agreed">
             <view class="check-square" :class="{ 'is-checked': agreed }">
               <text v-if="agreed" class="check-square__icon">✓</text>
@@ -140,7 +145,7 @@
             </text>
           </view>
 
-          <!-- 提交按钮 ─ 金色渐变 + 浮起阴影 -->
+          <!-- 提交按钮 -->
           <view
             class="btn-submit"
             :class="{
@@ -150,6 +155,7 @@
             @click="doRegister"
           >
             <view v-if="!submitting" class="btn-submit__inner">
+              <view class="btn-submit__shimmer" />
               <text class="btn-submit__text">注册</text>
             </view>
             <view v-else class="btn-submit__flow">
@@ -288,7 +294,20 @@ async function doRegister() {
     content: '';
     position: fixed;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='55' fill='none' stroke='%23B89876' stroke-width='0.5' opacity='0.08'/%3E%3C/svg%3E");
+    background:
+      radial-gradient(ellipse 60% 50% at 8% 5%, rgba(184, 152, 118, 0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 55% 45% at 92% 95%, rgba(184, 152, 118, 0.05) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 35% at 85% 8%, rgba(212, 196, 174, 0.04) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 40% at 15% 92%, rgba(212, 196, 174, 0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='55' fill='none' stroke='%23B89876' stroke-width='0.5' opacity='0.06'/%3E%3C/svg%3E");
     background-size: 240rpx 240rpx;
     background-position: center 15%;
     background-repeat: no-repeat;
@@ -322,6 +341,9 @@ async function doRegister() {
     justify-content: center;
     overflow: hidden;
     flex-shrink: 0;
+    background: transparent;
+    box-shadow: none;
+    filter: drop-shadow(0 0 10rpx rgba(184, 152, 118, 0.20));
 
     &-img {
       width: 42rpx;
@@ -332,7 +354,6 @@ async function doRegister() {
   }
 
   &__text { display: flex; flex-direction: column; gap: 5rpx; }
-
   &__name {
     font-size: 28rpx;
     font-weight: 800;
@@ -340,7 +361,6 @@ async function doRegister() {
     letter-spacing: 1.2rpx;
     line-height: 1;
   }
-
   &__slogan {
     font-size: 18rpx;
     color: $bronze-gold;
@@ -348,47 +368,61 @@ async function doRegister() {
     letter-spacing: 0.5rpx;
     line-height: 1;
   }
-
   &__actions { flex-shrink: 0; }
 }
 
-.nav-pill {
+// Ghost Button
+.ghost-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 56rpx;
-  padding: 0 24rpx;
-  border-radius: 999rpx;
-  background: rgba(184, 152, 118, 0.12);
-  border: 1.5rpx solid rgba(184, 152, 118, 0.28);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: background 0.2s ease, border-color 0.2s ease;
+  padding: 0 4rpx;
   cursor: pointer;
+  position: relative;
 
-  &:active {
-    background: rgba(184, 152, 118, 0.22);
-    border-color: rgba(184, 152, 118, 0.45);
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 6rpx;
+    left: 0;
+    right: 0;
+    height: 1.5rpx;
+    background: repeating-linear-gradient(
+      90deg,
+      rgba(184, 152, 118, 0.5) 0rpx,
+      rgba(184, 152, 118, 0.5) 6rpx,
+      transparent 6rpx,
+      transparent 12rpx
+    );
+    border-radius: 1rpx;
   }
 
+  &:active { opacity: 0.55; }
+
   &__text {
-    font-size: 24rpx;
+    font-size: 26rpx;
     color: $bronze-gold;
-    font-weight: 600;
-    letter-spacing: 0.5rpx;
+    font-weight: 500;
+    letter-spacing: 1rpx;
     line-height: 1;
   }
 }
 
 // ============================================
-//  表单区域
+//  表单区域（光学居中）
 // ============================================
 .auth-body {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24rpx 40rpx 0;
+  justify-content: center;
+  padding-top: 5dvh;
+  padding-left: 40rpx;
+  padding-right: 40rpx;
+  width: 100%;
+  box-sizing: border-box;
   position: relative;
   z-index: 1;
 }
@@ -406,22 +440,27 @@ async function doRegister() {
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1rpx solid rgba(184, 152, 118, 0.12);
+  border: 1rpx solid rgba(184, 152, 118, 0.10);
   border-radius: 40rpx;
   box-shadow:
     0 24rpx 80rpx rgba(47, 53, 66, 0.06),
     0 4rpx 16rpx rgba(0, 0, 0, 0.03);
-  padding: 48rpx 48rpx 52rpx;
+  padding: 52rpx 48rpx 52rpx;
 
-  &__head { margin-bottom: 48rpx; }
+  &__head { margin-bottom: 44rpx; }
+
+  &__title-wrap {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 12rpx;
+  }
 
   &__title {
     display: block;
     font-size: 52rpx;
-    font-weight: 600;
+    font-weight: 500;
     color: $mineral-gray;
-    letter-spacing: 2rpx;
-    margin-bottom: 12rpx;
+    letter-spacing: 3rpx;
     line-height: 1.1;
   }
 
@@ -435,10 +474,10 @@ async function doRegister() {
 }
 
 // ============================================
-//  字段组 ─ 亲密性原则
+//  字段组
 // ============================================
 .field-group {
-  margin-bottom: 48rpx;
+  margin-bottom: 40rpx;
 
   &--muted { opacity: 0.72; }
 
@@ -466,7 +505,7 @@ async function doRegister() {
 }
 
 // ============================================
-//  极简输入框 ─ 透明底 + 底部细线
+//  输入框
 // ============================================
 .field-line {
   position: relative;
@@ -474,20 +513,32 @@ async function doRegister() {
   display: flex;
   align-items: center;
   border-bottom: 1.5rpx solid rgba(47, 53, 66, 0.12);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
 
-  &.is-focused {
-    border-bottom-color: $bronze-gold;
-    box-shadow: 0 2rpx 0 $bronze-gold;
+  &.is-focused { border-bottom-color: $bronze-gold; }
+
+  &__glow {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(212, 180, 131, 0.12) 40%,
+      rgba(212, 180, 131, 0.20) 60%,
+      transparent 100%
+    );
+    pointer-events: none;
   }
 
-  &--with-code {
-    padding-right: 160rpx;   // 给"获取验证码"文字链接留空间
+  &.is-focused &__glow {
+    animation: light-sweep 0.5s ease-out forwards;
   }
 
-  &--with-eye {
-    padding-right: 72rpx;    // 给眼睛留空间
-  }
+  &--with-code { padding-right: 160rpx; }
+  &--with-eye { padding-right: 72rpx; }
 
   &--dashed {
     border-bottom-style: dashed;
@@ -512,7 +563,6 @@ async function doRegister() {
     }
   }
 
-  // 获取验证码文字链接
   &__code-btn {
     position: absolute;
     right: 0;
@@ -544,8 +594,7 @@ async function doRegister() {
     &:active { opacity: 0.6; }
   }
 
-  // 眼睛图标
-  &__action {
+  &__eye-wrap {
     position: absolute;
     right: 0;
     top: 50%;
@@ -566,19 +615,24 @@ async function doRegister() {
     object-fit: contain;
     flex-shrink: 0;
     transition: color 0.2s ease;
-
     &:active { color: $bronze-gold; }
   }
 }
 
+@keyframes light-sweep {
+  0%   { width: 0; left: 0; opacity: 0.8; }
+  60%  { width: 100%; left: 0; opacity: 0.4; }
+  100% { width: 0; left: 100%; opacity: 0; }
+}
+
 // ============================================
-//  协议勾选 ─ 整行可点击热区
+//  协议勾选
 // ============================================
 .terms-row {
   display: flex;
   align-items: center;
   gap: 16rpx;
-  margin-bottom: 40rpx;
+  margin-bottom: 24rpx;
   margin-top: 8rpx;
   cursor: pointer;
   padding: 8rpx 0;
@@ -628,7 +682,7 @@ async function doRegister() {
 }
 
 // ============================================
-//  提交按钮 ─ 金色渐变 + 浮起阴影
+//  提交按钮
 // ============================================
 .btn-submit {
   height: 104rpx;
@@ -663,9 +717,24 @@ async function doRegister() {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+      background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, transparent 50%);
       pointer-events: none;
     }
+  }
+
+  &__shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.50) 40%,
+      rgba(255, 255, 255, 0.70) 50%,
+      rgba(255, 255, 255, 0.50) 60%,
+      transparent 80%
+    );
+    background-size: 200% 100%;
+    animation: btn-shimmer 2.8s ease-in-out infinite;
   }
 
   &__flow { background: $btn-gold-gradient; }
@@ -702,6 +771,12 @@ async function doRegister() {
     position: relative;
     z-index: 1;
   }
+}
+
+@keyframes btn-shimmer {
+  0%   { background-position: -200% 0; }
+  60%  { background-position: 150% 0; }
+  100% { background-position: 150% 0; }
 }
 
 @keyframes btn-flow-load {
