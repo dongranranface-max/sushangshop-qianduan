@@ -261,8 +261,8 @@ function nextTick(fn: () => void) { setTimeout(fn, 0) }
     height: 1.5rpx;
     background: repeating-linear-gradient(
       90deg,
-      rgba(212, 180, 131, 0.5) 0rpx,
-      rgba(212, 180, 131, 0.5) 6rpx,
+      rgba(168, 138, 92, 0.55) 0rpx,
+      rgba(168, 138, 92, 0.55) 6rpx,
       transparent 6rpx,
       transparent 12rpx
     );
@@ -273,8 +273,8 @@ function nextTick(fn: () => void) { setTimeout(fn, 0) }
 
   &__text {
     font-size: 26rpx;
-    color: #D4B483;
-    font-weight: 500;
+    color: #A88A5C;
+    font-weight: 600;
     letter-spacing: 1rpx;
     line-height: 1;
   }
@@ -319,7 +319,7 @@ function nextTick(fn: () => void) { setTimeout(fn, 0) }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 5dvh 40rpx 0;
+  padding: 8dvh 40rpx 0;
   width: 100%;
   box-sizing: border-box;
   position: relative;
@@ -354,7 +354,7 @@ function nextTick(fn: () => void) { setTimeout(fn, 0) }
     font-size: 52rpx;
     font-weight: 600;
     color: $mineral-gray;
-    letter-spacing: 3rpx;
+    letter-spacing: 2rpx;
     line-height: 1.1;
   }
 
@@ -414,8 +414,7 @@ function nextTick(fn: () => void) { setTimeout(fn, 0) }
 
     &::placeholder {
       font-size: 26rpx;
-      color: #AAAAAA;
-      font-weight: 400;
+      color: #BBBBBB;     font-weight: 400;
     }
   }
 
@@ -470,7 +469,7 @@ function nextTick(fn: () => void) { setTimeout(fn, 0) }
   position: relative;
   margin-top: 12rpx;
 
-  &:active { transform: scale(0.984); }
+  &:active { transform: scale(0.97); transition: transform 0.3s ease; }
   &.is-loading { opacity: 0.72; }
 
   &__inner,

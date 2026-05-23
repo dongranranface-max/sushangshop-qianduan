@@ -438,8 +438,8 @@ async function doReset() {
     height: 1.5rpx;
     background: repeating-linear-gradient(
       90deg,
-      rgba(212, 180, 131, 0.5) 0rpx,
-      rgba(212, 180, 131, 0.5) 6rpx,
+      rgba(168, 138, 92, 0.55) 0rpx,
+      rgba(168, 138, 92, 0.55) 6rpx,
       transparent 6rpx,
       transparent 12rpx
     );
@@ -450,7 +450,7 @@ async function doReset() {
 
   &__text {
     font-size: 26rpx;
-    color: #D4B483;
+    color: #A88A5C;
     font-weight: 500;
     letter-spacing: 1rpx;
     line-height: 1;
