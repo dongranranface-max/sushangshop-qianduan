@@ -708,7 +708,10 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
 //  适用：所有页面顶部 Logo
 // ============================================
 .logo-image {
+  width: 48rpx;
+  height: 48rpx;
   aspect-ratio: 1 / 1;
   object-fit: contain;
+  border-radius: 50%;
   will-change: transform;
 }
