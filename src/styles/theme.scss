@@ -702,3 +702,13 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
   background: $hero-orb;
   border-radius: 50%;
 }
+
+// ============================================
+//  Logo 图片全局工具类
+//  适用：所有页面顶部 Logo
+// ============================================
+.logo-image {
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  will-change: transform;
+}

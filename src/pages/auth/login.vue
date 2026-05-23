@@ -4,7 +4,7 @@
     <!-- Logo 视觉锚点 -->
     <view class="brand-hero">
       <view class="brand-hero__logo-card">
-        <image class="brand-hero__logo" src="/static/logo.png" mode="aspectFit" />
+        <image class="brand-hero__logo logo-image" src="/static/logo.png" mode="aspectFit" />
       </view>
     </view>
 

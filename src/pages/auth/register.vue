@@ -5,7 +5,7 @@
     <view class="auth-nav">
       <view class="auth-nav__brand">
         <view class="auth-nav__logo">
-          <image class="auth-nav__logo-img" src="/static/logo.png" mode="aspectFit" />
+          <image class="auth-nav__logo-img logo-image" src="/static/logo.png" mode="aspectFit" />
         </view>
         <view class="auth-nav__text">
           <text class="auth-nav__name">集享公社</text>
