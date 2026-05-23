@@ -425,6 +425,21 @@ $home-card-pad: 20rpx;
   }
 }
 
+@keyframes btn-flow-load {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fl-float-up {
+  from { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(-52rpx) scale(0.82); opacity: 0; }
+}
+
+@keyframes fl-float-down {
+  from { transform: translateY(-52rpx) scale(0.82); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
 @keyframes premium-glow-anim {
   0%, 100% { box-shadow: $shadow-gold; }
   50% { box-shadow: $shadow-fire-strong; }
@@ -475,6 +490,27 @@ $logo-card-bg: linear-gradient(160deg, rgba(47, 53, 66, 0.96) 0%, rgba(65, 75, 9
 $logo-glow-warm: rgba(184, 152, 118, 0.18);
 $hero-orb: radial-gradient(ellipse at 50% 60%, rgba(184, 152, 118, 0.14) 0%, transparent 65%);
 $glass-blur: blur(20px);
+
+// ──── FL 浮动标签 ────
+$fl-label-size: 22rpx;
+$fl-label-size-float: 18rpx;
+$fl-label-color: $text-secondary;
+$fl-label-color-focus: $bronze-gold;
+$fl-label-weight: 500;
+$fl-float-duration: 0.22s;
+$fl-float-timing: cubic-bezier(0.4, 0, 0.2, 1);
+
+// ──── 圆形倒计时 ────
+$countdown-ring-size: 56rpx;
+$countdown-ring-stroke: 3rpx;
+$countdown-ring-color: $bronze-gold;
+$countdown-ring-bg: rgba(47, 53, 66, 0.06);
+$countdown-text-size: 20rpx;
+$countdown-text-color: $bronze-dark;
+
+// ──── 按钮流动加载 ────
+$btn-flow-duration: 1.4s;
+$btn-flow-timing: ease-in-out;
 
 // 输入框
 $auth-input-bg: rgba(255, 255, 255, 0.72);
