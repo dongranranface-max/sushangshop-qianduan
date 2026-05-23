@@ -14,7 +14,8 @@
     "build:mp-weixin": "uni build -p mp-weixin",
     "lint": "eslint src --ext .vue,.ts,.tsx --fix",
     "lint:check": "eslint src --ext .vue,.ts,.tsx",
-    "format": "prettier --write \"src/**/*.{vue,ts,tsx,scss,json}\""
+    "format": "prettier --write \"src/**/*.{vue,ts,tsx,scss,json}\"",
+    "prepare": "husky"
   },
   "dependencies": {
     "@dcloudio/uni-app": "3.0.0-3060520221121001",
@@ -35,6 +36,8 @@
     "@vue/eslint-config-typescript": "^13.0.0",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.24.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.5",
     "prettier": "^3.2.0",
     "sass": "1.77.0",
     "typescript": "^5.4.5",
