@@ -41,7 +41,7 @@
                 maxlength="11"
                 placeholder=" "
                 @focus="onFocus('phone')"
-                @blur="onBlur('phone')"
+                @blur="onBlurPhone"
               />
             </view>
           </view>
@@ -86,12 +86,12 @@
               />
               <view class="field-line__eye-wrap" @click="showPwd = !showPwd">
                 <svg v-if="showPwd" class="field-line__eye" viewBox="0 0 24 24" fill="none">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1"/>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
                 </svg>
                 <svg v-else class="field-line__eye" viewBox="0 0 24 24" fill="none">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-                  <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
               </view>
             </view>
@@ -156,6 +156,7 @@ const sending = ref(false)
 const showPwd = ref(false)
 const agreed = ref(false)
 const countdown = ref(0)
+const _phoneMasked = ref(false)
 let countdownTimer: ReturnType<typeof setInterval> | null = null
 
 const focusState = reactive({
@@ -179,7 +180,15 @@ const canSubmit = computed(() =>
 )
 
 function onFocus(field: 'phone' | 'code' | 'pwd' | 'invite') { focusState[field] = true }
+
 function onBlur(field: 'phone' | 'code' | 'pwd' | 'invite') { focusState[field] = false }
+
+function onBlurPhone() {
+  focusState.phone = false
+  if (form.value.phone.length === 11) {
+    _phoneMasked.value = true
+  }
+}
 
 function goLogin() { uni.redirectTo({ url: '/pages/auth/login' }) }
 
@@ -256,11 +265,9 @@ async function doRegister() {
   box-sizing: border-box;
   overflow-x: hidden;
   position: relative;
+  will-change: transform;
 }
 
-// ============================================
-//  顶部导航栏
-// ============================================
 .auth-nav {
   display: flex;
   align-items: center;
@@ -341,16 +348,13 @@ async function doRegister() {
   }
 }
 
-// ============================================
-//  表单区域
-// ============================================
 .auth-body {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4dvh 40rpx 0;
+  padding: 5dvh 40rpx 0;
   width: 100%;
   box-sizing: border-box;
   position: relative;
@@ -370,15 +374,15 @@ async function doRegister() {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1rpx solid rgba(184, 152, 118, 0.12);
+  border: 1rpx solid rgba(212, 180, 131, 0.12);
   border-radius: 40rpx;
   box-shadow:
-    0 8rpx 32rpx rgba(47, 53, 66, 0.08),
-    0 32rpx 96rpx rgba(47, 53, 66, 0.10),
+    0 4rpx 20rpx rgba(47, 53, 66, 0.05),
+    0 24rpx 80rpx rgba(47, 53, 66, 0.08),
     0 64rpx 160rpx rgba(47, 53, 66, 0.06);
   padding: 48rpx 44rpx 48rpx;
 
-  &__head { margin-bottom: 40rpx; }
+  &__head { margin-bottom: 44rpx; }
 
   &__title-wrap {
     display: flex;
@@ -389,9 +393,9 @@ async function doRegister() {
   &__title {
     display: block;
     font-size: 52rpx;
-    font-weight: 500;
+    font-weight: 600;
     color: $mineral-gray;
-    letter-spacing: 1.5rpx;
+    letter-spacing: 2rpx;
     line-height: 1.1;
   }
 
@@ -404,11 +408,8 @@ async function doRegister() {
   }
 }
 
-// ============================================
-//  字段组
-// ============================================
 .field-group {
-  margin-bottom: 36rpx;
+  margin-bottom: 40rpx;
 
   &--muted { opacity: 0.7; }
 
@@ -416,7 +417,7 @@ async function doRegister() {
     height: 32rpx;
     display: flex;
     align-items: center;
-    margin-bottom: 6rpx;
+    margin-bottom: 10rpx;
   }
 
   &__label {
@@ -427,9 +428,6 @@ async function doRegister() {
   }
 }
 
-// ============================================
-//  浮动标签输入框
-// ============================================
 .field-line {
   position: relative;
   height: 96rpx;
@@ -439,7 +437,7 @@ async function doRegister() {
   overflow: visible;
   transition: border-color 0.25s ease;
 
-  &.is-focused { border-bottom-color: $bronze-gold; }
+  &.is-focused { border-bottom-color: #D4B483; }
 
   &--with-code { padding-right: 156rpx; }
   &--with-eye { padding-right: 72rpx; }
@@ -448,11 +446,10 @@ async function doRegister() {
     border-bottom-color: rgba(142, 116, 89, 0.22);
   }
 
-  // 浮动标签
   &__fl {
     position: absolute;
     left: 0;
-    bottom: 12rpx;
+    bottom: 14rpx;
     font-size: 28rpx;
     color: $text-muted;
     font-weight: 400;
@@ -465,7 +462,7 @@ async function doRegister() {
   &.has-value &__fl,
   &.is-focused &__fl {
     font-size: 18rpx;
-    color: $bronze-gold;
+    color: #D4B483;
     font-weight: 600;
     letter-spacing: 0.5rpx;
     transform: translateY(-40rpx) scale(0.85);
@@ -492,18 +489,24 @@ async function doRegister() {
     background: transparent;
     border: none;
     outline: none;
-    font-size: 30rpx;
+    font-size: 32rpx;
     font-weight: 500;
-    color: $mineral-gray;
+    color: #333333;
     padding: 0;
     box-sizing: border-box;
     padding-bottom: 8rpx;
+
+    &::placeholder {
+      font-size: 26rpx;
+      color: #BBBBBB;
+      font-weight: 400;
+    }
   }
 
   &__code-btn {
     position: absolute;
     right: 0;
-    bottom: 12rpx;
+    bottom: 14rpx;
     height: 52rpx;
     display: flex;
     align-items: center;
@@ -514,7 +517,7 @@ async function doRegister() {
 
     text {
       font-size: 24rpx;
-      color: $bronze-gold;
+      color: #D4B483;
       font-weight: 600;
       letter-spacing: 0.3rpx;
       line-height: 1;
@@ -546,13 +549,10 @@ async function doRegister() {
     flex-shrink: 0;
     transition: color 0.2s ease;
 
-    &:active { color: $bronze-gold; }
+    &:active { color: #D4B483; }
   }
 }
 
-// ============================================
-//  协议勾选
-// ============================================
 .terms-row {
   display: flex;
   align-items: center;
@@ -565,7 +565,7 @@ async function doRegister() {
   width: 44rpx;
   height: 44rpx;
   border-radius: 12rpx;
-  border: 1.5rpx solid rgba(184, 152, 118, 0.45);
+  border: 1.5rpx solid rgba(212, 180, 131, 0.45);
   background: rgba(255, 255, 255, 0.60);
   display: flex;
   align-items: center;
@@ -575,14 +575,14 @@ async function doRegister() {
   box-sizing: border-box;
 
   &.is-checked {
-    background: rgba(184, 152, 118, 0.12);
-    border-color: $bronze-gold;
-    box-shadow: 0 0 0 3rpx rgba(184, 152, 118, 0.10);
+    background: rgba(212, 180, 131, 0.12);
+    border-color: #D4B483;
+    box-shadow: 0 0 0 3rpx rgba(212, 180, 131, 0.10);
   }
 
   &__icon {
     font-size: 22rpx;
-    color: $bronze-gold;
+    color: #D4B483;
     font-weight: 700;
     line-height: 1;
   }
@@ -599,9 +599,6 @@ async function doRegister() {
   font-weight: 500;
 }
 
-// ============================================
-//  提交按钮
-// ============================================
 .btn-submit {
   height: 100rpx;
   border-radius: 50rpx;
@@ -636,7 +633,7 @@ async function doRegister() {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, transparent 50%);
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%);
       pointer-events: none;
     }
   }
@@ -653,7 +650,7 @@ async function doRegister() {
       transparent 80%
     );
     background-size: 200% 100%;
-    animation: btn-shimmer 2.8s ease-in-out infinite;
+    animation: btn-shimmer 4s ease-in-out infinite;
   }
 
   &__flow { background: $btn-gold-gradient; }

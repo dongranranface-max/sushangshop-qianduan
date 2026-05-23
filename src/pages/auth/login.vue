@@ -28,9 +28,6 @@
 
         <!-- 手机号 -->
         <view class="field-group">
-          <view class="field-group__label-row">
-            <text class="field-group__label">手机号</text>
-          </view>
           <view class="field-line" :class="{ 'is-focused': focusState.phone }">
             <input
               class="field-line__input"
@@ -61,17 +58,17 @@
             />
             <view class="field-line__eye-wrap" @click="showPwd = !showPwd">
               <svg v-if="showPwd" class="field-line__eye" viewBox="0 0 24 24" fill="none">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1"/>
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
               </svg>
               <svg v-else class="field-line__eye" viewBox="0 0 24 24" fill="none">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
               </svg>
             </view>
-            <view class="field-line__forget" @click="goForgot">
-              <text class="field-line__forget-text">忘记密码？</text>
-            </view>
+          </view>
+          <view class="field-line__forget" @click="goForgot">
+            <text class="field-line__forget-text">忘记密码？</text>
           </view>
         </view>
 
@@ -207,11 +204,9 @@ async function doLogin() {
   box-sizing: border-box;
   overflow-x: hidden;
   position: relative;
+  will-change: transform;
 }
 
-// ============================================
-//  右上角 Ghost Button
-// ============================================
 .auth-ghost-corner {
   position: fixed;
   top: calc(14rpx + env(safe-area-inset-top));
@@ -256,9 +251,6 @@ async function doLogin() {
   }
 }
 
-// ============================================
-//  品牌英雄区（简洁光晕）
-// ============================================
 .brand-hero {
   display: flex;
   flex-direction: column;
@@ -291,16 +283,13 @@ async function doLogin() {
   }
 }
 
-// ============================================
-//  表单区域
-// ============================================
 .auth-body {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4dvh 40rpx 0;
+  padding: 5dvh 40rpx 0;
   width: 100%;
   box-sizing: border-box;
   position: relative;
@@ -313,16 +302,16 @@ async function doLogin() {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1rpx solid rgba(184, 152, 118, 0.12);
+  border: 1rpx solid rgba(212, 180, 131, 0.12);
   border-radius: 40rpx;
   box-shadow:
-    0 8rpx 32rpx rgba(47, 53, 66, 0.08),
-    0 32rpx 96rpx rgba(47, 53, 66, 0.10),
+    0 4rpx 20rpx rgba(47, 53, 66, 0.05),
+    0 24rpx 80rpx rgba(47, 53, 66, 0.08),
     0 64rpx 160rpx rgba(47, 53, 66, 0.06);
   padding: 48rpx 44rpx 44rpx;
   box-sizing: border-box;
 
-  &__head { margin-bottom: 40rpx; }
+  &__head { margin-bottom: 44rpx; }
 
   &__title-wrap {
     display: flex;
@@ -333,9 +322,9 @@ async function doLogin() {
   &__title {
     display: block;
     font-size: 52rpx;
-    font-weight: 500;
+    font-weight: 600;
     color: $mineral-gray;
-    letter-spacing: 1.5rpx;
+    letter-spacing: 2rpx;
     line-height: 1.1;
   }
 
@@ -348,17 +337,14 @@ async function doLogin() {
   }
 }
 
-// ============================================
-//  字段组
-// ============================================
 .field-group {
-  margin-bottom: 36rpx;
+  margin-bottom: 40rpx;
 
   &__label-row {
     height: 32rpx;
     display: flex;
     align-items: center;
-    margin-bottom: 6rpx;
+    margin-bottom: 10rpx;
   }
 
   &__label {
@@ -369,21 +355,18 @@ async function doLogin() {
   }
 }
 
-// ============================================
-//  输入框
-// ============================================
 .field-line {
   position: relative;
-  height: 88rpx;
+  height: 96rpx;
   display: flex;
   align-items: center;
   border-bottom: 1.5rpx solid rgba(47, 53, 66, 0.12);
   overflow: visible;
   transition: border-color 0.25s ease;
 
-  &.is-focused { border-bottom-color: $bronze-gold; }
+  &.is-focused { border-bottom-color: #D4B483; }
 
-  &--with-action { padding-right: 140rpx; }
+  &--with-action { padding-right: 72rpx; }
 
   &__input {
     flex: 1;
@@ -391,25 +374,26 @@ async function doLogin() {
     background: transparent;
     border: none;
     outline: none;
-    font-size: 30rpx;
+    font-size: 32rpx;
     font-weight: 500;
-    color: $mineral-gray;
+    color: #333333;
     padding: 0;
     box-sizing: border-box;
 
     &::placeholder {
-      color: rgba(138, 138, 138, 0.5);
+      font-size: 26rpx;
+      color: #BBBBBB;
       font-weight: 400;
     }
   }
 
   &__eye-wrap {
     position: absolute;
-    right: 72rpx;
+    right: 0;
     top: 50%;
     transform: translateY(-50%);
-    width: 64rpx;
-    height: 64rpx;
+    width: 72rpx;
+    height: 72rpx;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -425,39 +409,34 @@ async function doLogin() {
     flex-shrink: 0;
     transition: color 0.2s ease;
 
-    &:active { color: $bronze-gold; }
+    &:active { color: #D4B483; }
   }
 
   &__forget {
-    position: absolute;
-    right: 0;
-    bottom: -48rpx;
-    height: 44rpx;
     display: flex;
     align-items: center;
-    cursor: pointer;
+    justify-content: flex-end;
+    margin-top: 16rpx;
+    padding-right: 8rpx;
   }
 
   &__forget-text {
-    font-size: 22rpx;
-    color: $bronze-gold;
-    font-weight: 500;
-    letter-spacing: 0.3rpx;
+    font-size: 24rpx;
+    color: #D4B483;
+    font-weight: 600;
+    letter-spacing: 0.5rpx;
     transition: opacity 0.2s;
 
     &:active { opacity: 0.55; }
   }
 }
 
-// ============================================
-//  提交按钮
-// ============================================
 .btn-submit {
   height: 100rpx;
   border-radius: 50rpx;
   overflow: hidden;
   position: relative;
-  margin-top: 6rpx;
+  margin-top: 8rpx;
 
   &:active { transform: scale(0.984); }
   &.is-loading { opacity: 0.72; }
@@ -479,7 +458,7 @@ async function doLogin() {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, transparent 50%);
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%);
       pointer-events: none;
     }
   }
@@ -496,7 +475,7 @@ async function doLogin() {
       transparent 80%
     );
     background-size: 200% 100%;
-    animation: btn-shimmer 2.8s ease-in-out infinite;
+    animation: btn-shimmer 4s ease-in-out infinite;
   }
 
   &__flow { background: $btn-gold-gradient; }
@@ -546,9 +525,6 @@ async function doLogin() {
   100% { background-position: 200% 0; }
 }
 
-// ============================================
-//  分割线
-// ============================================
 .divider-row {
   display: flex;
   align-items: center;
@@ -570,9 +546,6 @@ async function doLogin() {
   }
 }
 
-// ============================================
-//  第三方登录
-// ============================================
 .third-party {
   display: flex;
   align-items: center;
@@ -620,9 +593,6 @@ async function doLogin() {
   }
 }
 
-// ============================================
-//  底部协议
-// ============================================
 .auth-footer {
   margin-top: 28rpx;
   display: flex;
