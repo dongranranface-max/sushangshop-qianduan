@@ -362,14 +362,6 @@ async function doRegister() {
   &__actions { flex-shrink: 0; }
 }
 
-// ============================================
-//  提交按钮禁用态
-// ============================================
-.btn-submit.is-disabled {
-  opacity: 0.45;
-  pointer-events: none;
-}
-
 // Ghost Button
 .ghost-btn {
   display: inline-flex;
