@@ -77,6 +77,7 @@
             <view class="field-line field-line--with-eye" :class="{ 'is-focused': focusState.pwd, 'has-value': form.password }">
               <span class="field-line__fl">登录密码</span>
               <input
+                id="reg-pwd"
                 class="field-line__input"
                 v-model="form.password"
                 :type="showPwd ? 'text' : 'password'"
@@ -84,7 +85,7 @@
                 @focus="onFocus('pwd')"
                 @blur="onBlur('pwd')"
               />
-              <view class="field-line__eye-wrap" @click="showPwd = !showPwd">
+              <view class="field-line__eye-wrap" @click="togglePwd">
                 <svg v-if="showPwd" class="field-line__eye" viewBox="0 0 24 24" fill="none">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
@@ -97,7 +98,7 @@
             </view>
           </view>
 
-          <!-- 邀请码 -->
+          <!-- 邀请码（弱化）-->
           <view class="field-group field-group--muted">
             <view class="field-line field-line--dashed" :class="{ 'is-focused': focusState.invite, 'has-value': form.inviteCode }">
               <span class="field-line__fl field-line__fl--muted">邀请码 <text class="field-line__opt">(选填)</text></span>
@@ -156,7 +157,6 @@ const sending = ref(false)
 const showPwd = ref(false)
 const agreed = ref(false)
 const countdown = ref(0)
-const _phoneMasked = ref(false)
 let countdownTimer: ReturnType<typeof setInterval> | null = null
 
 const focusState = reactive({
@@ -180,17 +180,23 @@ const canSubmit = computed(() =>
 )
 
 function onFocus(field: 'phone' | 'code' | 'pwd' | 'invite') { focusState[field] = true }
-
 function onBlur(field: 'phone' | 'code' | 'pwd' | 'invite') { focusState[field] = false }
 
 function onBlurPhone() {
   focusState.phone = false
-  if (form.value.phone.length === 11) {
-    _phoneMasked.value = true
-  }
 }
 
-function goLogin() { uni.redirectTo({ url: '/pages/auth/login' }) }
+function togglePwd() {
+  const el = document.getElementById('reg-pwd') as HTMLInputElement | null
+  if (!el) { showPwd.value = !showPwd.value; return }
+  const pos = el.selectionStart ?? form.value.password.length
+  showPwd.value = !showPwd.value
+  setTimeout(() => { el.setSelectionRange(pos, pos) }, 0)
+}
+
+function goLogin() {
+  uni.redirectTo({ url: '/pages/auth/login', animationType: 'slide-in-left', animationDuration: 300 })
+}
 
 async function sendCode() {
   if (countdown.value > 0 || sending.value) return
@@ -304,7 +310,7 @@ async function doRegister() {
   }
   &__slogan {
     font-size: 18rpx;
-    color: $bronze-gold;
+    color: #D4B483;
     font-weight: 400;
     letter-spacing: 0.5rpx;
     line-height: 1;
@@ -329,8 +335,8 @@ async function doRegister() {
     height: 1.5rpx;
     background: repeating-linear-gradient(
       90deg,
-      rgba(184, 152, 118, 0.5) 0rpx,
-      rgba(184, 152, 118, 0.5) 6rpx,
+      rgba(212, 180, 131, 0.5) 0rpx,
+      rgba(212, 180, 131, 0.5) 6rpx,
       transparent 6rpx,
       transparent 12rpx
     );
@@ -341,7 +347,7 @@ async function doRegister() {
 
   &__text {
     font-size: 26rpx;
-    color: $bronze-gold;
+    color: #D4B483;
     font-weight: 500;
     letter-spacing: 1rpx;
     line-height: 1;
@@ -374,12 +380,12 @@ async function doRegister() {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1rpx solid rgba(212, 180, 131, 0.12);
+  border: 1rpx solid rgba(212, 180, 131, 0.15);
   border-radius: 40rpx;
   box-shadow:
-    0 4rpx 20rpx rgba(47, 53, 66, 0.05),
-    0 24rpx 80rpx rgba(47, 53, 66, 0.08),
-    0 64rpx 160rpx rgba(47, 53, 66, 0.06);
+    0 8rpx 32rpx rgba(47, 53, 66, 0.06),
+    0 32rpx 120rpx rgba(47, 53, 66, 0.08),
+    0 80rpx 200rpx rgba(47, 53, 66, 0.05);
   padding: 48rpx 44rpx 48rpx;
 
   &__head { margin-bottom: 44rpx; }
@@ -395,7 +401,7 @@ async function doRegister() {
     font-size: 52rpx;
     font-weight: 600;
     color: $mineral-gray;
-    letter-spacing: 2rpx;
+    letter-spacing: 3rpx;
     line-height: 1.1;
   }
 
@@ -409,9 +415,12 @@ async function doRegister() {
 }
 
 .field-group {
-  margin-bottom: 40rpx;
+  margin-bottom: 44rpx;
 
-  &--muted { opacity: 0.7; }
+  &--muted {
+    opacity: 0.6;
+    .field-line__fl { color: rgba(138, 138, 138, 0.75) !important; }
+  }
 
   &__label-row {
     height: 32rpx;
@@ -441,6 +450,7 @@ async function doRegister() {
 
   &--with-code { padding-right: 156rpx; }
   &--with-eye { padding-right: 72rpx; }
+
   &--dashed {
     border-bottom-style: dashed;
     border-bottom-color: rgba(142, 116, 89, 0.22);
@@ -468,14 +478,7 @@ async function doRegister() {
     transform: translateY(-40rpx) scale(0.85);
   }
 
-  &__fl--muted {
-    color: rgba(92, 92, 92, 0.75);
-  }
-
-  &.has-value &__fl--muted,
-  &.is-focused &__fl--muted {
-    color: rgba(142, 116, 89, 0.75);
-  }
+  &__fl--muted { color: rgba(138, 138, 138, 0.75) !important; }
 
   &__opt {
     font-size: 18rpx;
@@ -492,13 +495,15 @@ async function doRegister() {
     font-size: 32rpx;
     font-weight: 500;
     color: #333333;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5rpx;
     padding: 0;
     box-sizing: border-box;
     padding-bottom: 8rpx;
 
     &::placeholder {
       font-size: 26rpx;
-      color: #BBBBBB;
+      color: #AAAAAA;
       font-weight: 400;
     }
   }
@@ -595,7 +600,7 @@ async function doRegister() {
 }
 
 .terms-link {
-  color: $bronze-gold;
+  color: #D4B483;
   font-weight: 500;
 }
 
@@ -633,7 +638,7 @@ async function doRegister() {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+      background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 50%);
       pointer-events: none;
     }
   }
@@ -644,9 +649,9 @@ async function doRegister() {
     background: linear-gradient(
       105deg,
       transparent 20%,
-      rgba(255, 255, 255, 0.50) 40%,
-      rgba(255, 255, 255, 0.70) 50%,
-      rgba(255, 255, 255, 0.50) 60%,
+      rgba(255, 255, 255, 0.55) 40%,
+      rgba(255, 255, 255, 0.75) 50%,
+      rgba(255, 255, 255, 0.55) 60%,
       transparent 80%
     );
     background-size: 200% 100%;
@@ -661,9 +666,9 @@ async function doRegister() {
     background: repeating-linear-gradient(
       -60deg,
       transparent 0%,
-      rgba(212, 196, 174, 0.35) 15%,
-      rgba(255, 255, 255, 0.55) 30%,
-      rgba(212, 196, 174, 0.35) 45%,
+      rgba(212, 196, 174, 0.40) 15%,
+      rgba(255, 255, 255, 0.60) 30%,
+      rgba(212, 196, 174, 0.40) 45%,
       transparent 60%
     );
     background-size: 200% 100%;

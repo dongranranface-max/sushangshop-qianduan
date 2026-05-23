@@ -513,7 +513,7 @@ $btn-flow-duration: 1.4s;
 $btn-flow-timing: ease-in-out;
 
 // ──── 品牌线性渐变按钮（浮起感）────
-$btn-gold-gradient: linear-gradient(135deg, #D4B483 0%, #B5935E 100%);
+$btn-gold-gradient: linear-gradient(135deg, #E8D5A3 0%, #D4B483 25%, #B5935E 65%, #8B6845 100%);
 $btn-gold-shadow: 0 8rpx 20rpx rgba(212, 180, 131, 0.3);
 $btn-gold-shadow-hover: 0 16rpx 44rpx rgba(212, 180, 131, 0.38);
 
@@ -712,6 +712,5 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
   height: 48rpx;
   aspect-ratio: 1 / 1;
   object-fit: contain;
-  border-radius: 50%;
   will-change: transform;
 }

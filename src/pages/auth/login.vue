@@ -28,6 +28,9 @@
 
         <!-- 手机号 -->
         <view class="field-group">
+          <view class="field-group__label-row">
+            <text class="field-group__label">手机号</text>
+          </view>
           <view class="field-line" :class="{ 'is-focused': focusState.phone }">
             <input
               class="field-line__input"
@@ -49,14 +52,16 @@
           </view>
           <view class="field-line field-line--with-action" :class="{ 'is-focused': focusState.pwd }">
             <input
+              id="pwd-input"
               class="field-line__input"
               v-model="form.password"
               :type="showPwd ? 'text' : 'password'"
               placeholder="请输入登录密码"
               @focus="onFocus('pwd')"
               @blur="onBlur('pwd')"
+              @input="onPwdInput"
             />
-            <view class="field-line__eye-wrap" @click="showPwd = !showPwd">
+            <view class="field-line__eye-wrap" @click="togglePwd">
               <svg v-if="showPwd" class="field-line__eye" viewBox="0 0 24 24" fill="none">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
@@ -157,8 +162,31 @@ if (token) {
 function onFocus(field: 'phone' | 'pwd') { focusState[field] = true }
 function onBlur(field: 'phone' | 'pwd') { focusState[field] = false }
 
-function goRegister() { uni.navigateTo({ url: '/pages/auth/register' }) }
-function goForgot() { uni.navigateTo({ url: '/pages/auth/forgot-password' }) }
+function onPwdInput(e: any) {
+  const el = e.detail?.element || document.getElementById('pwd-input')
+  if (el && showPwd.value) {
+    const pos = el.selectionStart ?? form.value.password.length
+    form.value.password = form.value.password
+    nextTick(() => {
+      el.setSelectionRange(pos, pos)
+    })
+  }
+}
+
+function togglePwd() {
+  const el = document.getElementById('pwd-input') as HTMLInputElement | null
+  if (!el) { showPwd.value = !showPwd.value; return }
+  const pos = el.selectionStart ?? form.value.password.length
+  showPwd.value = !showPwd.value
+  nextTick(() => { el.setSelectionRange(pos, pos) })
+}
+
+function goRegister() {
+  uni.navigateTo({ url: '/pages/auth/register', animationType: 'slide-in-right', animationDuration: 300 })
+}
+function goForgot() {
+  uni.navigateTo({ url: '/pages/auth/forgot-password', animationType: 'slide-in-right', animationDuration: 300 })
+}
 
 function thirdPartyLogin(_type: 'wechat' | 'alipay' | 'apple') {
   uni.showToast({ title: '暂未开放', icon: 'none' })
@@ -189,6 +217,10 @@ async function doLogin() {
     uni.hideLoading()
   }
 }
+</script>
+
+<script lang="ts">
+function nextTick(fn: () => void) { setTimeout(fn, 0) }
 </script>
 
 <style lang="scss" scoped>
@@ -232,8 +264,8 @@ async function doLogin() {
     height: 1.5rpx;
     background: repeating-linear-gradient(
       90deg,
-      rgba(184, 152, 118, 0.5) 0rpx,
-      rgba(184, 152, 118, 0.5) 6rpx,
+      rgba(212, 180, 131, 0.5) 0rpx,
+      rgba(212, 180, 131, 0.5) 6rpx,
       transparent 6rpx,
       transparent 12rpx
     );
@@ -244,7 +276,7 @@ async function doLogin() {
 
   &__text {
     font-size: 26rpx;
-    color: $bronze-gold;
+    color: #D4B483;
     font-weight: 500;
     letter-spacing: 1rpx;
     line-height: 1;
@@ -255,7 +287,7 @@ async function doLogin() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 60rpx 0 16rpx;
+  padding: calc(20rpx + env(safe-area-inset-top)) 0 16rpx;
   flex-shrink: 0;
   z-index: 1;
 
@@ -267,11 +299,15 @@ async function doLogin() {
     align-items: center;
     justify-content: center;
     background: $bg-secondary;
-    box-shadow: 0 8rpx 40rpx rgba(184, 152, 118, 0.18), 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+    box-shadow:
+      0 8rpx 40rpx rgba(184, 152, 118, 0.18),
+      0 2rpx 8rpx rgba(0, 0, 0, 0.04);
     transition: box-shadow 0.3s ease;
 
     &:active {
-      box-shadow: 0 12rpx 52rpx rgba(184, 152, 118, 0.28), 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
+      box-shadow:
+        0 12rpx 52rpx rgba(184, 152, 118, 0.28),
+        0 4rpx 12rpx rgba(0, 0, 0, 0.06);
     }
   }
 
@@ -302,12 +338,12 @@ async function doLogin() {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1rpx solid rgba(212, 180, 131, 0.12);
+  border: 1rpx solid rgba(212, 180, 131, 0.15);
   border-radius: 40rpx;
   box-shadow:
-    0 4rpx 20rpx rgba(47, 53, 66, 0.05),
-    0 24rpx 80rpx rgba(47, 53, 66, 0.08),
-    0 64rpx 160rpx rgba(47, 53, 66, 0.06);
+    0 8rpx 32rpx rgba(47, 53, 66, 0.06),
+    0 32rpx 120rpx rgba(47, 53, 66, 0.08),
+    0 80rpx 200rpx rgba(47, 53, 66, 0.05);
   padding: 48rpx 44rpx 44rpx;
   box-sizing: border-box;
 
@@ -324,7 +360,7 @@ async function doLogin() {
     font-size: 52rpx;
     font-weight: 600;
     color: $mineral-gray;
-    letter-spacing: 2rpx;
+    letter-spacing: 3rpx;
     line-height: 1.1;
   }
 
@@ -338,7 +374,7 @@ async function doLogin() {
 }
 
 .field-group {
-  margin-bottom: 40rpx;
+  margin-bottom: 44rpx;
 
   &__label-row {
     height: 32rpx;
@@ -377,12 +413,14 @@ async function doLogin() {
     font-size: 32rpx;
     font-weight: 500;
     color: #333333;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5rpx;
     padding: 0;
     box-sizing: border-box;
 
     &::placeholder {
       font-size: 26rpx;
-      color: #BBBBBB;
+      color: #AAAAAA;
       font-weight: 400;
     }
   }
@@ -416,8 +454,8 @@ async function doLogin() {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    margin-top: 16rpx;
-    padding-right: 8rpx;
+    margin-top: 12rpx;
+    padding-right: 4rpx;
   }
 
   &__forget-text {
@@ -436,7 +474,7 @@ async function doLogin() {
   border-radius: 50rpx;
   overflow: hidden;
   position: relative;
-  margin-top: 8rpx;
+  margin-top: 12rpx;
 
   &:active { transform: scale(0.984); }
   &.is-loading { opacity: 0.72; }
@@ -458,7 +496,7 @@ async function doLogin() {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+      background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 50%);
       pointer-events: none;
     }
   }
@@ -469,9 +507,9 @@ async function doLogin() {
     background: linear-gradient(
       105deg,
       transparent 20%,
-      rgba(255, 255, 255, 0.50) 40%,
-      rgba(255, 255, 255, 0.70) 50%,
-      rgba(255, 255, 255, 0.50) 60%,
+      rgba(255, 255, 255, 0.55) 40%,
+      rgba(255, 255, 255, 0.75) 50%,
+      rgba(255, 255, 255, 0.55) 60%,
       transparent 80%
     );
     background-size: 200% 100%;
@@ -486,9 +524,9 @@ async function doLogin() {
     background: repeating-linear-gradient(
       -60deg,
       transparent 0%,
-      rgba(212, 196, 174, 0.35) 15%,
-      rgba(255, 255, 255, 0.55) 30%,
-      rgba(212, 196, 174, 0.35) 45%,
+      rgba(212, 196, 174, 0.40) 15%,
+      rgba(255, 255, 255, 0.60) 30%,
+      rgba(212, 196, 174, 0.40) 45%,
       transparent 60%
     );
     background-size: 200% 100%;
@@ -535,7 +573,7 @@ async function doLogin() {
 .divider {
   flex: 1;
   height: 1rpx;
-  background: rgba(47, 53, 66, 0.08);
+  background: rgba(47, 53, 66, 0.05);
   border-radius: 1rpx;
 
   &__text {
@@ -606,7 +644,7 @@ async function doLogin() {
   }
 
   &__link {
-    color: $bronze-gold;
+    color: #D4B483;
     font-weight: 500;
   }
 }

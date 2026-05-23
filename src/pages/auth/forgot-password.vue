@@ -136,15 +136,15 @@
             <view class="field-line field-line--with-eye" :class="{ 'is-focused': focusState.pwd, 'has-value': form.password }">
               <span class="field-line__fl">新密码</span>
               <input
+                id="fp-pwd"
                 class="field-line__input"
                 v-model="form.password"
                 :type="showPwd ? 'text' : 'password'"
                 placeholder=" "
                 @focus="onFocus('pwd')"
                 @blur="onBlur('pwd')"
-                @input="onPwdInput"
               />
-              <view class="field-line__eye-wrap" @click="showPwd = !showPwd">
+              <view class="field-line__eye-wrap" @click="togglePwd('pwd')">
                 <svg v-if="showPwd" class="field-line__eye" viewBox="0 0 24 24" fill="none">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
@@ -168,6 +168,7 @@
             <view class="field-line field-line--with-eye" :class="{ 'is-focused': focusState.confirm, 'has-value': form.confirm }">
               <span class="field-line__fl">确认新密码</span>
               <input
+                id="fp-confirm"
                 class="field-line__input"
                 v-model="form.confirm"
                 :type="showConfirm ? 'text' : 'password'"
@@ -175,7 +176,7 @@
                 @focus="onFocus('confirm')"
                 @blur="onBlur('confirm')"
               />
-              <view class="field-line__eye-wrap" @click="showConfirm = !showConfirm">
+              <view class="field-line__eye-wrap" @click="togglePwd('confirm')">
                 <svg v-if="showConfirm" class="field-line__eye" viewBox="0 0 24 24" fill="none">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
@@ -265,7 +266,9 @@ const canSubmit = computed(() =>
 function onFocus(field: 'phone' | 'code' | 'pwd' | 'confirm') { focusState[field] = true }
 function onBlur(field: 'phone' | 'code' | 'pwd' | 'confirm') { focusState[field] = false }
 
-function goLogin() { uni.redirectTo({ url: '/pages/auth/login' }) }
+function goLogin() {
+  uni.redirectTo({ url: '/pages/auth/login', animationType: 'slide-in-left', animationDuration: 300 })
+}
 
 async function sendCode() {
   if (countdown.value > 0 || sending.value) return
@@ -295,6 +298,16 @@ async function sendCode() {
 function goStep2() {
   if (!canGoStep2.value) return uni.showToast({ title: '请完成手机号与验证码', icon: 'none' })
   step.value = 2
+}
+
+function togglePwd(field: 'pwd' | 'confirm') {
+  const id = field === 'pwd' ? 'fp-pwd' : 'fp-confirm'
+  const el = document.getElementById(id) as HTMLInputElement | null
+  const target = field === 'pwd' ? showPwd : showConfirm
+  if (!el) { target.value = !target.value; return }
+  const pos = el.selectionStart ?? (field === 'pwd' ? form.value.password : form.value.confirm).length
+  target.value = !target.value
+  setTimeout(() => { el.setSelectionRange(pos, pos) }, 0)
 }
 
 function onPwdInput() {
@@ -366,7 +379,7 @@ async function doReset() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: calc(14rpx + env(safe-area-inset-top)) 32rpx 14rpx;
+  padding: calc(20rpx + env(safe-area-inset-top)) 32rpx 14rpx;
   background: $bg-primary;
   flex-shrink: 0;
   position: relative;
@@ -382,7 +395,9 @@ async function doReset() {
     align-items: center;
     justify-content: center;
     background: $bg-secondary;
-    box-shadow: 0 4rpx 20rpx rgba(184, 152, 118, 0.18), 0 1rpx 4rpx rgba(0, 0, 0, 0.04);
+    box-shadow:
+      0 4rpx 20rpx rgba(184, 152, 118, 0.18),
+      0 1rpx 4rpx rgba(0, 0, 0, 0.04);
     flex-shrink: 0;
 
     &-img { width: 40rpx; height: 40rpx; object-fit: contain; display: block; }
@@ -398,7 +413,7 @@ async function doReset() {
   }
   &__slogan {
     font-size: 18rpx;
-    color: $bronze-gold;
+    color: #D4B483;
     font-weight: 400;
     letter-spacing: 0.5rpx;
     line-height: 1;
@@ -423,8 +438,8 @@ async function doReset() {
     height: 1.5rpx;
     background: repeating-linear-gradient(
       90deg,
-      rgba(184, 152, 118, 0.5) 0rpx,
-      rgba(184, 152, 118, 0.5) 6rpx,
+      rgba(212, 180, 131, 0.5) 0rpx,
+      rgba(212, 180, 131, 0.5) 6rpx,
       transparent 6rpx,
       transparent 12rpx
     );
@@ -435,7 +450,7 @@ async function doReset() {
 
   &__text {
     font-size: 26rpx;
-    color: $bronze-gold;
+    color: #D4B483;
     font-weight: 500;
     letter-spacing: 1rpx;
     line-height: 1;
@@ -462,12 +477,12 @@ async function doReset() {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1rpx solid rgba(212, 180, 131, 0.12);
+  border: 1rpx solid rgba(212, 180, 131, 0.15);
   border-radius: 40rpx;
   box-shadow:
-    0 4rpx 20rpx rgba(47, 53, 66, 0.05),
-    0 24rpx 80rpx rgba(47, 53, 66, 0.08),
-    0 64rpx 160rpx rgba(47, 53, 66, 0.06);
+    0 8rpx 32rpx rgba(47, 53, 66, 0.06),
+    0 32rpx 120rpx rgba(47, 53, 66, 0.08),
+    0 80rpx 200rpx rgba(47, 53, 66, 0.05);
   padding: 48rpx 44rpx;
 
   &__head { margin-bottom: 44rpx; }
@@ -483,7 +498,7 @@ async function doReset() {
     font-size: 52rpx;
     font-weight: 600;
     color: $mineral-gray;
-    letter-spacing: 2rpx;
+    letter-spacing: 3rpx;
     line-height: 1.1;
   }
 
@@ -582,7 +597,7 @@ async function doReset() {
 }
 
 .field-group {
-  margin-bottom: 40rpx;
+  margin-bottom: 44rpx;
 
   &__label-row {
     height: 32rpx;
@@ -644,13 +659,15 @@ async function doReset() {
     font-size: 32rpx;
     font-weight: 500;
     color: #333333;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5rpx;
     padding: 0;
     box-sizing: border-box;
     padding-bottom: 8rpx;
 
     &::placeholder {
       font-size: 26rpx;
-      color: #BBBBBB;
+      color: #AAAAAA;
       font-weight: 400;
     }
   }
@@ -775,7 +792,7 @@ async function doReset() {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+      background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 50%);
       pointer-events: none;
     }
   }
@@ -786,9 +803,9 @@ async function doReset() {
     background: linear-gradient(
       105deg,
       transparent 20%,
-      rgba(255, 255, 255, 0.50) 40%,
-      rgba(255, 255, 255, 0.70) 50%,
-      rgba(255, 255, 255, 0.50) 60%,
+      rgba(255, 255, 255, 0.55) 40%,
+      rgba(255, 255, 255, 0.75) 50%,
+      rgba(255, 255, 255, 0.55) 60%,
       transparent 80%
     );
     background-size: 200% 100%;
@@ -803,9 +820,9 @@ async function doReset() {
     background: repeating-linear-gradient(
       -60deg,
       transparent 0%,
-      rgba(212, 196, 174, 0.35) 15%,
-      rgba(255, 255, 255, 0.55) 30%,
-      rgba(212, 196, 174, 0.35) 45%,
+      rgba(212, 196, 174, 0.40) 15%,
+      rgba(255, 255, 255, 0.60) 30%,
+      rgba(212, 196, 174, 0.40) 45%,
       transparent 60%
     );
     background-size: 200% 100%;
@@ -825,7 +842,7 @@ async function doReset() {
     font-size: 28rpx;
     font-weight: 700;
     color: #FFFFFF;
-    letter-spacing: 4rpx;
+    letter-spacing: 6rpx;
     position: relative;
     z-index: 1;
   }
