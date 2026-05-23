@@ -343,7 +343,6 @@ async function doRegister() {
     flex-shrink: 0;
     background: transparent;
     box-shadow: none;
-    aspect-ratio: 1 / 1;
     filter: drop-shadow(0 0 10rpx rgba(184, 152, 118, 0.20));
 
     &-img {

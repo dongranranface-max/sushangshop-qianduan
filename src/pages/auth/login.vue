@@ -466,7 +466,7 @@ async function doLogin() {
   display: flex;
   align-items: center;
   border-bottom: 1.5rpx solid rgba(47, 53, 66, 0.12);
-  overflow: hidden;
+  overflow: visible;
 
   &.is-focused {
     border-bottom-color: $bronze-gold;
