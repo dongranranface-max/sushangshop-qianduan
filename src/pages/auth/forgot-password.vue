@@ -10,7 +10,7 @@
     <view class="auth-nav">
       <view class="auth-nav__brand">
         <view class="auth-nav__logo">
-          <image class="auth-nav__logo-img logo-image" src="/static/logo.png" mode="aspectFit" />
+          <image class="auth-nav__logo-img" src="/static/logo.png" mode="aspectFit" />
         </view>
         <view class="auth-nav__text">
           <text class="auth-nav__name">集享公社</text>
@@ -400,7 +400,7 @@ async function doReset() {
       0 1rpx 4rpx rgba(0, 0, 0, 0.04);
     flex-shrink: 0;
 
-    &-img { width: 40rpx; height: 40rpx; object-fit: contain; display: block; }
+    &-img { width: 40rpx; height: 40rpx; aspect-ratio: 1 / 1; object-fit: contain; display: block; }
   }
 
   &__text { display: flex; flex-direction: column; gap: 5rpx; }
