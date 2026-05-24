@@ -244,7 +244,7 @@ function goMyInvest() {
   &__bg {
     position: absolute;
     inset: 0;
-    background: linear-gradient(145deg, #1E2433 0%, #2A3142 50%, #1E2433 100%);
+    background: linear-gradient(145deg, #F5F2ED 0%, #EDE9E1 50%, #F0EDE8 100%);
     z-index: 0;
   }
 
@@ -386,14 +386,15 @@ function goMyInvest() {
 
   &--compute,
   &--quant {
-    .service-card__name { color: $bronze-light; }
-    .service-card__desc { color: rgba(255, 255, 255, 0.5); }
+    background: rgba(255, 255, 255, 0.92);
+    .service-card__name { color: $accent-dark; }
+    .service-card__desc { color: $text-muted; }
     .service-card__tag {
-      background: rgba(184, 152, 118, 0.15);
-      color: $bronze-gold;
-      border-color: rgba(184, 152, 118, 0.25);
+      background: rgba(184, 152, 118, 0.08);
+      color: $accent-dark;
+      border-color: rgba(184, 152, 118, 0.20);
     }
-    .service-card__arrow { color: rgba(255, 255, 255, 0.3); }
+    .service-card__arrow { color: $text-muted; }
   }
 
   &--crossborder {
@@ -443,6 +444,12 @@ function goMyInvest() {
     .service-card__icon {
       font-size: 40rpx;
     }
+  }
+
+  &--compute &__icon-wrap,
+  &--quant &__icon-wrap {
+    background: rgba(184, 152, 118, 0.08);
+    border-color: rgba(184, 152, 118, 0.15);
   }
 
   &--crossborder &__icon-wrap {

@@ -274,14 +274,13 @@ function logout() {
   border-radius: $radius-2xl;
   overflow: hidden;
   position: relative;
-  box-shadow: $shadow-gold;
+  box-shadow: $clay-shadow;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1rpx solid rgba(255, 255, 255, 0.8);
 }
 
 .user-header__bg {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(145deg, #1E2433 0%, #2A3142 50%, #1E2433 100%);
-  z-index: 0;
+  display: none;
 }
 
 .user-header__inner {
@@ -301,7 +300,7 @@ function logout() {
     width: 100rpx;
     height: 100rpx;
     border-radius: 50%;
-    border: 3rpx solid rgba(184, 152, 118, 0.6);
+    border: 3rpx solid rgba(184, 152, 118, 0.4);
     background: $bg-tertiary;
   }
 
@@ -309,7 +308,7 @@ function logout() {
     position: absolute;
     inset: -5rpx;
     border-radius: 50%;
-    border: 2rpx solid rgba(184, 152, 118, 0.3);
+    border: 2rpx solid rgba(184, 152, 118, 0.25);
   }
 }
 
@@ -327,7 +326,7 @@ function logout() {
   .user-name {
     font-size: 34rpx;
     font-weight: 700;
-    color: #fff;
+    color: $text-primary;
     max-width: 200rpx;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -337,19 +336,19 @@ function logout() {
   .member-badge {
     padding: 2rpx 12rpx;
     border-radius: 20rpx;
-    background: rgba(255, 255, 255, 0.15);
-    border: 1rpx solid rgba(184, 152, 118, 0.4);
+    background: rgba(184, 152, 118, 0.12);
+    border: 1rpx solid rgba(184, 152, 118, 0.25);
 
     text {
       font-size: 20rpx;
       font-weight: 700;
-      color: $bronze-light;
+      color: $accent-dark;
     }
   }
 
   .user-id {
     font-size: 22rpx;
-    color: rgba(255, 255, 255, 0.5);
+    color: $text-muted;
     display: block;
   }
 }
@@ -360,8 +359,8 @@ function logout() {
   align-items: center;
   gap: 4rpx;
   padding: 10rpx 20rpx;
-  background: rgba(184, 152, 118, 0.20);
-  border: 1rpx solid rgba(184, 152, 118, 0.30);
+  background: rgba(184, 152, 118, 0.10);
+  border: 1rpx solid rgba(184, 152, 118, 0.20);
   border-radius: 20rpx;
   flex-shrink: 0;
 
@@ -386,17 +385,17 @@ function logout() {
       font-family: $asset-balance-font;
       font-size: 32rpx;
       font-weight: 700;
-      color: #fff;
+      color: $text-primary;
       font-variant-numeric: tabular-nums;
 
-      &.accent { color: $bronze-light; }
-      &.gold { color: $bronze-gold; }
+      &.accent { color: $accent-dark; }
+      &.gold { color: $bronze-dark; }
     }
 
     .asset-label {
       display: block;
       font-size: 20rpx;
-      color: rgba(255, 255, 255, 0.45);
+      color: $text-muted;
       margin-top: 4rpx;
     }
   }
@@ -404,7 +403,7 @@ function logout() {
   .asset-divider {
     width: 1rpx;
     height: 40rpx;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(47, 53, 66, 0.08);
   }
 }
 

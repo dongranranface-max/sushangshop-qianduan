@@ -201,7 +201,7 @@ const mallPortals = [
     name: '兑换商城',
     desc: '积分全额兑换 零元好物',
     icon: '兑',
-    gradient: 'linear-gradient(135deg, #2F3542 0%, #1E2433 100%)',
+    gradient: 'linear-gradient(135deg, #F0EDE8 0%, #E8E4DC 100%)',
     type: 3,
   },
 ]
