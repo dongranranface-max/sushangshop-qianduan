@@ -475,22 +475,22 @@ function logout() {
 }
 
 .energy-orb {
-  width: 52rpx;
-  height: 52rpx;
+  width: 40rpx;
+  height: 40rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(47, 53, 66, 0.08);
-  border: 2rpx solid rgba(47, 53, 66, 0.12);
+  border: 1.5rpx solid rgba(47, 53, 66, 0.12);
   transition: all 0.3s ease;
 
-  text { font-size: 18rpx; font-weight: 700; color: $text-muted; }
+  text { font-size: 16rpx; font-weight: 700; color: $text-muted; }
 
   &.active {
-    background: $bronze-gradient;
-    border-color: $bronze-gold;
-    box-shadow: 0 0 12rpx rgba(184, 152, 118, 0.4);
+    background: $accent-gradient;
+    border-color: $accent;
+    box-shadow: 0 0 10rpx rgba(184, 152, 118, 0.35);
     text { color: #fff; }
   }
 }

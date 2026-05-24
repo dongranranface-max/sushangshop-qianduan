@@ -264,18 +264,16 @@ $code-btn-text-counting:  $text-muted;
 
 @mixin section-head {
   @include type-page-title;
-  padding-left: 20rpx;
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
   &::before {
     content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
     width: 6rpx;
     height: 32rpx;
     border-radius: 4rpx;
     background: $accent-gradient;
+    flex-shrink: 0;
   }
 }
 
