@@ -4,527 +4,478 @@
     <view class="search-header">
       <view class="search-bar">
         <text class="search-icon">搜</text>
-        <input 
-          class="search-input" 
+        <input
+          class="search-input"
           v-model="keyword"
           placeholder="搜索商品"
           placeholder-class="search-placeholder"
           confirm-type="search"
           @confirm="doSearch"
+          @input="onInput"
           focus
         />
-        <text v-if="keyword" class="clear-icon" @click="keyword = ''">×</text>
+        <text v-if="keyword" class="clear-icon" @click="clearKeyword">×</text>
       </view>
       <text class="cancel-btn" @click="goBack">取消</text>
     </view>
-    
-    <!-- 搜索历史 -->
-    <view class="history-section" v-if="!keyword && historyList.length > 0">
+
+    <!-- 搜索历史（无关键词时） -->
+    <view v-if="!keyword && historyList.length > 0" class="history-section">
       <view class="section-header">
         <text class="section-title">搜索历史</text>
         <text class="clear-history" @click="clearHistory">清空</text>
       </view>
       <view class="history-tags">
-        <text 
-          class="history-tag" 
-          v-for="(tag, index) in historyList" 
+        <text
+          v-for="(tag, index) in historyList"
           :key="index"
+          class="history-tag"
           @click="searchWithKeyword(tag)"
         >
           {{ tag }}
         </text>
       </view>
     </view>
-    
+
     <!-- 热门搜索 -->
-    <view class="hot-section" v-if="!keyword">
+    <view v-if="!keyword" class="hot-section">
       <view class="section-header">
         <text class="section-title">热门搜索</text>
       </view>
       <view class="hot-list">
-        <view 
-          class="hot-item" 
-          v-for="(item, index) in hotList" 
+        <view
+          v-for="(item, index) in hotList"
           :key="index"
+          class="hot-item"
           @click="searchWithKeyword(item.keyword)"
         >
           <view class="hot-rank" :class="'rank-' + (index + 1)">{{ index + 1 }}</view>
           <view class="hot-info">
             <text class="hot-keyword">{{ item.keyword }}</text>
-            <text class="hot-desc">{{ item.desc }}</text>
+            <text v-if="item.desc" class="hot-desc">{{ item.desc }}</text>
           </view>
-          <view class="hot-tag" v-if="item.isNew">新</view>
-        </view>
-      </view>
-    </view>
-    
-    <!-- 搜索结果 -->
-    <view class="result-section" v-if="keyword && searchResult.length > 0">
-      <view class="result-header">
-        <text class="result-count">找到 {{ searchResult.length }} 个商品</text>
-      </view>
-      <view class="result-list">
-        <view 
-          class="result-item" 
-          v-for="product in searchResult" 
-          :key="product.id"
-          @click="goProduct(product.id)"
-        >
-          <image class="result-image" :src="product.coverImage" mode="aspectFill" />
-          <view class="result-info">
-            <text class="result-name">{{ product.name }}</text>
-            <view class="result-bottom">
-              <text class="result-price">¥{{ product.price }}</text>
-              <text class="result-points" v-if="product.requiredPoints">+{{ product.requiredPoints }}积分</text>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
-    
-    <!-- 搜索骨架 -->
-    <view class="sk-result" v-if="keyword && searching">
-      <view class="sk-item" v-for="i in 4" :key="i">
-        <view class="sk-img shimmer"></view>
-        <view class="sk-info">
-          <view class="sk-line sk-long shimmer"></view>
-          <view class="sk-line sk-short shimmer"></view>
+          <view v-if="item.isNew" class="hot-tag">新</view>
         </view>
       </view>
     </view>
 
-    <!-- 无结果 -->
-    <view class="empty-section" v-else-if="keyword && searchResult.length === 0 && searching">
-      <view class="empty-icon"><text>搜</text></view>
-      <text class="empty-text">没有找到相关商品</text>
-      <text class="empty-hint">试试其他关键词</text>
-    </view>
-    
-    <!-- 搜索建议 -->
-    <view class="suggest-section" v-if="keyword && !searching">
-      <view 
-        class="suggest-item" 
-        v-for="(suggest, index) in suggestList" 
-        :key="index"
-        @click="searchWithKeyword(suggest)"
-      >
-        <text class="suggest-icon">搜</text>
-        <text class="suggest-text">{{ suggest }}</text>
+    <!-- 搜索结果（有关键词时） -->
+    <view v-if="keyword" class="result-section">
+      <!-- 骨架屏 -->
+      <view v-if="loading && !searchResult.length" class="result-grid">
+        <view v-for="i in 6" :key="i" class="sk-card">
+          <view class="sk-img shimmer" />
+          <view class="sk-info">
+            <view class="sk-line shimmer" />
+            <view class="sk-line sk-short shimmer" />
+          </view>
+        </view>
+      </view>
+
+      <!-- 空结果 -->
+      <view v-else-if="!loading && !searchResult.length" class="empty-state">
+        <view class="empty-state__icon">未</view>
+        <text class="empty-state__text">未找到"{{ keyword }}"相关商品</text>
+        <text class="empty-state__sub">换个关键词试试吧</text>
+      </view>
+
+      <!-- 结果列表 -->
+      <view v-else class="result-grid">
+        <HomeProductCard
+          v-for="product in searchResult"
+          :key="product.id"
+          :product="product"
+          :type="currentType"
+          @click="goProduct(product)"
+        />
+      </view>
+
+      <!-- 结果计数 -->
+      <view v-if="!loading && searchResult.length > 0" class="result-count">
+        <text>找到 {{ searchResult.length }} 个商品</text>
       </view>
     </view>
+
+    <view class="safe-area-bottom" />
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 import { productApi } from '@/utils/api'
+import { HOME_CATEGORY_FALLBACK } from '@/utils/category'
+import HomeProductCard from '@/components/HomeProductCard.vue'
 
 const keyword = ref('')
-const searching = ref(false)
+const searchResult = ref<any[]>([])
+const loading = ref(false)
+const currentType = ref(1)
 const historyList = ref<string[]>([])
-const searchingTimer = ref<ReturnType<typeof setTimeout> | null>(null)
-
-const hotList = ref([
-  { keyword: 'iPhone 15', desc: '热搜第一', isNew: false },
-  { keyword: '华为 Mate 60', desc: '国产旗舰', isNew: true },
-  { keyword: '戴森吹风机', desc: '热门推荐', isNew: false },
-  { keyword: 'AirPods Pro', desc: '苹果耳机', isNew: false },
-  { keyword: '小米手环', desc: '智能穿戴', isNew: false },
-  { keyword: 'Switch游戏机', desc: '掌机热卖', isNew: true },
+const hotList = ref<any[]>([
+  { keyword: '手机', desc: '热门' },
+  { keyword: '电脑', desc: '办公' },
+  { keyword: '耳机', desc: '影音' },
+  { keyword: '积分', desc: '换购' },
 ])
 
-const searchResult = ref<any[]>([])
-const suggestList = ref<string[]>([])
-
 onMounted(() => {
-  const history = uni.getStorageSync('searchHistory')
-  if (history) {
-    try { historyList.value = JSON.parse(history) } catch {}
-  }
+  loadHistory()
 })
 
-function goBack() {
-  uni.navigateBack()
-}
+onShow(() => {
+  currentType.value = Number(uni.getStorageSync('search_type') || 1)
+})
 
-async function doSearch() {
-  if (!keyword.value) return
-  searching.value = true
-  suggestList.value = []
-
+function loadHistory() {
   try {
-    const res = await productApi.getList({ keyword: keyword.value, limit: 50 })
-    searchResult.value = res.list || []
-
-    // 添加到历史
-    if (keyword.value && !historyList.value.includes(keyword.value)) {
-      historyList.value.unshift(keyword.value)
-      uni.setStorageSync('searchHistory', JSON.stringify(historyList.value))
+    const raw = uni.getStorageSync('search_history')
+    if (raw) {
+      historyList.value = JSON.parse(raw)
     }
-  } catch {
-    searchResult.value = []
-  } finally {
-    searching.value = false
-  }
+  } catch {}
 }
 
-function searchWithKeyword(kw: string) {
-  keyword.value = kw
-  doSearch()
+function saveHistory(kw: string) {
+  if (!kw.trim()) return
+  const list = historyList.value.filter((h) => h !== kw)
+  list.unshift(kw)
+  historyList.value = list.slice(0, 20)
+  try {
+    uni.setStorageSync('search_history', JSON.stringify(historyList.value))
+  } catch {}
 }
 
 function clearHistory() {
   historyList.value = []
-  uni.removeStorageSync('searchHistory')
+  try {
+    uni.removeStorageSync('search_history')
+  } catch {}
 }
 
-function goProduct(id: string | number) {
-  uni.navigateTo({ url: `/pages/product/detail?id=${id}` })
+function clearKeyword() {
+  keyword.value = ''
+  searchResult.value = []
 }
 
-// 搜索建议（实时从商品列表拉取）
-watch(keyword, (newVal) => {
-  if (searchingTimer.value) {
-    clearTimeout(searchingTimer.value)
+function onInput() {
+  if (!keyword.value.trim()) {
+    searchResult.value = []
   }
+}
 
-  if (!newVal) {
-    suggestList.value = []
-    return
+function doSearch() {
+  const kw = keyword.value.trim()
+  if (!kw) return
+  saveHistory(kw)
+  performSearch(kw)
+}
+
+function searchWithKeyword(kw: string) {
+  keyword.value = kw
+  saveHistory(kw)
+  performSearch(kw)
+}
+
+async function performSearch(kw: string) {
+  if (!kw) return
+  loading.value = true
+  try {
+    const res = await productApi.getList({
+      type: currentType.value,
+      keyword: kw,
+      page: 1,
+      limit: 40,
+    })
+    searchResult.value = res.list || []
+  } catch {
+    searchResult.value = []
+  } finally {
+    loading.value = false
   }
+}
 
-  searchingTimer.value = setTimeout(async () => {
-    try {
-      const res = await productApi.getList({ keyword: newVal, limit: 10 })
-      suggestList.value = (res.list || []).map((p: any) => p.name)
-    } catch {
-      suggestList.value = []
-    }
-  }, 300)
-})
+function goBack() {
+  if (keyword.value) {
+    clearKeyword()
+  } else {
+    uni.navigateBack()
+  }
+}
+
+function goProduct(p: any) {
+  uni.navigateTo({
+    url: `/pages/product/detail?id=${p.id}&type=${currentType.value}`,
+  })
+}
 </script>
 
 <style lang="scss" scoped>
 @import '@/styles/theme.scss';
-@import '@/styles/page-shell.scss';
 
 .page-container {
   min-height: 100vh;
-  background: var(--bg-primary);
-  padding: 0 var(--spacing-lg);
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, #F9F9F9 0%, #F0EDE8 100%);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
+// ========== 搜索栏 ==========
 .search-header {
   display: flex;
   align-items: center;
-  gap: var(--spacing-base);
-  padding: var(--spacing-base) 0;
-  
-  .search-bar {
-    flex: 1;
-    @include search-bar-shell;
-    margin-bottom: 0;
-    
-    .search-icon {
-      font-size: 26rpx;
-      font-weight: var(--weight-heavy);
-      color: $navy;
-      margin-right: 8rpx;
-    }
-    
-    .search-input {
-      flex: 1;
-      font-size: 28rpx;
-      color: $text-primary;
-      margin: 0 var(--spacing-sm);
-    }
-    
-    .clear-icon {
-      font-size: 36rpx;
-      color: var(--text-muted);
-    }
+  gap: 16rpx;
+  padding: 12rpx $spacing-base;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1rpx solid $border-light;
+}
+
+.search-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  height: 72rpx;
+  padding: 0 24rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1rpx solid rgba(20, 20, 20, 0.06);
+  border-radius: $radius-full;
+  box-shadow: $clay-shadow;
+
+  .search-icon {
+    font-size: 24rpx;
+    font-weight: 700;
+    color: $text-muted;
+    flex-shrink: 0;
   }
-  
-  .cancel-btn {
+
+  .search-input {
+    flex: 1;
     font-size: 28rpx;
-    color: var(--text-secondary);
+    color: $text-primary;
+    height: 100%;
+  }
+
+  .search-placeholder {
+    font-size: 26rpx;
+    color: $text-muted;
+  }
+
+  .clear-icon {
+    font-size: 32rpx;
+    color: $text-muted;
+    padding: 8rpx;
+    flex-shrink: 0;
   }
 }
 
-.history-section, .hot-section {
-  margin-top: var(--spacing-xl);
-  
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--spacing-base);
-    
-    .section-title {
-      font-size: 30rpx;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .clear-history {
-      font-size: 26rpx;
-      color: var(--primary);
-    }
-  }
+.cancel-btn {
+  font-size: 28rpx;
+  color: $text-secondary;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+// ========== 历史记录 ==========
+.history-section,
+.hot-section {
+  padding: $spacing-base $spacing-base 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-base;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.clear-history {
+  font-size: 24rpx;
+  color: $text-muted;
 }
 
 .history-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
-  
-  .history-tag {
-    padding: 12rpx 24rpx;
-    background: var(--bg-card);
-    border: 1rpx solid var(--border-color);
-    border-radius: 50rpx;
-    font-size: 26rpx;
-    color: var(--text-secondary);
+  gap: 12rpx;
+}
+
+.history-tag {
+  padding: 10rpx 24rpx;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1rpx solid rgba(20, 20, 20, 0.06);
+  border-radius: $radius-full;
+  font-size: 26rpx;
+  color: $text-secondary;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:active {
+    background: rgba(47, 53, 66, 0.04);
+    transform: scale(0.97);
   }
 }
 
+// ========== 热门搜索 ==========
 .hot-list {
-  .hot-item {
-    display: flex;
-    align-items: center;
-    padding: var(--spacing-base) 0;
-    border-bottom: 1rpx solid var(--border-light);
-    
-    .hot-rank {
-      width: 48rpx;
-      height: 48rpx;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28rpx;
-      font-weight: 700;
-      color: var(--text-secondary);
-      background: var(--bg-card);
-      border-radius: 8rpx;
-      
-      &.rank-1 { color: var(--gold); background: rgba(var(--gold), 0.2); }
-      &.rank-2 { color: #C0C0C0; background: rgba(192, 192, 192, 0.2); }
-      &.rank-3 { color: #CD7F32; background: rgba(205, 127, 50, 0.2); }
-    }
-    
-    .hot-info {
-      flex: 1;
-      margin-left: var(--spacing-base);
-      
-      .hot-keyword {
-        font-size: 28rpx;
-        color: var(--text-primary);
-        font-weight: 500;
-      }
-      
-      .hot-desc {
-        font-size: 22rpx;
-        color: var(--text-muted);
-        margin-left: var(--spacing-sm);
-      }
-    }
-    
-    .hot-tag {
-      padding: 4rpx 12rpx;
-      background: var(--danger);
-      color: #fff;
-      font-size: 20rpx;
-      border-radius: 6rpx;
-    }
-  }
-}
-
-.result-section {
-  margin-top: var(--spacing-lg);
-  
-  .result-header {
-    margin-bottom: var(--spacing-base);
-    
-    .result-count {
-      font-size: 26rpx;
-      color: var(--text-secondary);
-    }
-  }
-  
-  .result-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-base);
-    
-    .result-item {
-      display: flex;
-      @include premium-surface($bg-secondary);
-      border-radius: $radius-lg;
-      overflow: hidden;
-      padding: var(--spacing-base);
-      
-      .result-image {
-        width: 180rpx;
-        height: 180rpx;
-        border-radius: $radius-sm;
-      }
-      
-      .result-info {
-        flex: 1;
-        margin-left: var(--spacing-base);
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        
-        .result-name {
-          font-size: 28rpx;
-          color: var(--text-primary);
-          @include line-clamp(2);
-        }
-        
-        .result-bottom {
-          display: flex;
-          align-items: baseline;
-          gap: var(--spacing-sm);
-          
-          .result-price {
-            font-size: 32rpx;
-            font-weight: 700;
-            color: var(--primary);
-          }
-          
-          .result-points {
-            font-size: 22rpx;
-            color: var(--gold);
-          }
-        }
-      }
-    }
-  }
-}
-
-// 搜索骨架屏
-.sk-result {
-  margin-top: var(--spacing-lg);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-base);
+  gap: 2rpx;
+}
 
-  .sk-item {
+.hot-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-base;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid $border-light;
+  transition: all 0.2s ease;
+
+  &:last-child { border-bottom: none; }
+  &:active { opacity: 0.7; }
+
+  .hot-rank {
+    width: 44rpx;
+    height: 44rpx;
     display: flex;
-    @include premium-surface($bg-secondary);
-    border-radius: $radius-lg;
-    overflow: hidden;
-    padding: var(--spacing-base);
+    align-items: center;
+    justify-content: center;
+    font-size: 24rpx;
+    font-weight: 700;
+    border-radius: 50%;
+    background: $bg-tertiary;
+    color: $text-muted;
+    flex-shrink: 0;
 
-    .sk-img {
-      width: 180rpx;
-      height: 180rpx;
-      border-radius: $radius-sm;
-      background: $bg-tertiary;
-      flex-shrink: 0;
+    &.rank-1, &.rank-2, &.rank-3 {
+      background: $warm-yellow;
+      color: $accent-dark;
+      border: 1rpx solid $border-primary;
+    }
+  }
+
+  .hot-info {
+    flex: 1;
+
+    .hot-keyword {
+      display: block;
+      font-size: 28rpx;
+      font-weight: 600;
+      color: $text-primary;
+      margin-bottom: 4rpx;
     }
 
-    .sk-info {
-      flex: 1;
-      margin-left: var(--spacing-base);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 16rpx;
+    .hot-desc {
+      display: block;
+      font-size: 22rpx;
+      color: $text-muted;
     }
+  }
 
-    .sk-line {
-      height: 24rpx;
-      border-radius: 8rpx;
-      background: $bg-tertiary;
-      &.sk-long { width: 80%; }
-      &.sk-short { width: 45%; }
-    }
+  .hot-tag {
+    font-size: 20rpx;
+    padding: 4rpx 12rpx;
+    background: rgba(184, 152, 118, 0.10);
+    color: $accent-dark;
+    border-radius: 20rpx;
+    border: 1rpx solid rgba(184, 152, 118, 0.25);
+    font-weight: 600;
   }
 }
 
-.shimmer {
-  animation: shimmer 1.2s ease-in-out infinite;
+// ========== 搜索结果 ==========
+.result-section {
+  padding: $spacing-base;
 }
 
-@keyframes shimmer {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.8; }
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-base;
 }
 
-.empty-section {
+.sk-card {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: $radius-lg;
+  overflow: hidden;
+
+  .sk-img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: $bg-tertiary;
+  }
+
+  .sk-info {
+    padding: $spacing-base;
+    display: flex;
+    flex-direction: column;
+    gap: 10rpx;
+  }
+
+  .sk-line {
+    height: 22rpx;
+    border-radius: 8rpx;
+    background: $bg-tertiary;
+    width: 80%;
+
+    &.sk-short { width: 40%; }
+  }
+}
+
+.shimmer { animation: shim 1.4s ease-in-out infinite; }
+
+@keyframes shim {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.7; }
+}
+
+.result-count {
+  text-align: center;
+  padding: $spacing-base 0;
+  font-size: 24rpx;
+  color: $text-muted;
+}
+
+// ========== 空状态 ==========
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-2xl) 0;
+  padding: 160rpx 40rpx;
+  text-align: center;
 
-  .empty-icon {
-    position: relative;
-    width: 140rpx;
-    height: 140rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: var(--spacing-lg);
-
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 2rpx solid $border-primary;
-      background: $warm-yellow;
-    }
-
-    &::after {
-      content: '';
-      position: absolute;
-      inset: -12rpx;
-      border-radius: 50%;
-      border: 1rpx dashed rgba($accent-dark, 0.3);
-    }
-
-    text {
-      font-size: 48rpx;
-      font-weight: var(--weight-heavy);
-      color: $navy;
-      z-index: 1;
-    }
+  &__icon {
+    width: 120rpx;
+    height: 120rpx;
+    line-height: 120rpx;
+    text-align: center;
+    font-size: 48rpx;
+    font-weight: 800;
+    background: $warm-yellow;
+    border: 1rpx solid $border-primary;
+    border-radius: 50%;
+    color: $accent-dark;
+    margin-bottom: 24rpx;
   }
 
-  .empty-text {
-    font-size: 32rpx;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
+  &__text {
+    font-size: 30rpx;
+    font-weight: 600;
+    color: $text-primary;
+    margin-bottom: 12rpx;
   }
 
-  .empty-hint {
+  &__sub {
     font-size: 26rpx;
-    color: var(--text-secondary);
-  }
-}
-
-.suggest-section {
-  margin-top: var(--spacing-lg);
-  
-  .suggest-item {
-    display: flex;
-    align-items: center;
-    padding: var(--spacing-base) 0;
-    border-bottom: 1rpx solid var(--border-light);
-    
-    .suggest-icon {
-      font-size: 28rpx;
-      color: var(--text-secondary);
-      margin-right: var(--spacing-sm);
-    }
-    
-    .suggest-text {
-      font-size: 28rpx;
-      color: var(--text-primary);
-    }
+    color: $text-muted;
   }
 }
 </style>
