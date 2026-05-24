@@ -109,7 +109,8 @@ import HomeProductCard from '@/components/HomeProductCard.vue'
 
 const keyword = ref('')
 const searchResult = ref<any[]>([])
-const loading = ref(false)
+const statusBarHeight = ref(20);
+const loading = ref(false);
 const currentType = ref(1)
 const historyList = ref<string[]>([])
 const hotList = ref<any[]>([
@@ -120,7 +121,8 @@ const hotList = ref<any[]>([
 ])
 
 onMounted(() => {
-  loadHistory()
+  statusBarHeight.value = uni.getSystemInfoSync().statusBarHeight || 20;
+  loadHistory();
 })
 
 onShow(() => {
@@ -212,6 +214,8 @@ function goProduct(p: any) {
 
 <style lang="scss" scoped>
 @import '@/styles/theme.scss';
+
+.status-bar { width: 100%; }
 
 .page-container {
   min-height: 100vh;
