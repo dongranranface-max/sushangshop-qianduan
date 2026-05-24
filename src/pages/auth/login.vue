@@ -232,7 +232,7 @@ function nextTick(fn: () => void) { setTimeout(fn, 0) }
 .auth-page {
   width: 100%;
   min-height: 100dvh;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, #F9F9F9 0%, #F0EDE8 100%);
+  @include page-bg;
   display: flex;
   flex-direction: column;
   align-items: center;

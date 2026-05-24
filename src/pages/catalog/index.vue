@@ -249,7 +249,7 @@ function goCategoryProducts(cat: any) {
 
 .page-container {
   min-height: 100vh;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, #F9F9F9 0%, #F0EDE8 100%);
+  @include page-bg;
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
 }
 

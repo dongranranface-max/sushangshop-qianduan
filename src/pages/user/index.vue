@@ -262,7 +262,7 @@ function logout() {
 
 .page-container {
   min-height: 100vh;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, #F9F9F9 0%, #F0EDE8 100%);
+  @include page-bg;
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
 }
 
@@ -497,17 +497,17 @@ function logout() {
 
 .vip-progress {
   &__bar {
-    height: 10rpx;
+    height: 16rpx;
     background: rgba(47, 53, 66, 0.1);
-    border-radius: 5rpx;
+    border-radius: 8rpx;
     overflow: hidden;
     margin-bottom: 12rpx;
   }
 
   &__fill {
     height: 100%;
-    background: $gold-gradient;
-    border-radius: 5rpx;
+    background: $accent-gradient;
+    border-radius: 8rpx;
     transition: width 0.5s ease;
   }
 }
@@ -609,7 +609,7 @@ function logout() {
   margin: 0 $spacing-base;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: $spacing-base;
+  gap: $spacing-base $spacing-base;
 }
 
 .tool-item {

@@ -1,322 +1,247 @@
 // ===========================================
-//  全局字体体系 · 层级对比强化
-// ===========================================
-:root {
-  --font-sans: 'Noto Sans SC', 'HarmonyOS Sans SC', 'PingFang SC', 'Hiragino Sans GB',
-    'Microsoft YaHei', 'Source Han Sans SC', system-ui, sans-serif;
-  --font-display: var(--font-sans);
-  --font-caption: 20rpx;
-  --font-body: 24rpx;
-  --font-card-title: 26rpx;
-  --font-page-title: 32rpx;
-  --font-banner: 48rpx;
-  --font-xs: var(--font-caption);
-  --font-sm: var(--font-body);
-  --font-base: var(--font-body);
-  --font-md: var(--font-card-title);
-  --font-lg: var(--font-page-title);
-  --font-xl: var(--font-page-title);
-  --font-2xl: var(--font-banner);
-  --font-3xl: 56rpx;
-  --leading-tight: 1.2;
-  --leading-normal: 1.55;
-  --leading-relaxed: 1.7;
-  --tracking-tight: -0.02em;
-  --tracking-normal: 0.02em;
-  --tracking-wide: 0.08em;
-  --tracking-wider: 0.14em;
-  --tracking-banner: 2rpx;
-  --weight-regular: 400;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-  --weight-bold: 700;
-  --weight-heavy: 800;
-}
-
-@mixin type-banner-title {
-  font-family: var(--font-display);
-  font-size: var(--font-banner);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-banner);
-  line-height: var(--leading-tight);
-}
-@mixin type-page-title {
-  font-family: var(--font-display);
-  font-size: var(--font-page-title);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-normal);
-  color: var(--text-primary);
-  line-height: var(--leading-tight);
-}
-@mixin type-card-title {
-  font-size: var(--font-card-title);
-  font-weight: var(--weight-semibold);
-  color: var(--text-primary);
-  line-height: var(--leading-tight);
-}
-@mixin type-body {
-  font-size: var(--font-body);
-  font-weight: var(--weight-regular);
-  color: var(--text-primary);
-  line-height: var(--leading-normal);
-}
-@mixin type-caption {
-  font-size: var(--font-caption);
-  font-weight: var(--weight-regular);
-  color: var(--text-muted);
-  letter-spacing: var(--tracking-normal);
-}
-
-// ===========================================
 //  集享公社 · 轻奢金融主题
 //  象牙白底 · 深藏青 · 香槟金 · 克制留白
 // ===========================================
 
-// SCSS Variables
-$bg-primary: #F8F7F4;
-$bg-secondary: #FFFFFF;
-$bg-tertiary: #EFEEEA;
-$primary: #2F3542;
-$primary-light: #414B5E;
-$primary-dark: #1E222D;
-$mineral-gray: #2F3542;
-$mineral-blue: #707B8C;
-$bronze-gold: #B89876;
-$bronze-light: #D4C4AE;
-$bronze-dark: #8E7459;
-$mineral-dark: #414B5E;
-$navy: $mineral-gray;
-$navy-light: $mineral-dark;
-$navy-muted: $mineral-blue;
-$accent: #B89876;
-$accent-light: #D4C4AE;
-$accent-dark: #8E7459;
-$accent-fire: linear-gradient(135deg, #2F3542 0%, #414B5E 100%);
-$accent-glow: rgba(184, 152, 118, 0.25);
-$ai-gradient: linear-gradient(135deg, #2F3542 0%, #414B5E 55%, #4F5D73 100%);
-$ai-gradient-soft: linear-gradient(135deg, rgba(47, 53, 66, 0.06) 0%, rgba(65, 75, 94, 0.04) 100%);
-$bronze-gradient: linear-gradient(135deg, #D4C4AE 0%, #B89876 50%, #8E7459 100%);
-$gold-gradient: $bronze-gradient;
-$warm-yellow: #EDE9E1;
-$warm-pink: #F0EDE8;
-$warm-blue: #ECEEF2;
-$appliance-gray: #5C5C5C;
-$appliance-blue: #707B8C;
-$gold: #B89876;
-$gold-light: #D4C4AE;
-$success: #5A7A6A;
-$warning: #A07850;
-$danger: #B06060;
-$profit: #8E7459;
-$info: #414B5E;
-$text-primary: #141414;
+// SCSS Variables — 统一色彩 Token（去冗余）
+// 语义：accent = 金色系 | mineral = 藏青系 | profit = 增值金
+
+// 基础色板
+$bg-primary:    #F8F7F4;
+$bg-secondary:  #FFFFFF;
+$bg-tertiary:   #EFEEEA;
+
+// 附加背景色（用于glass-card-fire等，放在前方避免未定义）
+$warm-yellow:  #EDE9E1;
+$warm-pink:    #F0EDE8;
+$warm-blue:    #ECEEF2;
+
+// 金色系（唯一来源）
+$accent:       #B89876;   // 主金
+$accent-light: #D4C4AE;   // 浅金
+$accent-dark:  #8E7459;   // 深金
+
+// 藏青系（唯一来源）
+$mineral-gray:  #2F3542;   // 主藏青
+$mineral-blue:  #707B8C;   // 蓝灰
+$mineral-dark:  #414B5E;   // 深藏青
+
+// 向后兼容别名（统一用accent系）
+$bronze-gold:   $accent;
+$bronze-light:   $accent-light;
+$bronze-dark:    $accent-dark;
+$gold:           $accent;
+$gold-light:     $accent-light;
+
+// 语义色（标准色值）
+$success: #3D8B6E;   // 翠绿
+$warning: #D4850A;   // 橙黄
+$danger:  #C0454A;   // 正红
+$info:    $mineral-blue;
+$profit:  $accent-dark;
+
+// 文字色
+$text-primary:   #141414;
 $text-secondary: #5C5C5C;
-$text-muted: #8A8A8A;
-$text-accent: #8E7459;
-$text-inverse: #FFFFFF;
-$border-color: rgba(20, 20, 20, 0.08);
-$border-light: rgba(20, 20, 20, 0.05);
+$text-muted:     #8A8A8A;
+$text-accent:    $accent-dark;
+$text-inverse:   #FFFFFF;
+
+// 边框
+$border-color:   rgba(20, 20, 20, 0.08);
+$border-light:   rgba(20, 20, 20, 0.05);
 $border-primary: rgba(184, 152, 118, 0.40);
-$border-accent: rgba(142, 116, 89, 0.30);
-$glass-bg: #FFFFFF;
+
+// 玻璃
+$glass-bg:       #FFFFFF;
 $glass-bg-hover: #FAFAF8;
-$glass-border: rgba(20, 20, 20, 0.06);
-$clay-shadow: 0 12rpx 48rpx rgba(47, 53, 66, 0.06), 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
-$clay-inset: none;
-$radius-sm: 12rpx;
-$radius-md: 16rpx;
-$radius-lg: 24rpx;
-$radius-xl: 28rpx;
-$radius-2xl: 36rpx;
-$radius-full: 9999rpx;
-$radius: 20rpx;
-$shadow-glow: 0 16rpx 48rpx rgba(47, 53, 66, 0.08);
-$shadow-glow-strong: 0 20rpx 56rpx rgba(47, 53, 66, 0.1);
-$shadow-fire: 0 12rpx 40rpx rgba(184, 152, 118, 0.22);
-$shadow-fire-strong: 0 16rpx 48rpx rgba(142, 116, 89, 0.28);
-$shadow-gold: 0 12rpx 36rpx rgba(184, 152, 118, 0.18);
-$shadow-card: $clay-shadow;
-$spacing-xs: 8rpx;
-$spacing-sm: 16rpx;
+$glass-border:   rgba(20, 20, 20, 0.06);
+
+// 阴影
+$clay-shadow:  0 12rpx 48rpx rgba(47, 53, 66, 0.06), 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
+$shadow-glow:  0 16rpx 48rpx rgba(47, 53, 66, 0.08);
+$shadow-fire:   0 12rpx 40rpx rgba(184, 152, 118, 0.22);
+$shadow-gold:   0 12rpx 36rpx rgba(184, 152, 118, 0.18);
+
+// 圆角
+$radius-sm:   12rpx;
+$radius-md:   16rpx;
+$radius-lg:   24rpx;
+$radius-xl:   28rpx;
+$radius-2xl:  36rpx;
+$radius-full:  9999rpx;
+$radius:      20rpx;
+
+// 间距
+$spacing-xs:  8rpx;
+$spacing-sm:  16rpx;
 $spacing-base: 28rpx;
-$spacing-lg: 40rpx;
-$spacing-xl: 56rpx;
+$spacing-lg:  40rpx;
+$spacing-xl:  56rpx;
 $spacing-2xl: 72rpx;
-$home-module-gap: 48rpx;
-$home-card-pad: 20rpx;
+
+// 字体体系
+$font-sans: 'Noto Sans SC', 'HarmonyOS Sans SC', 'PingFang SC',
+            'Hiragino Sans GB', 'Microsoft YaHei', 'Source Han Sans SC',
+            system-ui, sans-serif;
+
+$font-caption:     20rpx;   // 辅助/标签
+$font-body:        26rpx;    // 正文（24→26，拉开与caption的层级差距）
+$font-card-title:  28rpx;
+$font-page-title:  32rpx;
+$font-banner:      48rpx;
+
+$font-xs:       $font-caption;
+$font-sm:       $font-body;
+$font-base:     $font-body;
+$font-md:       $font-card-title;
+$font-lg:       $font-page-title;
+$font-xl:       $font-page-title;
+$font-2xl:      $font-banner;
+$font-3xl:      56rpx;
+
+$leading-tight:    1.2;
+$leading-normal:   1.55;
+$leading-relaxed:  1.7;
+$tracking-tight:   -0.02em;
+$tracking-normal:  0.02em;
+$tracking-wide:    0.08em;
+$tracking-wider:   0.14em;
+$tracking-banner:  2rpx;
+
+$weight-regular:  400;
+$weight-medium:   500;
+$weight-semibold: 600;
+$weight-bold:     700;
+$weight-heavy:    800;
 
 // ===========================================
-//  金融风资产卡片 · Design Tokens
-//  深色底纹 + 毛玻璃 + 香槟金
+//  渐变 & 按钮系统
 // ===========================================
 
-// 资产卡片背景渐变（深蓝/暗金）
-$asset-card-bg: linear-gradient(145deg, #1E2433 0%, #2A3142 50%, #1E2433 100%);
-$asset-card-border: rgba(212, 180, 131, 0.18);
-$asset-card-radius: 32rpx;
-$asset-card-shadow: 0 16rpx 64rpx rgba(0, 0, 0, 0.28), 0 4rpx 16rpx rgba(0, 0, 0, 0.14);
+$accent-gradient:  linear-gradient(135deg, #D4C4AE 0%, #B89876 50%, #8E7459 100%);
+$brand-gradient:   linear-gradient(145deg, #2F3542 0%, #3D4656 40%, #4A5568 100%);
+$brand-gold-gradient: linear-gradient(135deg, #E8D5A3 0%, #D4B483 25%, #B5935E 65%, #8B6845 100%);
+$btn-brand-gradient: $brand-gradient;
+$btn-gold-gradient:  $brand-gold-gradient;
 
-// 毛玻璃层
-$asset-glass-bg: rgba(255, 255, 255, 0.06);
-$asset-glass-border: rgba(255, 255, 255, 0.10);
+// ===========================================
+//  资产卡片 Token
+// ===========================================
 
-// 资产数值
-$asset-balance-size: 52rpx;
+$asset-card-bg:      linear-gradient(145deg, #1E2433 0%, #2A3142 50%, #1E2433 100%);
+$asset-card-border:   rgba(212, 180, 131, 0.18);
+$asset-card-radius:   32rpx;
+$asset-card-shadow:   0 16rpx 64rpx rgba(0, 0, 0, 0.28), 0 4rpx 16rpx rgba(0, 0, 0, 0.14);
+$asset-balance-size:  52rpx;
 $asset-balance-weight: 800;
 $asset-balance-color: #FFFFFF;
-$asset-balance-font: 'DIN Alternate', 'Roboto', 'Noto Sans SC', system-ui, sans-serif;
-
-// 昨日收益
-$asset-profit-size: 28rpx;
-$asset-profit-color: $bronze-light;
-$asset-profit-weight: 600;
-
-// 标签文字
-$asset-label-size: 22rpx;
-$asset-label-color: rgba(255, 255, 255, 0.55);
-$asset-label-weight: 500;
-
-// 眼睛图标
-$asset-eye-color: rgba(255, 255, 255, 0.45);
-$asset-eye-active: rgba(255, 255, 255, 0.85);
-
-// 进度条
-$progress-bg: rgba(255, 255, 255, 0.08);
-$progress-fill: linear-gradient(90deg, $bronze-gold 0%, $bronze-light 100%);
-$progress-text: rgba(255, 255, 255, 0.5);
+$asset-balance-font:   'Noto Sans SC', system-ui, sans-serif; // DIN/Roboto未引入，降级到Noto
+$asset-profit-size:    28rpx;
+$asset-profit-color:   $accent-light;
+$asset-profit-weight:  600;
+$asset-label-size:     22rpx;
+$asset-label-color:    rgba(255, 255, 255, 0.55);
+$asset-label-weight:   500;
+$asset-eye-color:      rgba(255, 255, 255, 0.45);
+$asset-eye-active:     rgba(255, 255, 255, 0.85);
 
 // ===========================================
-//  跑马灯 · Design Tokens
+//  跑马灯 Token
 // ===========================================
-$ticker-bg: rgba(30, 36, 51, 0.90);
-$ticker-border: rgba(212, 180, 131, 0.15);
-$ticker-icon-color: $bronze-light;
+
+$ticker-bg:         rgba(30, 36, 51, 0.90);
+$ticker-border:     rgba(212, 180, 131, 0.15);
+$ticker-icon-color: $accent-light;
 $ticker-text-color: rgba(255, 255, 255, 0.72);
 $ticker-dot-color: rgba(212, 180, 131, 0.40);
-$ticker-radius: 20rpx;
+$ticker-radius:     20rpx;
 
 // ===========================================
-//  轻奢登录体系 · Auth Design Tokens
+//  Auth Token
 // ===========================================
 
-$brand-gradient: linear-gradient(145deg, #2F3542 0%, #3D4656 40%, #4A5568 100%);
-$brand-glow: linear-gradient(145deg, rgba(47, 53, 66, 0.92) 0%, rgba(74, 85, 104, 0.88) 100%);
-$brand-gold-gradient: linear-gradient(135deg, #B89876 0%, #D4C4AE 50%, #B89876 100%);
-$logo-card-bg: linear-gradient(160deg, rgba(47, 53, 66, 0.96) 0%, rgba(65, 75, 94, 0.92) 100%);
-$logo-glow-warm: rgba(184, 152, 118, 0.18);
-$hero-orb: radial-gradient(ellipse at 50% 60%, rgba(184, 152, 118, 0.14) 0%, transparent 65%);
 $glass-blur: blur(20px);
 
-// FL 浮动标签
-$fl-label-size: 22rpx;
-$fl-label-size-float: 18rpx;
-$fl-label-color: $text-secondary;
-$fl-label-color-focus: $bronze-gold;
-$fl-label-weight: 500;
-$fl-float-duration: 0.22s;
-$fl-float-timing: cubic-bezier(0.4, 0, 0.2, 1);
-
-// 圆形倒计时
-$countdown-ring-size: 56rpx;
-$countdown-ring-stroke: 3rpx;
-$countdown-ring-color: $bronze-gold;
-$countdown-ring-bg: rgba(47, 53, 66, 0.06);
-$countdown-text-size: 20rpx;
-$countdown-text-color: $bronze-dark;
-
-// 按钮流动加载
-$btn-flow-duration: 1.4s;
-$btn-flow-timing: ease-in-out;
-
-// 品牌线性渐变按钮
-$btn-gold-gradient: linear-gradient(135deg, #E8D5A3 0%, #D4B483 25%, #B5935E 65%, #8B6845 100%);
-$btn-gold-shadow: 0 8rpx 20rpx rgba(212, 180, 131, 0.3);
-$btn-gold-shadow-hover: 0 16rpx 44rpx rgba(212, 180, 131, 0.38);
-
 // 输入框
-$auth-input-bg: rgba(255, 255, 255, 0.72);
-$auth-input-border: rgba(47, 53, 66, 0.08);
-$auth-input-border-focus: rgba(142, 116, 89, 0.55);
-$auth-input-line: rgba(142, 116, 89, 0.50);
-$auth-input-radius: 20rpx;
-$auth-input-height: 96rpx;
-$auth-input-glow: rgba(184, 152, 118, 0.12);
+$auth-input-bg:          rgba(255, 255, 255, 0.72);
+$auth-input-border:       rgba(47, 53, 66, 0.08);
+$auth-input-border-focus:  rgba(142, 116, 89, 0.55);
+$auth-input-radius:       20rpx;
+$auth-input-height:       96rpx;
+$auth-input-glow:         rgba(184, 152, 118, 0.12);
 
 // 卡片
-$auth-card-bg: rgba(255, 255, 255, 0.90);
-$auth-card-border: rgba(255, 255, 255, 0.60);
-$auth-card-radius: 40rpx;
-$auth-card-shadow: 0 24rpx 80rpx rgba(47, 53, 66, 0.08), 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
-$auth-card-blur-bg: rgba(255, 255, 255, 0.82);
+$auth-card-blur-bg:  rgba(255, 255, 255, 0.82);
+$auth-card-border:    rgba(255, 255, 255, 0.60);
+$auth-card-radius:   40rpx;
+$auth-card-shadow:   0 24rpx 80rpx rgba(47, 53, 66, 0.08), 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
 
-// 按钮
-$btn-brand-gradient: linear-gradient(135deg, #2F3542 0%, #3D4656 50%, #4A5568 100%);
-$btn-brand-shadow: 0 12rpx 40rpx rgba(47, 53, 66, 0.22);
+// FL浮动标签
+$fl-label-size:         22rpx;
+$fl-label-size-float:    18rpx;
+$fl-label-color:         $text-secondary;
+$fl-label-color-focus:   $accent;
+$fl-label-weight:        500;
+$fl-float-duration:      0.22s;
+$fl-float-timing:       cubic-bezier(0.4, 0, 0.2, 1);
+
+// 圆形倒计时
+$countdown-ring-size:    56rpx;
+$countdown-ring-stroke:  3rpx;
+$countdown-ring-color:   $accent;
+$countdown-ring-bg:      rgba(47, 53, 66, 0.06);
+$countdown-text-size:    20rpx;
+$countdown-text-color:   $accent-dark;
+
+// 按钮阴影
+$btn-brand-shadow:       0 12rpx 40rpx rgba(47, 53, 66, 0.22);
 $btn-brand-shadow-hover: 0 16rpx 52rpx rgba(47, 53, 66, 0.30);
 $btn-brand-shadow-active: 0 6rpx 24rpx rgba(47, 53, 66, 0.18);
-
-$btn-gold-gradient: $brand-gold-gradient;
-$btn-gold-shadow: 0 12rpx 40rpx rgba(184, 152, 118, 0.28);
-$btn-gold-shadow-hover: 0 16rpx 52rpx rgba(184, 152, 118, 0.36);
+$btn-gold-shadow:        0 12rpx 40rpx rgba(184, 152, 118, 0.28);
+$btn-gold-shadow-hover:  0 16rpx 52rpx rgba(184, 152, 118, 0.36);
 $btn-gold-shadow-active: 0 6rpx 24rpx rgba(184, 152, 118, 0.22);
-$btn-disabled-bg: rgba(47, 53, 66, 0.28);
-$btn-disabled-text: rgba(255, 255, 255, 0.55);
-
-// 协议
-$check-bg: rgba(255, 255, 255, 0.90);
-$check-border: rgba(47, 53, 66, 0.15);
-$check-border-checked: $accent-dark;
-$check-bg-checked: $accent-dark;
-$check-radius: 10rpx;
-$check-size: 40rpx;
+$btn-disabled-bg:        rgba(47, 53, 66, 0.28);
+$btn-disabled-text:      rgba(255, 255, 255, 0.55);
 
 // 步骤指示器
-$step-dot-size: 56rpx;
-$step-dot-border: rgba(142, 116, 89, 0.30);
-$step-dot-border-done: $success;
+$step-dot-border-done:   $success;
 $step-dot-border-active: $accent-dark;
-$step-dot-bg-active: rgba(142, 116, 89, 0.10);
-$step-line-bg: rgba(47, 53, 66, 0.08);
-$step-line-bg-active: rgba(142, 116, 89, 0.40);
-
-// 品牌文字
-$brand-name-size: 30rpx;
-$brand-slogan-size: 19rpx;
-$brand-slogan-weight: 400;
-$brand-slogan-letter: 0.6rpx;
-
-// 副标题
-$subtitle-size: 26rpx;
-$subtitle-weight: 400;
-$subtitle-color: $text-muted;
-$subtitle-lh: 1.55;
-
-// 页面标题
-$title-size: 52rpx;
-$title-weight: 800;
-$title-lh: 1.1;
-
-// 协议文字
-$terms-text-size: 24rpx;
-$terms-link-color: $accent-dark;
-$terms-link-weight: 500;
-
-// 邀请码（弱化）
-$invite-muted-opacity: 0.55;
+$step-dot-bg-active:     rgba(142, 116, 89, 0.10);
+$step-line-bg:            rgba(47, 53, 66, 0.08);
+$step-line-bg-active:     rgba(142, 116, 89, 0.40);
 
 // 验证码按钮
-$code-btn-border: rgba(142, 116, 89, 0.42);
+$code-btn-border:        rgba(142, 116, 89, 0.42);
 $code-btn-border-counting: rgba(47, 53, 66, 0.10);
-$code-btn-text: $accent-dark;
-$code-btn-text-counting: $text-muted;
-
-// 底部协议
-$footer-text-size: 22rpx;
-$footer-text-color: rgba(20, 20, 20, 0.40);
+$code-btn-text:           $accent-dark;
+$code-btn-text-counting:  $text-muted;
 
 // ===========================================
-//  Utility Mixins
+//  Mixins
 // ===========================================
+
+// 统一页面背景（解决各页面radial-gradient参数不一致问题）
+@mixin page-bg {
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, #F9F9F9 0%, #F0EDE8 100%);
+}
+
+// 统一玻璃卡片背景透明度
+@mixin glass-card-surface {
+  background: rgba(255, 255, 255, 0.90);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1rpx solid rgba(255, 255, 255, 0.60);
+  border-radius: $radius-lg;
+  box-shadow: $clay-shadow;
+}
+
+// 文字抗锯齿
+@mixin font-smoothing {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
 
 @mixin line-clamp($lines) {
   display: -webkit-box;
@@ -337,13 +262,6 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
   @include premium-surface($bg);
 }
 
-@mixin ai-jelly-text {
-  background: $bronze-gradient;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
 @mixin section-head {
   @include type-page-title;
   padding-left: 20rpx;
@@ -357,11 +275,10 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
     width: 6rpx;
     height: 32rpx;
     border-radius: 4rpx;
-    background: $bronze-gradient;
+    background: $accent-gradient;
   }
 }
 
-// Auth mixins
 @mixin auth-card {
   background: $auth-card-blur-bg;
   backdrop-filter: $glass-blur;
@@ -411,116 +328,68 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
   }
 }
 
-@mixin btn-brand-outline {
-  background: transparent;
-  border: 1.5rpx solid $code-btn-border;
-  border-radius: $radius-full;
-  transition: all 0.25s ease;
-  &:active {
-    background: rgba(142, 116, 89, 0.08);
-    transform: scale(0.975);
-  }
-}
-
-@mixin btn-brand-disabled {
-  background: $btn-disabled-bg;
-  color: $btn-disabled-text;
-  box-shadow: none;
-  pointer-events: none;
-}
-
-@mixin logo-card {
-  background: $logo-card-bg;
-  border-radius: 36rpx;
-  box-shadow: 0 12rpx 48rpx rgba(47, 53, 66, 0.28), 0 4rpx 16rpx rgba(0, 0, 0, 0.12);
-}
-
-@mixin hero-glow {
-  background: $hero-orb;
-  border-radius: 50%;
-}
-
 // ===========================================
-//  Global CSS Custom Properties
+//  CSS Custom Properties（与SCSS变量同步）
 // ===========================================
 
 :root {
-  --bg-primary: #F8F7F4;
-  --bg-secondary: #FFFFFF;
-  --bg-tertiary: #EFEEEA;
-  --bg-elevated: #FFFFFF;
-  --bg-overlay: rgba(255, 255, 255, 0.94);
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #FAFAF8;
-  --mineral-gray: #2F3542;
-  --mineral-blue: #707B8C;
-  --bronze-gold: #B89876;
-  --bronze-light: #D4C4AE;
-  --bronze-dark: #8E7459;
-  --mineral-dark: #414B5E;
-  --mineral-line: rgba(47, 53, 66, 0.10);
-  --navy: #2F3542;
-  --navy-light: #414B5E;
-  --navy-muted: #707B8C;
-  --ai-gradient: linear-gradient(135deg, #2F3542 0%, #414B5E 55%, #4F5D73 100%);
-  --ai-gradient-soft: linear-gradient(135deg, rgba(47, 53, 66, 0.06) 0%, rgba(65, 75, 94, 0.04) 100%);
-  --bronze-gradient: linear-gradient(135deg, #D4C4AE 0%, #B89876 50%, #8E7459 100%);
-  --primary: #2F3542;
-  --primary-light: #414B5E;
-  --primary-dark: #1E222D;
-  --primary-glow: rgba(47, 53, 66, 0.12);
-  --accent: #B89876;
-  --accent-light: #D4C4AE;
-  --accent-dark: #8E7459;
-  --accent-glow: rgba(184, 152, 118, 0.25);
-  --warm-yellow: #EDE9E1;
-  --warm-pink: #F0EDE8;
-  --warm-blue: #ECEEF2;
-  --gold: #B89876;
-  --gold-light: #D4C4AE;
-  --success: #5A7A6A;
-  --warning: #A07850;
-  --danger: #B06060;
-  --profit: #8E7459;
-  --text-primary: #141414;
-  --text-secondary: #5C5C5C;
-  --text-muted: #8A8A8A;
-  --text-accent: #8E7459;
-  --text-inverse: #FFFFFF;
-  --border-color: rgba(20, 20, 20, 0.08);
-  --border-light: rgba(20, 20, 20, 0.05);
-  --border-primary: rgba(184, 152, 118, 0.40);
-  --border-accent: rgba(142, 116, 89, 0.30);
-  --glass-bg: #FFFFFF;
-  --glass-border: rgba(20, 20, 20, 0.06);
-  --clay-shadow: 0 12rpx 48rpx rgba(47, 53, 66, 0.06), 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
-  --clay-shadow-inset: none;
-  --clay-inset: none;
-  --radius: 20rpx;
-  --radius-lg: 24rpx;
-  --radius-xl: 28rpx;
-  --shadow-glow: 0 16rpx 48rpx rgba(47, 53, 66, 0.08);
-  --shadow-fire: 0 12rpx 40rpx rgba(184, 152, 118, 0.2);
-  --shadow-card: var(--clay-shadow);
-  --spacing-xs: 8rpx;
-  --spacing-sm: 16rpx;
-  --spacing-base: 28rpx;
-  --spacing-lg: 40rpx;
+  --font-sans: $font-sans;
+  --font-caption: $font-caption;
+  --font-body: $font-body;
+  --font-card-title: $font-card-title;
+  --font-page-title: $font-page-title;
+  --font-banner: $font-banner;
+  --leading-tight: $leading-tight;
+  --leading-normal: $leading-normal;
+  --tracking-tight: $tracking-tight;
+  --tracking-normal: $tracking-normal;
+  --tracking-wide: $tracking-wide;
+  --weight-regular: $weight-regular;
+  --weight-medium: $weight-medium;
+  --weight-semibold: $weight-semibold;
+  --weight-bold: $weight-bold;
+  --weight-heavy: $weight-heavy;
+  --accent: $accent;
+  --accent-light: $accent-light;
+  --accent-dark: $accent-dark;
+  --mineral-gray: $mineral-gray;
+  --mineral-blue: $mineral-blue;
+  --mineral-dark: $mineral-dark;
+  --success: $success;
+  --warning: $warning;
+  --danger: $danger;
+  --profit: $profit;
+  --text-primary: $text-primary;
+  --text-secondary: $text-secondary;
+  --text-muted: $text-muted;
+  --text-accent: $text-accent;
+  --text-inverse: $text-inverse;
+  --border-color: $border-color;
+  --border-light: $border-light;
+  --border-primary: $border-primary;
+  --glass-bg: $glass-bg;
+  --glass-border: $glass-border;
+  --clay-shadow: $clay-shadow;
+  --radius: $radius;
+  --radius-lg: $radius-lg;
+  --radius-xl: $radius-xl;
+  --spacing-xs: $spacing-xs;
+  --spacing-sm: $spacing-sm;
+  --spacing-base: $spacing-base;
+  --spacing-lg: $spacing-lg;
 }
 
 // ===========================================
-//  Base Component Styles
+//  Base
 // ===========================================
 
-.glass-card,
-.clay-card {
+.glass-card, .clay-card {
   @include premium-surface($bg-secondary);
   position: relative;
   overflow: hidden;
 }
 
-.glass-card-hover,
-.clay-card-hover {
+.glass-card-hover, .clay-card-hover {
   @extend .clay-card;
   transition: transform 0.28s ease, box-shadow 0.28s ease;
   &:active {
@@ -529,19 +398,64 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
   }
 }
 
-.glass-card-fire,
-.clay-card-warm {
+.glass-card-fire, .clay-card-warm {
   @include premium-surface($warm-yellow);
   border-color: $border-primary;
 }
 
-.glass-dashboard,
-.clay-dashboard {
+.glass-dashboard, .clay-dashboard {
   @include premium-surface($bg-secondary);
   border-radius: $radius-2xl;
   background: linear-gradient(145deg, $warm-yellow 0%, $bg-secondary 50%);
   box-shadow: $shadow-gold;
 }
+
+// ===========================================
+//  Typography Mixins
+// ===========================================
+
+@mixin type-banner-title {
+  font-family: $font-sans;
+  font-size: $font-banner;
+  font-weight: $weight-bold;
+  letter-spacing: $tracking-banner;
+  line-height: $leading-tight;
+  @include font-smoothing;
+}
+@mixin type-page-title {
+  font-family: $font-sans;
+  font-size: $font-page-title;
+  font-weight: $weight-bold;
+  letter-spacing: $tracking-normal;
+  color: $text-primary;
+  line-height: $leading-tight;
+  @include font-smoothing;
+}
+@mixin type-card-title {
+  font-size: $font-card-title;
+  font-weight: $weight-semibold;
+  color: $text-primary;
+  line-height: $leading-tight;
+  @include font-smoothing;
+}
+@mixin type-body {
+  font-size: $font-body;
+  font-weight: $weight-medium;  // 中文正文用500，提升可读性
+  color: $text-primary;
+  line-height: $leading-normal;
+  @include font-smoothing;
+}
+@mixin type-caption {
+  font-size: $font-caption;
+  font-weight: $weight-regular;
+  color: $text-muted;
+  letter-spacing: $tracking-normal;
+  @include font-smoothing;
+}
+
+// ===========================================
+//  Buttons
+// ===========================================
 
 .btn {
   display: flex;
@@ -549,18 +463,18 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
   justify-content: center;
   height: 88rpx;
   border-radius: $radius-full;
-  font-size: var(--font-md);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-wide);
+  font-size: $font-md;
+  font-weight: $weight-semibold;
+  letter-spacing: $tracking-wide;
   transition: all 0.25s ease;
+  @include font-smoothing;
   &:active {
     opacity: 0.9;
     transform: scale(0.98);
   }
 }
 
-.btn-primary,
-.btn-black {
+.btn-primary, .btn-black {
   @extend .btn;
   background: $mineral-gray;
   color: $text-inverse;
@@ -569,7 +483,7 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
 
 .btn-fire {
   @extend .btn;
-  background: $accent-fire;
+  background: linear-gradient(135deg, #2F3542 0%, #414B5E 100%);
   color: $text-inverse;
   box-shadow: $shadow-glow;
 }
@@ -588,8 +502,12 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
   &:active { color: $text-accent; }
 }
 
-.btn-sm { height: 64rpx; font-size: var(--font-sm); padding: 0 32rpx; }
-.btn-lg { height: 96rpx; font-size: var(--font-lg); }
+.btn-sm { height: 64rpx; font-size: $font-sm; padding: 0 32rpx; }
+.btn-lg { height: 96rpx; font-size: $font-lg; }
+
+// ===========================================
+//  Badges & Tags
+// ===========================================
 
 .ai-badge {
   display: inline-flex;
@@ -598,10 +516,11 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
   border-radius: $radius-sm;
   background: $warm-yellow;
   border: 1rpx solid $border-primary;
-  font-size: var(--font-xs);
-  font-weight: var(--weight-bold);
+  font-size: $font-xs;
+  font-weight: $weight-bold;
   color: $accent-dark;
-  letter-spacing: var(--tracking-wide);
+  letter-spacing: $tracking-wide;
+  @include font-smoothing;
 }
 
 .tag {
@@ -609,38 +528,19 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
   align-items: center;
   padding: 4rpx 14rpx;
   border-radius: $radius-sm;
-  font-size: var(--font-xs);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-normal);
+  font-size: $font-xs;
+  font-weight: $weight-semibold;
+  letter-spacing: $tracking-normal;
 }
-.tag-primary {
-  @extend .tag;
-  background: $warm-blue;
-  color: $mineral-blue;
-}
-.tag-accent {
+.tag-primary { @extend .tag; background: $warm-blue; color: $mineral-blue; }
+.tag-accent, .tag-gold {
   @extend .tag;
   background: $warm-yellow;
   color: $accent-dark;
   border: 1rpx solid $border-primary;
 }
-.tag-gold {
-  @extend .tag;
-  background: $warm-yellow;
-  color: $accent-dark;
-  border: 1rpx solid $border-primary;
-}
-.tag-fire {
-  @extend .tag;
-  background: $warm-yellow;
-  color: $accent-dark;
-}
-.tag-outline {
-  @extend .tag;
-  background: transparent;
-  color: $text-secondary;
-  border: 1rpx solid $border-color;
-}
+.tag-fire { @extend .tag; background: $warm-yellow; color: $accent-dark; }
+.tag-outline { @extend .tag; background: transparent; color: $text-secondary; border: 1rpx solid $border-color; }
 
 .member-badge {
   display: inline-flex;
@@ -649,20 +549,13 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
   width: 80rpx;
   height: 80rpx;
   border-radius: 50%;
-  font-size: var(--font-lg);
-  font-weight: var(--weight-heavy);
+  font-size: $font-lg;
+  font-weight: $weight-heavy;
   @include premium-surface($bg-secondary);
   color: $mineral-blue;
   border: 2rpx solid $border-primary;
-  &.v4, &.v5, &.v6 {
-    background: $warm-yellow;
-    color: $accent-dark;
-  }
-  &.v7, &.v8, &.v9 {
-    background: $mineral-gray;
-    color: $bronze-light;
-    border-color: $bronze-gold;
-  }
+  &.v4, &.v5, &.v6 { background: $warm-yellow; color: $accent-dark; }
+  &.v7, &.v8, &.v9 { background: $mineral-gray; color: $accent-light; border-color: $accent; }
 }
 
 // ===========================================
@@ -686,15 +579,15 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
 
 @keyframes premium-glow-anim {
   0%, 100% { box-shadow: $shadow-gold; }
-  50% { box-shadow: $shadow-fire-strong; }
+  50% { box-shadow: $shadow-fire; }
 }
-.fire-portal,
-.clay-portal-glow {
+
+.fire-portal, .clay-portal-glow {
   animation: premium-glow-anim 4s ease-in-out infinite;
 }
 
 // ===========================================
-//  Utility Classes
+//  Utilities
 // ===========================================
 
 .page-container {
@@ -703,6 +596,7 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
   background: $bg-primary;
+  @include font-smoothing;
 }
 
 .flex { display: flex; }
@@ -714,12 +608,76 @@ $footer-text-color: rgba(20, 20, 20, 0.40);
 .text-accent { color: $text-accent; }
 .text-secondary { color: $text-secondary; }
 .text-muted { color: $text-muted; }
-.text-sm { font-size: var(--font-sm); }
-.text-xs { font-size: var(--font-xs); }
-.font-bold { font-weight: var(--weight-bold); }
+.text-sm { font-size: $font-sm; }
+.text-xs { font-size: $font-xs; }
+.font-bold { font-weight: $weight-bold; }
 .mt-sm { margin-top: $spacing-sm; }
 .mt-base { margin-top: $spacing-base; }
 .mt-lg { margin-top: $spacing-lg; }
 .mb-sm { margin-bottom: $spacing-sm; }
 .mb-base { margin-bottom: $spacing-base; }
 .mb-lg { margin-bottom: $spacing-lg; }
+
+// 辅助变量（向后兼容，保持引用点不变）
+$accent-fire: linear-gradient(135deg, #2F3542 0%, #414B5E 100%);
+$ai-gradient: linear-gradient(135deg, #2F3542 0%, #414B5E 55%, #4F5D73 100%);
+$ai-gradient-soft: linear-gradient(135deg, rgba(47, 53, 66, 0.06) 0%, rgba(65, 75, 94, 0.04) 100%);
+$bronze-gradient: $accent-gradient;
+$gold-gradient: $accent-gradient;
+$home-module-gap: 48rpx;
+$home-card-pad: 20rpx;
+$progress-bg: rgba(255, 255, 255, 0.08);
+$progress-fill: linear-gradient(90deg, $accent 0%, $accent-light 100%);
+$progress-text: rgba(255, 255, 255, 0.5);
+$shadow-glow-strong: 0 20rpx 56rpx rgba(47, 53, 66, 0.1);
+$shadow-fire-strong: 0 16rpx 48rpx rgba(142, 116, 89, 0.28);
+$shadow-card: $clay-shadow;
+$brand-glow: linear-gradient(145deg, rgba(47, 53, 66, 0.92) 0%, rgba(74, 85, 104, 0.88) 100%);
+$logo-card-bg: linear-gradient(160deg, rgba(47, 53, 66, 0.96) 0%, rgba(65, 75, 94, 0.92) 100%);
+$logo-glow-warm: rgba(184, 152, 118, 0.18);
+$hero-orb: radial-gradient(ellipse at 50% 60%, rgba(184, 152, 118, 0.14) 0%, transparent 65%);
+$check-bg: rgba(255, 255, 255, 0.90);
+$check-border: rgba(47, 53, 66, 0.15);
+$check-border-checked: $accent-dark;
+$check-bg-checked: $accent-dark;
+$check-radius: 10rpx;
+$check-size: 40rpx;
+$step-dot-size: 56rpx;
+$step-dot-border: rgba(142, 116, 89, 0.30);
+$step-line-bg: rgba(47, 53, 66, 0.08);
+$step-line-bg-active: rgba(142, 116, 89, 0.40);
+$brand-name-size: 30rpx;
+$brand-slogan-size: 19rpx;
+$brand-slogan-weight: 400;
+$brand-slogan-letter: 0.6rpx;
+$subtitle-size: 26rpx;
+$subtitle-weight: 400;
+$subtitle-color: $text-muted;
+$subtitle-lh: 1.55;
+$title-size: 52rpx;
+$title-weight: 800;
+$title-lh: 1.1;
+$terms-text-size: 24rpx;
+$terms-link-color: $accent-dark;
+$terms-link-weight: 500;
+$invite-muted-opacity: 0.55;
+$footer-text-size: 22rpx;
+$footer-text-color: rgba(20, 20, 20, 0.40);
+$auth-input-line: rgba(142, 116, 89, 0.50);
+$btn-flow-duration: 1.4s;
+$btn-flow-timing: ease-in-out;
+$btn-gold-gradient: $brand-gold-gradient;
+$btn-gold-shadow: 0 8rpx 20rpx rgba(212, 180, 131, 0.3);
+$btn-gold-shadow-hover: 0 16rpx 44rpx rgba(212, 180, 131, 0.38);
+$asset-glass-bg: rgba(255, 255, 255, 0.06);
+$asset-glass-border: rgba(255, 255, 255, 0.10);
+
+// 废弃alias（用于兼容旧引用，Warning: 未来版本会删除）
+$navy: $mineral-gray;
+$navy-light: $mineral-dark;
+$navy-muted: $mineral-blue;
+$primary: $mineral-gray;
+$primary-light: $mineral-dark;
+$primary-dark: #1E222D;
+$appliance-gray: #5C5C5C;
+$appliance-blue: #707B8C;

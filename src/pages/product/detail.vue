@@ -230,7 +230,7 @@ function onSwiperChange(e: any) { currentImg.value = e.detail.current }
 
 .page-container {
   min-height: 100vh;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, #F9F9F9 0%, #F0EDE8 100%);
+  @include page-bg;
   padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
 }
 
@@ -284,13 +284,19 @@ function onSwiperChange(e: any) { currentImg.value = e.detail.current }
 }
 
 .gallery-swiper {
+  position: relative;
   width: 100%;
-  height: 750rpx;
+  padding-bottom: 100%;
+  overflow: hidden;
+  background: $bg-tertiary;
 }
 
 .gallery-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+  object-fit: cover;
   background: $bg-tertiary;
 }
 

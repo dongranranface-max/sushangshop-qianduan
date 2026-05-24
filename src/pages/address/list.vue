@@ -128,7 +128,7 @@ function deleteAddr(addr: any) {
 
 .page-container {
   min-height: 100vh;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, #F9F9F9 0%, #F0EDE8 100%);
+  @include page-bg;
 }
 
 .status-bar { width: 100%; }
