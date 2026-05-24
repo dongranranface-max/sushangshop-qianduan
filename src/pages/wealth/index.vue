@@ -1,179 +1,166 @@
 <template>
   <view class="page-container">
-    <!-- 顶部沉浸式资产状态栏 -->
-    <AssetStatusBar v-if="loggedIn" />
-    <view v-else class="safe-area-top" :style="{ height: statusBarHeight + 'px' }" />
+    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }" />
 
-    <!-- 未登录引导 -->
-    <view v-if="!loggedIn" class="not-logged">
-      <text class="not-logged__title">登录后查看增值资产</text>
-      <view class="not-logged__btn" @click="goLogin">
-        <text>立即登录</text>
+    <!-- 页面标题 -->
+    <view class="page-header">
+      <text class="page-title">增值区</text>
+      <view class="page-sub">稳健增值 智慧理财</view>
+    </view>
+
+    <!-- 资产总览卡 -->
+    <view class="asset-overview" v-if="loggedIn">
+      <view class="asset-overview__bg" />
+      <view class="asset-overview__inner">
+        <view class="asset-overview__top">
+          <view class="asset-label-row">
+            <text class="asset-overview__label">总资产（积分）</text>
+            <view class="asset-overview__eye" @click="toggleAsset">
+              <text>{{ showAsset ? '👁' : '👁‍🗨' }}</text>
+            </view>
+          </view>
+          <text class="asset-overview__value">
+            {{ showAsset ? ecoPointsDisplay : '******' }}
+          </text>
+        </view>
+        <view class="asset-overview__stats">
+          <view class="stat-item">
+            <text class="stat-value">{{ showAsset ? yesterdayProfit : '****' }}</text>
+            <text class="stat-label">昨日收益（积分）</text>
+          </view>
+          <view class="stat-divider" />
+          <view class="stat-item">
+            <text class="stat-value">{{ showAsset ? consumerPointsDisplay : '****' }}</text>
+            <text class="stat-label">消费积分</text>
+          </view>
+          <view class="stat-divider" />
+          <view class="stat-item">
+            <text class="stat-value">{{ showAsset ? `¥${balanceDisplay}` : '****' }}</text>
+            <text class="stat-label">账户余额</text>
+          </view>
+        </view>
       </view>
     </view>
 
-    <!-- 已登录：增值理财主页 -->
-    <view v-else class="page-body">
+    <!-- 未登录 -->
+    <view v-if="!loggedIn" class="login-prompt" @click="goLogin">
+      <text class="login-prompt__text">登录后查看资产详情</text>
+      <text class="login-prompt__btn">立即登录 ›</text>
+    </view>
 
-      <!-- 资产骨架屏 -->
-      <view v-if="loadingAsset" class="asset-card asset-card--skeleton">
-        <view class="skeleton-panel">
-          <view class="sk-line sk-title" />
-          <view class="sk-row">
-            <view class="sk-block" />
-            <view class="sk-block sk-w60" />
-          </view>
-        </view>
+    <!-- 三大增值服务入口 -->
+    <view class="services-section">
+      <view class="section-head">
+        <text class="section-title">增值服务</text>
       </view>
-
-      <!-- 资产概览卡片 -->
-      <view v-else class="asset-card">
-        <!-- 顶部：昨日分红高亮 -->
-        <view class="profit-banner">
-          <view class="profit-banner__left">
-            <text class="profit-banner__label">昨日分红</text>
-            <view class="profit-banner__value-row">
-              <text class="profit-banner__value">+{{ yesterdayProfit.toFixed(2) }}</text>
-              <text class="profit-banner__unit">积分</text>
+      <view class="service-grid">
+        <view
+          v-for="svc in services"
+          :key="svc.id"
+          class="service-card"
+          :class="`service-card--${svc.id}`"
+          @click="goService(svc)"
+        >
+          <view class="service-card__glow" />
+          <view class="service-card__inner">
+            <view class="service-card__icon-wrap">
+              <text class="service-card__icon">{{ svc.icon }}</text>
+            </view>
+            <view class="service-card__info">
+              <text class="service-card__name">{{ svc.name }}</text>
+              <text class="service-card__desc">{{ svc.desc }}</text>
+              <view class="service-card__tag">
+                <text>{{ svc.tag }}</text>
+              </view>
             </view>
           </view>
-          <view class="profit-banner__divider" />
-          <view class="profit-banner__right">
-            <text class="profit-banner__hint">平台每日结算</text>
-            <text class="profit-banner__safe">本金全额保障</text>
-          </view>
+          <view class="service-card__arrow">›</view>
         </view>
+      </view>
+    </view>
 
-        <!-- 资产明细 -->
-        <view class="asset-row">
-          <view class="asset-item">
-            <text class="asset-item__value">{{ ecoPoints.toLocaleString() }}</text>
-            <text class="asset-item__label">生态积分</text>
-            <text class="asset-item__sub">≈ ¥{{ (ecoPoints / 100).toFixed(2) }}</text>
+    <!-- 我的投资入口 -->
+    <view class="my-invest-section" v-if="loggedIn">
+      <view class="invest-banner" @click="goMyInvest">
+        <view class="invest-banner__left">
+          <text class="invest-banner__title">我的投资</text>
+          <text class="invest-banner__sub">查看全部投资记录</text>
+        </view>
+        <view class="invest-banner__right">
+          <text class="invest-banner__arrow">›</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 投资记录 -->
+    <view class="invest-history" v-if="loggedIn && investRecords.length > 0">
+      <view class="section-head">
+        <text class="section-title">最近投资</text>
+      </view>
+      <view class="record-list">
+        <view v-for="record in investRecords.slice(0, 3)" :key="record.id" class="record-item">
+          <view class="record-icon">{{ record.icon }}</view>
+          <view class="record-info">
+            <text class="record-name">{{ record.name }}</text>
+            <text class="record-date">{{ record.date }}</text>
           </view>
-          <view class="asset-divider" />
-          <view class="asset-item">
-            <text class="asset-item__value">{{ creditPoints.toLocaleString() }}</text>
-            <text class="asset-item__label">消费积分</text>
-            <text class="asset-item__sub">可兑免费商品</text>
-          </view>
-          <view class="asset-divider" />
-          <view class="asset-item asset-item--action" @click="goAssetDetail">
-            <view class="asset-item__icon">›</view>
-            <text class="asset-item__label">明细</text>
+          <view class="record-profit" :class="{ positive: record.profit > 0 }">
+            <text>{{ record.profit > 0 ? '+' : '' }}{{ record.profit }}积分</text>
           </view>
         </view>
       </view>
-
-      <!-- 会员等级卡 -->
-      <WealthLevelCard :level-data="levelData" @click="goLevelDetail" />
-
-      <!-- 理财专区 -->
-      <view class="section">
-        <view class="section-head">
-          <view class="section-head__left">
-            <text class="section-head__icon">理</text>
-            <text class="section-head__title">理财专区</text>
-          </view>
-          <view class="section-head__more" @click="goInvestList">
-            <text>全部</text>
-            <text class="arrow">›</text>
-          </view>
-        </view>
-
-        <!-- 加载骨架屏 -->
-        <view v-if="loadingProducts" class="skeleton-list">
-          <view v-for="i in 3" :key="i" class="skeleton-card" />
-        </view>
-
-        <!-- 加载失败 -->
-        <view v-else-if="loadError" class="state-empty" @click="loadFinancialProducts">
-          <text class="state-empty__icon">!</text>
-          <text class="state-empty__text">加载失败</text>
-          <text class="state-empty__sub">点击重试</text>
-        </view>
-
-        <!-- 空状态 -->
-        <view v-else-if="!investProjects.length" class="state-empty">
-          <text class="state-empty__icon">理</text>
-          <text class="state-empty__text">暂无理财项目</text>
-          <text class="state-empty__sub">平台正在加紧上架，敬请期待</text>
-        </view>
-
-        <!-- 理财列表 -->
-        <view v-else class="invest-list">
-          <WealthInvestCard
-            v-for="project in investProjects"
-            :key="project.id"
-            :project="project"
-            @click="goProjectDetail"
-            @invest="goProjectDetail"
-          />
-        </view>
-      </view>
-
-      <!-- 理财规则说明 -->
-      <view class="rules-section">
-        <text class="rules-section__title">理财规则</text>
-        <view class="rules-grid">
-          <view v-for="rule in rules" :key="rule.id" class="rule-item">
-            <view class="rule-item__dot" />
-            <view class="rule-item__content">
-              <text class="rule-item__title">{{ rule.title }}</text>
-              <text class="rule-item__desc">{{ rule.desc }}</text>
-            </view>
-          </view>
-        </view>
-      </view>
-
     </view>
 
     <view class="safe-area-bottom" />
+
+    <LuxuryTabbar />
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { walletApi, levelApi, financialApi } from '@/utils/api'
-import { checkAuth } from '@/utils/auth'
-import AssetStatusBar from '@/components/AssetStatusBar.vue'
-import WealthLevelCard from '@/components/wealth/WealthLevelCard.vue'
-import WealthInvestCard from '@/components/wealth/WealthInvestCard.vue'
+import { checkAuth, requireAuth } from '@/utils/auth'
+import { assetStore } from '@/store/asset'
+import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 
 const statusBarHeight = ref(20)
 const loggedIn = ref(checkAuth())
-const ecoPoints = ref(0)
-const creditPoints = ref(0)
-const yesterdayProfit = ref(0)
-const loadingAsset = ref(false)
-const loadingProducts = ref(false)
-const loadError = ref(false)
+const showAsset = ref(true)
 
-const levelData = ref({
-  badge: '级',
-  name: 'V1',
-  levelName: '普通会员',
-  teamPerformance: '0',
-  minPerformance: '5000',
-  nextMinPerformance: '0',
-  dailyBonus: '0',
-  totalBonus: '0',
-  nextLevel: 0,
-  nextLevelName: '',
-  upgradeNeed: '0',
-  icon: '级',
-  level: 1,
-})
+const ecoPointsDisplay = computed(() => assetStore.formatEco(assetStore.ecoPoints))
+const consumerPointsDisplay = computed(() => assetStore.formatConsumer(assetStore.consumerPoints))
+const balanceDisplay = computed(() => assetStore.formatBalance(assetStore.balance))
+const yesterdayProfit = computed(() => assetStore.formatProfit(assetStore.yesterdayProfit))
 
-const investProjects = ref<any[]>([])
+const services = [
+  {
+    id: 'compute',
+    name: '算力中心',
+    icon: '🧮',
+    desc: '数字资产算力增值',
+    tag: '年化 8-15%',
+    gradient: 'linear-gradient(135deg, #1E2433 0%, #2A3142 100%)',
+  },
+  {
+    id: 'crossborder',
+    name: '跨境电商',
+    icon: '🌐',
+    desc: '全球好物 积分兑换',
+    tag: '新品上架',
+    gradient: 'linear-gradient(135deg, #F9F7F4 0%, #EDE9E1 100%)',
+  },
+  {
+    id: 'quant',
+    name: '量化交易',
+    icon: '📊',
+    desc: '智能量化 稳健套利',
+    tag: '专业策略',
+    gradient: 'linear-gradient(135deg, #2A3142 0%, #1E2433 100%)',
+  },
+]
 
-const rules = ref([
-  { id: 1, title: '收益计算', desc: '每日结算，自动到账' },
-  { id: 2, title: '周期灵活', desc: '30/60/90天可选' },
-  { id: 3, title: '本金安全', desc: '到期全额返还' },
-  { id: 4, title: '提前赎回', desc: '收取2-5%手续费' },
-])
+const investRecords = ref<any[]>([])
 
 onMounted(() => {
   statusBarHeight.value = uni.getSystemInfoSync().statusBarHeight || 20
@@ -181,471 +168,422 @@ onMounted(() => {
 
 onShow(() => {
   loggedIn.value = checkAuth()
-  if (!loggedIn.value) return
-  loadAssetData()
-  loadLevelData()
-  loadFinancialProducts()
+  if (loggedIn.value) {
+    assetStore.fetchBalance()
+    loadInvestRecords()
+  }
 })
 
-async function loadAssetData() {
-  loadingAsset.value = true
-  try {
-    const bal = await walletApi.getBalance()
-    ecoPoints.value = Number(bal.ecoPoints || 0)
-    creditPoints.value = Number(bal.consumerPoints || 0)
-    yesterdayProfit.value = Number(bal?.yesterdayProfit ?? bal?.todayEarnings ?? 0)
-  } catch {
-    // silent fail
-  } finally {
-    loadingAsset.value = false
-  }
+function loadInvestRecords() {
+  // Mock data - replace with API call
+  investRecords.value = [
+    { id: 1, icon: '🧮', name: '算力增值计划A', date: '2026-05-20', profit: 128.5 },
+    { id: 2, icon: '📊', name: '量化策略Beta', date: '2026-05-18', profit: 86.3 },
+  ]
 }
 
-async function loadLevelData() {
-  try {
-    const data = await levelApi.getMyLevel()
-    levelData.value = {
-      badge: data.icon || '级',
-      name: data.levelName || 'V1',
-      levelName: data.levelName || '普通会员',
-      teamPerformance: data.teamPerformance || '0',
-      minPerformance: data.minPerformance || '5000',
-      nextMinPerformance: data.nextMinPerformance || data.minPerformance || '5000',
-      dailyBonus: data.dailyBonus || '0',
-      totalBonus: data.totalBonus || '0',
-      nextLevel: data.nextLevel || 0,
-      nextLevelName: data.nextLevelName || '',
-      upgradeNeed: data.upgradeNeed || '0',
-      icon: data.icon || '级',
-      level: data.level || 1,
-    }
-  } catch {
-    // silent fail
-  }
+function toggleAsset() {
+  showAsset.value = !showAsset.value
 }
 
-async function loadFinancialProducts() {
-  loadingProducts.value = true
-  loadError.value = false
-  try {
-    const products = await financialApi.getProducts()
-    investProjects.value = ((products || []) as any[]).map((p: any) => ({
-      id: p.id,
-      name: p.name,
-      icon: p.rateType === 1 ? '活' : p.rateType === 2 ? '稳' : '全',
-      yield: p.displayRate || p.rateValue,
-      cycleDays: p.cycleDays || p.cycle || 30,
-      minAmount: p.minAmount,
-      progress: p.totalInvested && p.totalAmount
-        ? Math.round((Number(p.totalInvested) / Number(p.totalAmount)) * 100)
-        : 50,
-      level: p.riskLevel === 1 ? 'safe' : p.riskLevel === 2 ? 'new' : 'high',
-      displayRate: p.displayRate || p.rateValue,
-      totalAmount: p.totalAmount,
-      totalInvested: p.totalInvested,
-      riskLevel: p.riskLevel,
-    }))
-  } catch {
-    loadError.value = true
-  } finally {
-    loadingProducts.value = false
+function goLogin() { uni.navigateTo({ url: '/pages/auth/login' }) }
+function goService(svc: any) {
+  if (!requireAuth()) return
+  if (svc.id === 'compute') {
+    uni.navigateTo({ url: '/pages/wealth/my-invest' })
+  } else {
+    uni.showToast({ title: `${svc.name}开发中`, icon: 'none' })
   }
 }
-
-function goLogin() {
-  uni.navigateTo({ url: '/pages/auth/login' })
-}
-function goAssetDetail() {
-  uni.navigateTo({ url: '/pages/user/points-detail' })
-}
-function goInvestList() {
-  uni.navigateTo({ url: '/pages/wealth/invest' })
-}
-function goLevelDetail() {
-  uni.navigateTo({ url: '/pages/user/level-detail' })
-}
-function goProjectDetail(project: any) {
-  uni.navigateTo({ url: `/pages/wealth/invest?productId=${project.id}` })
+function goMyInvest() {
+  if (!requireAuth()) return
+  uni.navigateTo({ url: '/pages/wealth/my-invest' })
 }
 </script>
 
 <style lang="scss" scoped>
 @import '@/styles/theme.scss';
-@import '@/styles/page-shell.scss';
 
 .page-container {
   min-height: 100vh;
-  background: $bg-primary;
-  padding: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, #F9F9F9 0%, #F0EDE8 100%);
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
 }
 
-.safe-area-top { width: 100%; }
+.status-bar { width: 100%; }
 
-.page-body {
-  padding: 0 $spacing-base $spacing-xl;
-}
-
-// 未登录
-.not-logged {
+// ========== 页面标题 ==========
+.page-header {
+  padding: 12rpx $spacing-base 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 120rpx 40rpx;
+  gap: 4rpx;
 
-  &__title {
-    font-size: 30rpx;
-    color: $text-secondary;
-    margin-bottom: 40rpx;
+  .page-title {
+    font-size: 40rpx;
+    font-weight: 700;
+    color: $mineral-gray;
+    letter-spacing: 1rpx;
   }
 
-  &__btn {
-    padding: 20rpx 64rpx;
-    background: $btn-gold-gradient;
-    border-radius: $radius-full;
-    box-shadow: $btn-gold-shadow;
-
-    text {
-      font-size: 30rpx;
-      font-weight: 700;
-      color: #fff;
-    }
+  .page-sub {
+    font-size: 24rpx;
+    color: $text-muted;
+    letter-spacing: 0.3rpx;
   }
 }
 
-// 资产概览卡片
-.asset-card {
-  margin: 16rpx $spacing-base;
-  background: $asset-card-bg;
-  border: 1rpx solid $asset-card-border;
-  border-radius: $asset-card-radius;
-  box-shadow: $asset-card-shadow;
+// ========== 资产总览卡 ==========
+.asset-overview {
+  position: relative;
+  margin: $spacing-base;
+  border-radius: $radius-2xl;
   overflow: hidden;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 16rpx 64rpx rgba(0, 0, 0, 0.22);
 
-  // 左上角光晕
-  &::before {
-    content: '';
+  &__bg {
     position: absolute;
-    top: -30rpx;
-    left: -30rpx;
-    width: 200rpx;
-    height: 200rpx;
-    background: radial-gradient(circle, rgba(184, 152, 118, 0.14) 0%, transparent 70%);
-    pointer-events: none;
+    inset: 0;
+    background: linear-gradient(145deg, #1E2433 0%, #2A3142 50%, #1E2433 100%);
+    z-index: 0;
   }
-}
 
-.profit-banner {
-  display: flex;
-  align-items: center;
-  padding: 28rpx 32rpx 24rpx;
-  background: rgba(255, 255, 255, 0.04);
-  border-bottom: 1rpx solid rgba(255, 255, 255, 0.06);
+  &__inner {
+    position: relative;
+    z-index: 1;
+    padding: $spacing-lg;
+  }
 
-  &__left { flex: 1; }
+  &__top {
+    margin-bottom: $spacing-lg;
+  }
 
   &__label {
     font-size: 22rpx;
     color: rgba(255, 255, 255, 0.5);
-    font-weight: 500;
     display: block;
     margin-bottom: 8rpx;
   }
 
-  &__value-row {
-    display: flex;
-    align-items: baseline;
-    gap: 6rpx;
-  }
-
   &__value {
     font-family: $asset-balance-font;
-    font-size: 44rpx;
-    font-weight: $asset-balance-weight;
+    font-size: 56rpx;
+    font-weight: 700;
+    color: $bronze-light;
+    letter-spacing: -1rpx;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__eye {
+    display: inline-block;
+    font-size: 28rpx;
+    margin-left: 12rpx;
+    opacity: 0.7;
+  }
+
+  &__stats {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding-top: $spacing-base;
+    border-top: 1rpx solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+.asset-label-row {
+  display: flex;
+  align-items: center;
+}
+
+.stat-item {
+  flex: 1;
+  text-align: center;
+
+  .stat-value {
+    display: block;
+    font-family: $asset-balance-font;
+    font-size: 28rpx;
+    font-weight: 700;
     color: $bronze-light;
     font-variant-numeric: tabular-nums;
-  }
-
-  &__unit {
-    font-size: 22rpx;
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  &__divider {
-    width: 1rpx;
-    height: 64rpx;
-    background: rgba(212, 180, 131, 0.15);
-    margin: 0 28rpx;
-    flex-shrink: 0;
-  }
-
-  &__right {
-    display: flex;
-    flex-direction: column;
-    gap: 6rpx;
-  }
-
-  &__hint {
-    font-size: 20rpx;
-    color: rgba(255, 255, 255, 0.4);
-  }
-
-  &__safe {
-    font-size: 20rpx;
-    color: rgba(184, 152, 118, 0.7);
-    font-weight: 600;
-  }
-}
-
-.asset-row {
-  display: flex;
-  align-items: center;
-  padding: 24rpx 20rpx;
-}
-
-.asset-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6rpx;
-
-  &__value {
-    font-family: $asset-balance-font;
-    font-size: 36rpx;
-    font-weight: 700;
-    color: #fff;
-    font-variant-numeric: tabular-nums;
-  }
-
-  &__label {
-    font-size: 20rpx;
-    color: rgba(255, 255, 255, 0.45);
-    font-weight: 500;
-  }
-
-  &__sub {
-    font-size: 18rpx;
-    color: rgba(255, 255, 255, 0.3);
-  }
-
-  &__icon {
-    font-size: 32rpx;
-    color: rgba(255, 255, 255, 0.4);
     margin-bottom: 4rpx;
   }
 
-  &--action {
-    cursor: pointer;
+  .stat-label {
+    display: block;
+    font-size: 18rpx;
+    color: rgba(255, 255, 255, 0.45);
   }
 }
 
-.asset-divider {
+.stat-divider {
   width: 1rpx;
-  height: 60rpx;
-  background: rgba(255, 255, 255, 0.06);
-  flex-shrink: 0;
-}
-
-// 骨架屏
-.asset-card--skeleton {
-  padding: 28rpx 32rpx;
-  min-height: 140rpx;
-}
-
-.skeleton-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-}
-
-.sk-line {
-  height: 20rpx;
+  height: 48rpx;
   background: rgba(255, 255, 255, 0.08);
-  border-radius: 10rpx;
-  animation: sk-shimmer 1.4s ease-in-out infinite;
 }
 
-.sk-title { width: 40%; height: 28rpx; }
-.sk-row { display: flex; gap: 24rpx; }
-.sk-block {
-  flex: 1;
-  height: 80rpx;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 16rpx;
-  animation: sk-shimmer 1.4s ease-in-out infinite;
-}
-.sk-w60 { flex: 0.6; }
-
-@keyframes sk-shimmer {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.8; }
-}
-
-// 骨架列表
-.skeleton-list {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-base;
-}
-.skeleton-card {
-  height: 200rpx;
-  background: rgba(47, 53, 66, 0.06);
-  border-radius: $radius-lg;
-  animation: sk-shimmer 1.4s ease-in-out infinite;
-}
-
-// 空状态
-.state-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80rpx 40rpx;
-  background: $bg-secondary;
-  border: 1rpx solid $border-light;
+// ========== 未登录 ==========
+.login-prompt {
+  margin: $spacing-base;
+  padding: $spacing-lg;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1rpx solid rgba(255, 255, 255, 0.6);
   border-radius: $radius-xl;
-
-  &__icon {
-    width: 88rpx;
-    height: 88rpx;
-    line-height: 88rpx;
-    text-align: center;
-    font-size: 36rpx;
-    font-weight: 800;
-    background: $warm-yellow;
-    border: 1rpx solid $border-primary;
-    border-radius: 50%;
-    color: $accent-dark;
-    margin-bottom: 20rpx;
-  }
+  box-shadow: $clay-shadow;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   &__text {
-    font-size: 30rpx;
-    font-weight: 600;
-    color: $text-primary;
-    margin-bottom: 8rpx;
+    font-size: 28rpx;
+    color: $text-secondary;
+    font-weight: 500;
   }
 
-  &__sub {
-    font-size: 24rpx;
-    color: $text-muted;
+  &__btn {
+    font-size: 26rpx;
+    color: $accent-dark;
+    font-weight: 600;
   }
 }
 
-// 理财专区
-.section {
-  margin: $spacing-lg 0;
+// ========== 服务卡片 ==========
+.services-section {
+  padding: 0 $spacing-base;
+  margin-bottom: $spacing-base;
 }
 
 .section-head {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: 24rpx;
-  padding: 0 $spacing-base;
-
-  &__left {
-    display: flex;
-    align-items: center;
-    gap: 12rpx;
-  }
-
-  &__icon {
-    width: 56rpx;
-    height: 56rpx;
-    line-height: 56rpx;
-    text-align: center;
-    font-size: 26rpx;
-    font-weight: 800;
-    background: $warm-yellow;
-    border: 1rpx solid $border-primary;
-    border-radius: 50%;
-    color: $accent-dark;
-  }
-
-  &__title {
-    font-size: 32rpx;
-    font-weight: 700;
-    color: $text-primary;
-    letter-spacing: 0.5rpx;
-  }
-
-  &__more {
-    display: flex;
-    align-items: center;
-    gap: 4rpx;
-    font-size: 24rpx;
-    color: $text-secondary;
-  }
+  align-items: center;
+  margin-bottom: $spacing-base;
 }
 
-.invest-list {
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: $mineral-gray;
+  letter-spacing: 0.5rpx;
+}
+
+.service-grid {
   display: flex;
   flex-direction: column;
   gap: $spacing-base;
-  padding: 0 $spacing-base;
 }
 
-// 理财规则
-.rules-section {
-  margin: $spacing-lg $spacing-base;
-  padding: 32rpx 28rpx;
-  background: $bg-secondary;
-  border: 1rpx solid $border-light;
+.service-card {
+  position: relative;
   border-radius: $radius-xl;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
-  &__title {
-    font-size: 28rpx;
-    font-weight: 700;
-    color: $text-primary;
-    display: block;
-    margin-bottom: 24rpx;
-  }
-}
-
-.rules-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24rpx;
-}
-
-.rule-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12rpx;
-
-  &__dot {
-    width: 10rpx;
-    height: 10rpx;
-    border-radius: 50%;
-    background: $bronze-gold;
-    margin-top: 8rpx;
-    flex-shrink: 0;
+  &:active {
+    transform: scale(0.98);
   }
 
-  &__content {
+  &--compute,
+  &--quant {
+    .service-card__name { color: $bronze-light; }
+    .service-card__desc { color: rgba(255, 255, 255, 0.5); }
+    .service-card__tag {
+      background: rgba(184, 152, 118, 0.15);
+      color: $bronze-gold;
+      border-color: rgba(184, 152, 118, 0.25);
+    }
+    .service-card__arrow { color: rgba(255, 255, 255, 0.3); }
+  }
+
+  &--crossborder {
+    .service-card__glow {
+      background: radial-gradient(circle at 80% 50%, rgba(184, 152, 118, 0.25) 0%, transparent 60%);
+    }
+    .service-card__name { color: $accent-dark; }
+    .service-card__desc { color: rgba(47, 53, 66, 0.5); }
+    .service-card__tag {
+      background: rgba(184, 152, 118, 0.08);
+      color: $accent-dark;
+      border-color: rgba(184, 152, 118, 0.2);
+    }
+    .service-card__arrow { color: rgba(47, 53, 66, 0.2); }
+  }
+
+  &__glow {
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 55%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(184, 152, 118, 0.15) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &__inner {
+    position: relative;
+    z-index: 1;
     display: flex;
-    flex-direction: column;
-    gap: 4rpx;
+    align-items: center;
+    gap: $spacing-base;
+    padding: 28rpx $spacing-lg;
   }
 
-  &__title {
-    font-size: 26rpx;
-    font-weight: 600;
-    color: $text-primary;
+  &__icon-wrap {
+    width: 88rpx;
+    height: 88rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $radius-xl;
+    border: 1rpx solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+
+    .service-card__icon {
+      font-size: 40rpx;
+    }
+  }
+
+  &--crossborder &__icon-wrap {
+    background: rgba(184, 152, 118, 0.08);
+    border-color: rgba(184, 152, 118, 0.15);
+  }
+
+  &__info {
+    flex: 1;
+  }
+
+  &__name {
+    display: block;
+    font-size: 30rpx;
+    font-weight: 700;
+    margin-bottom: 6rpx;
   }
 
   &__desc {
+    display: block;
+    font-size: 22rpx;
+    margin-bottom: 10rpx;
+  }
+
+  &__tag {
+    display: inline-flex;
+    padding: 4rpx 12rpx;
+    border-radius: 20rpx;
+    border: 1rpx solid;
+    font-size: 20rpx;
+    font-weight: 600;
+  }
+
+  &__arrow {
+    font-size: 40rpx;
+    font-weight: 200;
+    flex-shrink: 0;
+  }
+}
+
+// ========== 我的投资 ==========
+.my-invest-section {
+  padding: 0 $spacing-base;
+  margin-bottom: $spacing-base;
+}
+
+.invest-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-base $spacing-lg;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1rpx solid rgba(255, 255, 255, 0.6);
+  border-radius: $radius-xl;
+  box-shadow: $clay-shadow;
+
+  &__left {}
+
+  &__title {
+    display: block;
+    font-size: 28rpx;
+    font-weight: 700;
+    color: $text-primary;
+    margin-bottom: 4rpx;
+  }
+
+  &__sub {
+    display: block;
+    font-size: 22rpx;
+    color: $text-muted;
+  }
+
+  &__arrow {
+    font-size: 36rpx;
+    color: $text-muted;
+  }
+}
+
+// ========== 投资记录 ==========
+.invest-history {
+  padding: 0 $spacing-base;
+}
+
+.record-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.record-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-base;
+  padding: $spacing-base;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1rpx solid rgba(255, 255, 255, 0.6);
+  border-radius: $radius-lg;
+  box-shadow: $clay-shadow;
+}
+
+.record-icon {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  background: rgba(47, 53, 66, 0.06);
+  border-radius: $radius-md;
+  flex-shrink: 0;
+}
+
+.record-info {
+  flex: 1;
+
+  .record-name {
+    display: block;
+    font-size: 28rpx;
+    font-weight: 600;
+    color: $text-primary;
+    margin-bottom: 4rpx;
+  }
+
+  .record-date {
+    display: block;
     font-size: 22rpx;
     color: $text-muted;
   }
 }
 
-.safe-area-bottom {
-  height: constant(safe-area-inset-bottom);
-  height: env(safe-area-inset-bottom);
+.record-profit {
+  font-family: $asset-balance-font;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: $text-muted;
+  font-variant-numeric: tabular-nums;
+
+  &.positive {
+    color: $success;
+  }
 }
 </style>

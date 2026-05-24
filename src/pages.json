@@ -1,23 +1,9 @@
 {
   "pages": [
-    {
-      "path": "pages/index/index",
-      "style": {
-        "navigationStyle": "custom",
-        "enablePullDownRefresh": true,
-        "backgroundColor": "#F5F4F1",
-        "backgroundTextStyle": "light"
-      }
-    },
+    { "path": "pages/index/index", "style": { "navigationStyle": "custom", "enablePullDownRefresh": true } },
     { "path": "pages/catalog/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/cart/index", "style": { "navigationStyle": "custom" } },
-    {
-      "path": "pages/wealth/index",
-      "style": {
-        "navigationStyle": "custom",
-        "backgroundColor": "#F5F4F1"
-      }
-    },
+    { "path": "pages/wealth/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/user/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/order/list", "style": { "navigationStyle": "custom" } },
     { "path": "pages/buy/index", "style": { "navigationStyle": "custom" } },
@@ -54,41 +40,16 @@
     "backgroundTextStyle": "light"
   },
   "tabBar": {
-    "color": "#8A8A8A",
-    "selectedColor": "#9A7B4F",
-    "backgroundColor": "#FFFFFF",
+    "color": "#BBBBBB",
+    "selectedColor": "#B89876",
+    "backgroundColor": "rgba(255,255,255,0.01)",
     "borderStyle": "white",
     "list": [
-      {
-        "pagePath": "pages/index/index",
-        "text": "主页",
-        "iconPath": "static/tabbar/home.png",
-        "selectedIconPath": "static/tabbar/home-active.png"
-      },
-      {
-        "pagePath": "pages/catalog/index",
-        "text": "分类",
-        "iconPath": "static/tabbar/catalog.png",
-        "selectedIconPath": "static/tabbar/catalog-active.png"
-      },
-      {
-        "pagePath": "pages/cart/index",
-        "text": "购物车",
-        "iconPath": "static/tabbar/cart.png",
-        "selectedIconPath": "static/tabbar/cart-active.png"
-      },
-      {
-        "pagePath": "pages/wealth/index",
-        "text": "增值区",
-        "iconPath": "static/tabbar/wealth.png",
-        "selectedIconPath": "static/tabbar/wealth-active.png"
-      },
-      {
-        "pagePath": "pages/user/index",
-        "text": "我的",
-        "iconPath": "static/tabbar/user.png",
-        "selectedIconPath": "static/tabbar/user-active.png"
-      }
+      { "pagePath": "pages/index/index", "text": "主页" },
+      { "pagePath": "pages/catalog/index", "text": "分类" },
+      { "pagePath": "pages/cart/index", "text": "购物车" },
+      { "pagePath": "pages/wealth/index", "text": "增值区" },
+      { "pagePath": "pages/user/index", "text": "我的" }
     ]
   }
 }

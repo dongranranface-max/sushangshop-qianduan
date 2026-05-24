@@ -1,703 +1,720 @@
 <template>
-  <view
-    class="page-container"
-    :style="{ '--home-top-offset': homeTopOffset + 'px' }"
-  >
-    <!-- 顶部导航：Logo + 搜索框 + 购物车 -->
-    <view
-      class="home-top"
-      :class="{ 'home-top--scrolled': pageScrolled }"
-      :style="{ paddingTop: statusBarHeight + 'px' }"
-    >
-      <BrandLogo size="sm" :show-text="false" />
-      <view class="search-bar" @click="goSearch">
-        <text class="search-bar__icon">⌕</text>
-        <text class="search-bar__ph">{{ searchHint }}</text>
-      </view>
-      <view class="home-top__cart" @click="goCart">
-        <text class="home-top__cart-t">购物车</text>
+  <view class="page-container">
+    <!-- 毛玻璃状态栏 -->
+    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }" />
+
+    <!-- 搜索栏 -->
+    <view class="search-header" @click="goSearch">
+      <view class="search-bar">
+        <text class="search-icon">⌕</text>
+        <text class="search-placeholder">搜索商品/服务</text>
       </view>
     </view>
 
-    <!-- 页面主体 -->
-    <view class="page-body">
-
-      <!-- Banner 轮播 -->
-      <view class="banner-wrap">
-        <swiper
-          class="banner"
-          indicator-dots
-          indicator-active-color="#D4B483"
-          indicator-color="rgba(255,255,255,0.35)"
-          autoplay
-          circular
-          :interval="4500"
-        >
-          <swiper-item v-for="(b, i) in banners" :key="i">
-            <view
-              class="banner__slide"
-              :class="'banner__slide--' + (b.theme || 'consume')"
-              @click="onBanner(i)"
-            >
-              <image
-                v-if="b.image"
-                class="banner__img"
-                :src="b.image"
-                mode="aspectFill"
-                :lazy-load="i > 0"
-              />
-              <view class="banner__shade" />
-              <view class="banner__content">
-                <text v-if="b.tag" class="banner__tag">{{ b.tag }}</text>
-                <text class="banner__title">{{ b.title }}</text>
-                <text class="banner__sub">{{ b.sub }}</text>
-                <view class="banner__cta" @click.stop="onBanner(i)">
-                  <text>{{ b.cta }}</text>
-                </view>
-              </view>
-              <view v-if="!loggedIn && i === 0" class="banner__login-pill" @click.stop="goLogin">
-                <text>登录领积分</text>
-              </view>
-            </view>
-          </swiper-item>
-        </swiper>
-      </view>
-
-      <!-- 跑马灯通知 -->
-      <view class="home-block">
-        <RewardTicker variant="feed" label="动态信息" @click="goWealthTab" />
-      </view>
-
-      <view v-if="loggedIn" class="home-divider" />
-
-      <!-- 资产状态栏（已登录） -->
-      <view v-if="loggedIn" class="home-block">
-        <AssetStatusBar />
-      </view>
-
-      <view class="home-divider" />
-
-      <!-- 商城服务入口 -->
-      <view class="home-block home-section">
-        <text class="home-section__title">商城服务</text>
-        <MallPortalGrid @select="onPortal" />
-      </view>
-
-      <view class="home-divider" />
-
-      <!-- 热门分类 -->
-      <view class="home-block home-block--category">
-        <view class="block-head">
-          <text class="block-head__title">热门分类</text>
-          <text class="block-head__more" @click="goCatalog()">全部分类 ›</text>
-        </view>
-        <HomeCategoryNav
-          :categories="homeCategories"
-          @select="onCategory"
-          @all="goCatalog()"
+    <!-- 全屏轮播 -->
+    <view class="banner-section">
+      <swiper
+        class="banner-swiper"
+        :current="currentBanner"
+        @change="onBannerChange"
+        autoplay
+        interval="5000"
+        circular
+        duration="400"
+      >
+        <swiper-item v-for="(banner, idx) in banners" :key="idx" class="banner-item">
+          <image class="banner-img" :src="banner.image" mode="aspectFill" />
+          <view class="banner-overlay">
+            <text class="banner-title">{{ banner.title }}</text>
+            <text class="banner-sub">{{ banner.sub }}</text>
+          </view>
+        </swiper-item>
+      </swiper>
+      <!-- 轮播指示器 -->
+      <view class="banner-dots">
+        <view
+          v-for="(_, idx) in banners"
+          :key="idx"
+          class="banner-dot"
+          :class="{ active: currentBanner === idx }"
         />
       </view>
-
-      <view class="home-divider" />
-
-      <!-- 商品列表 -->
-      <view id="feed-anchor" class="home-block feed-section">
-        <view class="feed-tabs feed-tabs--sticky">
-          <view
-            v-for="t in feedTabs"
-            :key="t.type"
-            class="feed-tab"
-            :class="{ active: feedType === t.type }"
-            @click="switchFeedTab(t.type)"
-          >
-            <text class="feed-tab__abbr">{{ t.abbr }}</text>
-            <text class="feed-tab__label">{{ t.label }}</text>
-          </view>
-        </view>
-
-        <view class="feed-head">
-          <view class="feed-head__row">
-            <text class="feed-head__title">{{ feedTitle }}</text>
-            <text class="feed-head__more" @click="goFeedMore">查看更多 ›</text>
-          </view>
-          <text class="feed-head__hint">{{ feedHint }}</text>
-        </view>
-
-        <HomeProductSkeleton v-if="feedLoading" :count="4" />
-        <view v-else-if="!feedList.length" class="feed-empty" @click="goCatalog()">
-          <text>暂无商品，去分类逛逛 ›</text>
-        </view>
-        <view v-else :key="feedType" class="product-grid product-grid--fade">
-          <HomeProductCard
-            v-for="p in feedVisibleList"
-            :key="p.id"
-            :product="p"
-            :type="feedType"
-            :default-cover="defaultCover"
-            @click="goProduct(p.id, feedType)"
-          />
-        </view>
-
-        <view
-          v-if="!feedLoading && !feedExpanded && feedList.length > FEED_PREVIEW"
-          class="feed-more-btn"
-          @click="expandFeed"
-        >
-          <text>展开更多 ({{ feedList.length - FEED_PREVIEW }}+)</text>
-        </view>
-      </view>
-
     </view>
 
-    <view class="safe-area-bottom" />
+    <!-- 平台实时数据滚动 -->
+    <view class="ticker-strip">
+      <view class="ticker-left">
+        <text class="ticker-tag">实时</text>
+        <view class="ticker-content">
+          <text class="ticker-text">{{ tickerText }}</text>
+        </view>
+      </view>
+      <text class="ticker-arrow">›</text>
+    </view>
+
+    <!-- 三大商城入口 -->
+    <view class="mall-portals">
+      <view
+        v-for="mall in mallPortals"
+        :key="mall.id"
+        class="mall-portal-card"
+        :style="{ background: mall.gradient }"
+        @click="goMall(mall)"
+      >
+        <view class="mall-portal-glow" />
+        <view class="mall-portal-inner">
+          <view class="mall-icon-wrap">
+            <text class="mall-icon">{{ mall.icon }}</text>
+          </view>
+          <view class="mall-info">
+            <text class="mall-name">{{ mall.name }}</text>
+            <text class="mall-desc">{{ mall.desc }}</text>
+          </view>
+          <view class="mall-arrow">
+            <text>›</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 热门分类 -->
+    <view class="section-block">
+      <view class="section-head">
+        <view class="section-head__left">
+          <text class="section-title">热门分类</text>
+        </view>
+        <view class="section-head__right" @click="goCatalog">
+          <text class="section-more">查看全部 ›</text>
+        </view>
+      </view>
+      <scroll-view class="category-scroll" scroll-x>
+        <view class="category-list">
+          <view
+            v-for="cat in hotCategories"
+            :key="cat.id"
+            class="category-item"
+            @click="goCatalogCategory(cat)"
+          >
+            <view class="category-icon-wrap" :style="{ background: cat.bg }">
+              <text class="category-icon">{{ cat.icon }}</text>
+            </view>
+            <text class="category-name">{{ cat.name }}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 精品推荐 -->
+    <view class="section-block">
+      <view class="section-head">
+        <view class="section-head__left">
+          <text class="section-title">精品推荐</text>
+        </view>
+      </view>
+      <view v-if="loading && !products.length" class="boutique-grid">
+        <view v-for="i in 4" :key="i" class="boutique-skeleton shimmer" />
+      </view>
+      <view v-else class="boutique-grid">
+        <view
+          v-for="p in products"
+          :key="p.id"
+          class="boutique-card"
+          @click="goProduct(p)"
+        >
+          <image class="boutique-img" :src="p.coverImage || p.image" mode="aspectFill" />
+          <view class="boutique-info">
+            <text class="boutique-name">{{ p.name }}</text>
+            <view class="boutique-price">
+              <text class="boutique-cash">¥{{ p.price }}</text>
+              <text v-if="p.requiredPoints" class="boutique-points">+{{ p.requiredPoints }}积分</text>
+            </view>
+          </view>
+          <view v-if="p.type === 1" class="boutique-badge">购</view>
+          <view v-else-if="p.type === 2" class="boutique-badge boutique-badge--gold">换</view>
+          <view v-else class="boutique-badge boutique-badge--dark">兑</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部安全区 -->
+    <view class="safe-area-bottom" :style="{ height: (100 + safeAreaBottom) + 'px' }" />
+
+    <!-- 自定义毛玻璃 TabBar -->
+    <LuxuryTabbar />
+
+    <!-- 资产状态栏 -->
+    <AssetStatusBar v-if="loggedIn" />
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { onShow, onPullDownRefresh, onPageScroll } from '@dcloudio/uni-app'
+import { ref, computed, onMounted } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 import { productApi } from '@/utils/api'
-import { checkAuth, requireAuth } from '@/utils/auth'
+import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
-import BrandLogo from '@/components/BrandLogo.vue'
-import MallPortalGrid from '@/components/MallPortalGrid.vue'
-import type { PortalType } from '@/components/MallPortalGrid.vue'
-import HomeCategoryNav from '@/components/HomeCategoryNav.vue'
-import type { HomeCategory } from '@/utils/category'
-import { normalizeCategoryTree, flattenCategories, HOME_CATEGORY_FALLBACK } from '@/utils/category'
-import { HOME_BANNERS, DEFAULT_PRODUCT_COVER } from '@/utils/media'
+import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 import AssetStatusBar from '@/components/AssetStatusBar.vue'
-import HomeProductCard from '@/components/HomeProductCard.vue'
-import HomeProductSkeleton from '@/components/HomeProductSkeleton.vue'
-import RewardTicker from '@/components/RewardTicker.vue'
-
-const CATALOG_PRESET_KEY = 'catalog_preset'
-const FEED_PREVIEW = 4
 
 const statusBarHeight = ref(20)
-const homeTopOffset = ref(56)
-const pageScrolled = ref(false)
+const safeAreaBottom = ref(0)
 const loggedIn = ref(checkAuth())
-const feedType = ref<1 | 2 | 3>(1)
-const feedLoading = ref(false)
-const feedExpanded = ref(false)
-const homeCategories = ref<HomeCategory[]>([...HOME_CATEGORY_FALLBACK])
-let categoriesLoadSeq = 0
-const consumeList = ref<any[]>([])
-const exchangeList = ref<any[]>([])
-const redeemList = ref<any[]>([])
-const defaultCover = DEFAULT_PRODUCT_COVER
-const banners = [...HOME_BANNERS]
+const currentBanner = ref(0)
+const loading = ref(false)
+const products = ref<any[]>([])
 
-const searchHints = ['搜索商品、品牌', '搜索换购好物', '搜索积分兑换礼']
-const searchHintIdx = ref(0)
-let searchTimer: ReturnType<typeof setInterval> | null = null
-const searchHint = computed(() => searchHints[searchHintIdx.value])
+const banners = ref([
+  { image: '/static/logo.png', title: '集享生活', sub: '品质生活 从集享开始' },
+  { image: '/static/logo.png', title: '消费即返', sub: '购买商品 积分双重收益' },
+  { image: '/static/logo.png', title: '增值理财', sub: '算力增值 稳健收益' },
+])
 
-const feedTabs = [
-  { type: 1 as const, label: '精选消费', abbr: '购' },
-  { type: 2 as const, label: '换购好物', abbr: '换' },
-  { type: 3 as const, label: '积分兑换', abbr: '兑' },
+const tickerText = ref('')
+const tickerQueue = [
+  '平台用户突破 128,000+',
+  '今日订单 3,892 单',
+  '生态积分发行量 8.8亿',
+  '累计分红 2,100万+',
+  '服务商覆盖 32 省份',
+]
+let tickerIndex = 0
+
+const mallPortals = [
+  {
+    id: 'consume',
+    name: '消费商城',
+    desc: '精选商品 消费即返积分',
+    icon: '购',
+    gradient: 'linear-gradient(135deg, #F9F7F4 0%, #EDE9E1 100%)',
+    type: 1,
+  },
+  {
+    id: 'exchange',
+    name: '换购商城',
+    desc: '积分抵现 超值换购',
+    icon: '换',
+    gradient: 'linear-gradient(135deg, #F0EDE8 0%, #E8E4DC 100%)',
+    type: 2,
+  },
+  {
+    id: 'redeem',
+    name: '兑换商城',
+    desc: '积分全额兑换 零元好物',
+    icon: '兑',
+    gradient: 'linear-gradient(135deg, #2F3542 0%, #1E2433 100%)',
+    type: 3,
+  },
 ]
 
-const feedList = computed(() => {
-  if (feedType.value === 1) return consumeList.value
-  if (feedType.value === 2) return exchangeList.value
-  return redeemList.value
-})
-
-const feedVisibleList = computed(() => {
-  const list = feedList.value
-  return feedExpanded.value ? list : list.slice(0, FEED_PREVIEW)
-})
-
-const feedTitle = computed(() => feedTabs.find((x) => x.type === feedType.value)?.label || '精选好物')
-
-const feedHint = computed(() => {
-  if (feedType.value === 1) return '现金购 · 确认收货返生态积分'
-  if (feedType.value === 2) return '积分抵现 · 需绑定银行卡'
-  return '消费积分免费兑好物'
-})
+const hotCategories = [
+  { id: 1, name: '手机数码', icon: '📱', bg: 'rgba(184,152,118,0.10)' },
+  { id: 2, name: '电脑办公', icon: '💻', bg: 'rgba(65,75,94,0.08)' },
+  { id: 3, name: '家居生活', icon: '🏠', bg: 'rgba(142,116,89,0.10)' },
+  { id: 4, name: '美妆护肤', icon: '💄', bg: 'rgba(65,75,94,0.08)' },
+  { id: 5, name: '食品生鲜', icon: '🍎', bg: 'rgba(142,116,89,0.10)' },
+  { id: 6, name: '服饰鞋帽', icon: '👟', bg: 'rgba(184,152,118,0.10)' },
+  { id: 7, name: '母婴用品', icon: '🍼', bg: 'rgba(65,75,94,0.08)' },
+  { id: 8, name: '图书文具', icon: '📚', bg: 'rgba(142,116,89,0.10)' },
+]
 
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
-  homeTopOffset.value = statusBarHeight.value + 44
-  loadCategories()
+  safeAreaBottom.value = sys.safeAreaInsets?.bottom || 0
   loadProducts()
-  searchTimer = setInterval(() => {
-    searchHintIdx.value = (searchHintIdx.value + 1) % searchHints.length
-  }, 3200)
-})
-
-onUnmounted(() => {
-  if (searchTimer) clearInterval(searchTimer)
+  startTicker()
 })
 
 onShow(() => {
   loggedIn.value = checkAuth()
   if (loggedIn.value) assetStore.fetchBalance()
-  loadCategories()
 })
 
-onPageScroll((e) => {
-  pageScrolled.value = e.scrollTop > 8
-})
-
-onPullDownRefresh(async () => {
-  feedExpanded.value = false
-  await Promise.all([
-    loadCategories(),
-    loadProducts(),
-    loggedIn.value ? assetStore.fetchBalance() : Promise.resolve(),
-  ])
-  uni.stopPullDownRefresh()
-})
-
-async function loadCategories() {
-  const seq = ++categoriesLoadSeq
-  try {
-    const res = await productApi.getCategories()
-    if (seq !== categoriesLoadSeq) return
-    const tree = normalizeCategoryTree(res)
-    const flat = flattenCategories(tree)
-    homeCategories.value = flat.length ? flat : [...HOME_CATEGORY_FALLBACK]
-  } catch (e) {
-    if (seq !== categoriesLoadSeq) return
-    homeCategories.value = [...HOME_CATEGORY_FALLBACK]
-  }
+function startTicker() {
+  tickerText.value = tickerQueue[0]
+  tickerIndex = 0
+  setInterval(() => {
+    tickerIndex = (tickerIndex + 1) % tickerQueue.length
+    tickerText.value = tickerQueue[tickerIndex]
+  }, 4000)
 }
 
 async function loadProducts() {
-  feedLoading.value = true
+  loading.value = true
   try {
-    const [c, e, r] = await Promise.all([
-      productApi.getList({ type: 1, limit: 8 }),
-      productApi.getList({ type: 2, limit: 8 }),
-      productApi.getList({ type: 3, limit: 8 }),
-    ])
-    consumeList.value = c.list || []
-    exchangeList.value = e.list || []
-    redeemList.value = r.list || []
-  } catch (err) {
-    // silent fail, show empty state
+    const res = await productApi.getList({ type: 1, limit: 8, page: 1 })
+    products.value = (res.list || []).slice(0, 4)
+  } catch {
+    products.value = []
   } finally {
-    feedLoading.value = false
+    loading.value = false
   }
 }
 
-function switchFeedTab(type: 1 | 2 | 3) {
-  feedType.value = type
-  feedExpanded.value = false
+function onBannerChange(e: any) {
+  currentBanner.value = e.detail.current
 }
 
-function expandFeed() {
-  feedExpanded.value = true
+function goSearch() { uni.navigateTo({ url: '/pages/search/index' }) }
+function goCatalog() { uni.switchTab({ url: '/pages/catalog/index' }) }
+function goMall(mall: any) {
+  uni.navigateTo({ url: `/pages/catalog/index?type=${mall.type}` })
 }
-
-function presetCatalog(type: number, categoryId = '') {
-  uni.setStorageSync(CATALOG_PRESET_KEY, { type, categoryId })
+function goCatalogCategory(cat: any) {
+  uni.navigateTo({ url: `/pages/catalog/index?categoryId=${cat.id}` })
 }
-
-function goLogin() {
-  uni.navigateTo({ url: '/pages/auth/login' })
-}
-function goSearch() {
-  uni.navigateTo({ url: '/pages/search/index' })
-}
-function goCart() {
-  uni.switchTab({ url: '/pages/cart/index' })
-}
-function goWealthTab() {
-  if (!requireAuth()) return
-  uni.switchTab({ url: '/pages/wealth/index' })
-}
-function goCatalog(type = 1, categoryId = '') {
-  presetCatalog(type, categoryId)
-  uni.switchTab({ url: '/pages/catalog/index' })
-}
-function goBuy() {
-  uni.navigateTo({ url: '/pages/buy/index' })
-}
-function goExchange() {
-  if (!requireAuth()) return
-  uni.navigateTo({ url: '/pages/exchange/list' })
-}
-function goRedeem() {
-  if (!requireAuth()) return
-  uni.navigateTo({ url: '/pages/redeem/list' })
-}
-function goProduct(id: string, type: number) {
-  uni.navigateTo({ url: `/pages/product/detail?id=${id}&type=${type}` })
-}
-
-function goFeedMore() {
-  if (feedType.value === 1) goBuy()
-  else if (feedType.value === 2) goExchange()
-  else goRedeem()
-}
-
-function onCategory(cat: HomeCategory) {
-  goCatalog(1, cat.id)
-}
-
-function onBanner(i: number) {
-  const link = banners[i]?.link
-  if (link === 'consume') goBuy()
-  else if (link === 'exchange') goExchange()
-  else if (link === 'wealth') goWealthTab()
-}
-
-function onPortal(type: PortalType) {
-  if (type !== 'consume' && !requireAuth()) return
-  switch (type) {
-    case 'consume': goBuy(); break
-    case 'exchange': goExchange(); break
-    case 'redeem': goRedeem(); break
-    case 'wealth': goWealthTab(); break
-  }
+function goProduct(p: any) {
+  uni.navigateTo({ url: `/pages/product/detail?id=${p.id}&type=${p.type || 1}` })
 }
 </script>
 
 <style lang="scss" scoped>
 @import '@/styles/theme.scss';
-@import '@/styles/page-shell.scss';
 
 .page-container {
-  overflow-x: hidden;
+  min-height: 100vh;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, #F9F9F9 0%, #F0EDE8 100%);
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
 }
 
-.page-body {
-  padding: 12rpx 0 $spacing-xl;
-}
+.status-bar { width: 100%; }
 
-.home-block {
-  margin-bottom: $home-module-gap;
-}
-.home-divider {
-  height: 1rpx;
-  background: $border-light;
-  margin-bottom: $home-module-gap;
-}
-
-// 顶部导航：Logo + 搜索 + 购物车
-.home-top {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  padding: 12rpx 0 16rpx;
-  margin: 0 (-$spacing-base);
-  padding-left: $spacing-base;
-  padding-right: $spacing-base;
-  position: sticky;
-  top: 0;
-  z-index: 110;
-  background: linear-gradient(180deg, rgba(245, 244, 241, 0.96) 0%, rgba(245, 244, 241, 0.88) 100%);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-
-  &--scrolled {
-    background: rgba(245, 244, 241, 0.92);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 8rpx 32rpx rgba(26, 36, 56, 0.08);
-    border-bottom: 1rpx solid $border-light;
-  }
-}
-
-.home-top__cart {
-  padding: 0 20rpx;
-  height: 64rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  @include premium-surface($bg-secondary);
-  border-radius: $radius-full;
-  flex-shrink: 0;
-}
-.home-top__cart-t {
-  font-size: var(--font-xs);
-  color: $text-primary;
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-wide);
-}
-
-.home-section__title {
-  @include section-head;
-  margin-bottom: 24rpx;
+// ========== 搜索栏 ==========
+.search-header {
+  padding: 12rpx $spacing-base 8rpx;
 }
 
 .search-bar {
-  flex: 1;
   display: flex;
   align-items: center;
-  height: 72rpx;
+  gap: 12rpx;
+  height: 80rpx;
   padding: 0 28rpx;
-  @include premium-surface($bg-secondary);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1rpx solid rgba(255, 255, 255, 0.6);
   border-radius: $radius-full;
-  min-width: 0;
+  box-shadow: $clay-shadow;
 
-  &__icon {
-    color: $text-accent;
-    margin-right: 12rpx;
-    font-size: 28rpx;
-    font-weight: var(--weight-medium);
-  }
-
-  &__ph {
-    font-size: var(--font-sm);
+  .search-icon {
+    font-size: 32rpx;
     color: $text-muted;
-    letter-spacing: var(--tracking-normal);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .search-placeholder {
+    flex: 1;
+    font-size: 28rpx;
+    color: $text-muted;
+    letter-spacing: 0.3rpx;
   }
 }
 
-// Banner
-.banner-wrap {
-  margin: 0 (-$spacing-base) $home-module-gap;
-  width: calc(100% + #{$spacing-base * 2});
-}
-.banner {
-  height: 422rpx;
-  border-radius: 0;
-  overflow: hidden;
-}
-.banner__slide {
+// ========== 轮播 ==========
+.banner-section {
   position: relative;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #EDE9E1 0%, #D4C4AE 45%, #B89876 100%);
+  margin: 0 $spacing-base;
+  border-radius: $radius-xl;
+  overflow: hidden;
+  box-shadow: 0 16rpx 56rpx rgba(47, 53, 66, 0.12);
+}
 
-  &--exchange {
-    background: linear-gradient(135deg, #ECEEF2 0%, #D4C4AE 50%, #8E7459 100%);
-  }
-  &--wealth {
-    background: linear-gradient(135deg, #2F3542 0%, #414B5E 55%, #8E7459 100%);
-  }
-  &--wealth .banner__title,
-  &--wealth .banner__sub {
-    color: #f5f4f1;
-  }
+.banner-swiper {
+  width: 100%;
+  height: 380rpx;
 }
-.banner__img {
-  position: absolute;
-  inset: 0;
+
+.banner-item {
+  width: 100%;
+  height: 380rpx;
+  position: relative;
+}
+
+.banner-img {
   width: 100%;
   height: 100%;
-  display: block;
+  background: $bg-tertiary;
 }
-.banner__shade {
+
+.banner-overlay {
   position: absolute;
+  bottom: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 45%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.35) 35%, transparent 100%);
-  pointer-events: none;
-  z-index: 1;
-}
-.banner__content {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 38%;
-  z-index: 2;
+  padding: 40rpx $spacing-lg 32rpx;
+  background: linear-gradient(to top, rgba(30, 36, 51, 0.75) 0%, transparent 100%);
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-start;
-  padding: 0 $spacing-base 36rpx;
-  box-sizing: border-box;
-}
-.banner__tag {
-  font-size: var(--font-xs);
-  padding: 6rpx 16rpx;
-  border-radius: $radius-sm;
-  margin-bottom: 12rpx;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1rpx solid rgba(255, 255, 255, 0.35);
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-wide);
-}
-.banner__title {
-  @include type-banner-title;
-  color: #fff;
-  text-align: left;
-  text-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.35);
-}
-.banner__sub {
-  font-size: var(--font-body);
-  font-weight: var(--weight-regular);
-  color: rgba(255, 255, 255, 0.88);
-  margin-top: 10rpx;
-  letter-spacing: var(--tracking-normal);
-  text-align: left;
-  line-height: var(--leading-normal);
-}
-.banner__cta {
-  margin-top: 20rpx;
-  padding: 12rpx 36rpx;
-  border: 2rpx solid rgba(255, 255, 255, 0.92);
-  border-radius: $radius-full;
-  background: transparent;
-  text {
-    font-size: var(--font-sm);
-    font-weight: var(--weight-semibold);
+  gap: 6rpx;
+
+  .banner-title {
+    font-size: 36rpx;
+    font-weight: 700;
     color: #fff;
-    letter-spacing: var(--tracking-wide);
+    letter-spacing: 1rpx;
   }
-  &:active {
-    background: rgba(255, 255, 255, 0.12);
+
+  .banner-sub {
+    font-size: 24rpx;
+    color: rgba(255, 255, 255, 0.7);
   }
-}
-.banner__login-pill {
-  position: absolute;
-  top: 20rpx;
-  right: $spacing-base;
-  z-index: 3;
-  padding: 10rpx 26rpx;
-  border: 2rpx solid rgba(255, 255, 255, 0.9);
-  border-radius: $radius-full;
-  background: rgba(0, 0, 0, 0.28);
-  font-size: var(--font-xs);
-  color: #fff;
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-wide);
 }
 
-.block-head {
+.banner-dots {
+  position: absolute;
+  bottom: 20rpx;
+  right: $spacing-lg;
+  display: flex;
+  gap: 8rpx;
+}
+
+.banner-dot {
+  width: 24rpx;
+  height: 4rpx;
+  border-radius: 2rpx;
+  background: rgba(255, 255, 255, 0.4);
+  transition: all 0.3s ease;
+
+  &.active {
+    width: 40rpx;
+    background: #fff;
+  }
+}
+
+// ========== 数据滚动条 ==========
+.ticker-strip {
+  margin: $spacing-base $spacing-base 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14rpx $spacing-base;
+  background: rgba(47, 53, 66, 0.88);
+  border-radius: $radius-full;
+  overflow: hidden;
+}
+
+.ticker-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex: 1;
+  overflow: hidden;
+}
+
+.ticker-tag {
+  font-size: 18rpx;
+  font-weight: 700;
+  color: $bronze-light;
+  background: rgba(184, 152, 118, 0.2);
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid rgba(184, 152, 118, 0.3);
+  flex-shrink: 0;
+  letter-spacing: 0.5rpx;
+}
+
+.ticker-content {
+  overflow: hidden;
+  flex: 1;
+}
+
+.ticker-text {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  animation: ticker-scroll 8s linear infinite;
+}
+
+@keyframes ticker-scroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.ticker-arrow {
+  font-size: 32rpx;
+  color: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+
+// ========== 三大商城入口 ==========
+.mall-portals {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  padding: $spacing-base $spacing-base 0;
+}
+
+.mall-portal-card {
+  position: relative;
+  border-radius: $radius-xl;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  // 兑换商城深色特殊处理
+  &:last-child {
+    .mall-icon-wrap {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .mall-name { color: $bronze-light; }
+    .mall-desc { color: rgba(255, 255, 255, 0.55); }
+    .mall-arrow { color: rgba(255, 255, 255, 0.4); }
+    .ticker-tag { color: $bronze-gold; }
+  }
+}
+
+.mall-portal-glow {
+  position: absolute;
+  top: -30%;
+  right: -5%;
+  width: 50%;
+  height: 80%;
+  background: radial-gradient(circle, rgba(184, 152, 118, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.mall-portal-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: $spacing-base;
+  padding: 28rpx $spacing-lg;
+}
+
+.mall-icon-wrap {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(184, 152, 118, 0.15);
+  border-radius: $radius-lg;
+  border: 1rpx solid rgba(184, 152, 118, 0.2);
+  flex-shrink: 0;
+
+  .mall-icon {
+    font-size: 32rpx;
+    font-weight: 800;
+    color: $accent-dark;
+  }
+}
+
+.mall-info {
+  flex: 1;
+
+  .mall-name {
+    display: block;
+    font-size: 30rpx;
+    font-weight: 700;
+    color: $accent-dark;
+    margin-bottom: 4rpx;
+  }
+
+  .mall-desc {
+    display: block;
+    font-size: 22rpx;
+    color: rgba(47, 53, 66, 0.5);
+  }
+}
+
+.mall-arrow {
+  font-size: 36rpx;
+  color: rgba(47, 53, 66, 0.2);
+  font-weight: 300;
+}
+
+// ========== 通用区块 ==========
+.section-block {
+  padding: $spacing-lg $spacing-base 0;
+}
+
+.section-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24rpx;
+  margin-bottom: $spacing-base;
 
-  &__title {
-    @include section-head;
-  }
-  &__more {
-    font-size: var(--font-sm);
-    color: $text-accent;
-    font-weight: var(--weight-medium);
-    letter-spacing: var(--tracking-normal);
-  }
-}
-
-.feed-section {
-  margin-bottom: 0;
-}
-.feed-tabs {
-  display: flex;
-  gap: $home-card-pad;
-  margin-bottom: 24rpx;
-}
-.feed-tabs--sticky {
-  position: sticky;
-  top: var(--home-top-offset, 56px);
-  z-index: 100;
-  padding: 12rpx 0;
-  margin: 0 (-$spacing-base);
-  padding-left: $spacing-base;
-  padding-right: $spacing-base;
-  background: linear-gradient(180deg, rgba(245, 244, 241, 0.98) 85%, rgba(245, 244, 241, 0));
-}
-.feed-tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20rpx 10rpx;
-  border-radius: $radius-lg;
-  @include premium-surface($bg-secondary);
-
-  &.active {
-    border-color: $border-primary;
-    background: $warm-yellow;
-    box-shadow: $shadow-gold;
-  }
-
-  &__abbr {
-    width: 48rpx;
-    height: 48rpx;
-    line-height: 48rpx;
-    text-align: center;
-    font-size: 26rpx;
-    font-weight: var(--weight-heavy);
-    color: $navy;
-    background: $bg-tertiary;
-    border-radius: 50%;
-  }
-  &.active .feed-tab__abbr {
-    background: $navy;
-    color: $gold-light;
-  }
-  &__label {
-    font-size: var(--font-xs);
-    color: $text-secondary;
-    margin-top: 8rpx;
-  }
-  &.active .feed-tab__label {
-    color: $text-primary;
-    font-weight: var(--weight-bold);
-  }
-}
-
-.feed-head {
-  margin-bottom: 24rpx;
-  padding: $home-card-pad $home-card-pad + 4rpx;
-  @include premium-surface($bg-secondary);
-  border-radius: $radius-lg;
-
-  &__row {
+  &__left {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 8rpx;
+    gap: 12rpx;
   }
-  &__title {
-    @include type-card-title;
-  }
-  &__hint {
-    @include type-caption;
-    @include line-clamp(2);
-  }
-  &__more {
-    font-size: 24rpx;
-    color: $text-secondary;
-    margin-left: 16rpx;
-  }
+
+  &__right {}
 }
 
-.feed-empty {
-  padding: 48rpx;
-  text-align: center;
-  font-size: 26rpx;
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: $mineral-gray;
+  letter-spacing: 0.5rpx;
+}
+
+.section-more {
+  font-size: 24rpx;
   color: $text-muted;
 }
 
-.product-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $home-card-pad;
-}
-.product-grid--fade {
-  animation: feed-fade 0.2s ease;
-}
-@keyframes feed-fade {
-  from { opacity: 0.6; }
-  to { opacity: 1; }
+// ========== 热门分类 ==========
+.category-scroll {
+  white-space: nowrap;
 }
 
-.feed-more-btn {
-  margin-top: $home-module-gap;
-  padding: $home-card-pad $home-card-pad + 4rpx;
-  text-align: center;
-  font-size: var(--font-sm);
-  color: $text-accent;
-  letter-spacing: var(--tracking-wide);
-  @include premium-surface($bg-secondary);
+.category-list {
+  display: inline-flex;
+  gap: $spacing-base;
+  padding-right: $spacing-base;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:active { transform: scale(0.95); }
+}
+
+.category-icon-wrap {
+  width: 96rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: $radius-lg;
+  border: 1rpx solid rgba(255, 255, 255, 0.6);
+  box-shadow: $clay-shadow;
+
+  .category-icon {
+    font-size: 36rpx;
+  }
+}
+
+.category-name {
+  font-size: 22rpx;
+  color: $text-secondary;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+// ========== 精品推荐 ==========
+.boutique-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-base;
+}
+
+.boutique-card {
+  position: relative;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1rpx solid rgba(255, 255, 255, 0.6);
+  box-shadow: $clay-shadow;
+  transition: transform 0.2s ease;
+
+  &:active { transform: scale(0.97); }
+}
+
+.boutique-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: block;
+  background: $bg-tertiary;
+}
+
+.boutique-info {
+  padding: 14rpx 16rpx 16rpx;
+}
+
+.boutique-name {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: $text-primary;
+  line-height: 1.4;
+  margin-bottom: 8rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.boutique-price {
+  display: flex;
+  align-items: baseline;
+  gap: 6rpx;
+}
+
+.boutique-cash {
+  font-family: $asset-balance-font;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: $mineral-gray;
+  font-variant-numeric: tabular-nums;
+}
+
+.boutique-points {
+  font-size: 20rpx;
+  color: $accent-dark;
+  font-weight: 600;
+}
+
+.boutique-badge {
+  position: absolute;
+  top: 10rpx;
+  left: 10rpx;
+  min-width: 40rpx;
+  height: 40rpx;
+  padding: 0 10rpx;
+  background: $warm-yellow;
+  border: 1rpx solid $border-primary;
+  border-radius: 20rpx;
+  font-size: 20rpx;
+  font-weight: 800;
+  color: $accent-dark;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &--gold {
+    background: rgba(47, 53, 66, 0.88);
+    border-color: rgba(47, 53, 66, 0.3);
+    color: $bronze-light;
+  }
+
+  &--dark {
+    background: $mineral-gray;
+    border-color: rgba(47, 53, 66, 0.3);
+    color: $bronze-light;
+  }
+}
+
+// ========== 骨架屏 ==========
+.boutique-skeleton {
+  aspect-ratio: 1 / 1;
+  background: $bg-tertiary;
+  border-radius: $radius-lg;
+}
+
+.shimmer {
+  animation: shim 1.4s ease-in-out infinite;
+}
+
+@keyframes shim {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.7; }
+}
+
+.safe-area-bottom {
+  width: 100%;
 }
 </style>

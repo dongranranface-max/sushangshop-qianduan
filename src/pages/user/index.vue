@@ -1,8 +1,8 @@
 <template>
   <view class="page-container">
-    <view class="safe-area-top" :style="{ height: statusBarHeight + 'px' }" />
+    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }" />
 
-    <!-- ========== 1. 用户信息卡片（深色头部） ========== -->
+    <!-- 深色用户头部 -->
     <view class="user-header" @click="goProfile">
       <view class="user-header__bg" />
       <view class="user-header__inner">
@@ -44,7 +44,7 @@
       </view>
     </view>
 
-    <!-- ========== 2. 昨日分红 Banner ========== -->
+    <!-- 昨日分红 Banner -->
     <view class="dividend-banner" @click="goSignIn">
       <view class="dividend-icon-wrap">
         <text class="dividend-icon">红</text>
@@ -58,11 +58,11 @@
       </view>
     </view>
 
-    <!-- ========== 3. VIP 进度 ========== -->
+    <!-- VIP 进度 -->
     <view class="vip-card">
       <view class="vip-card__header">
         <text class="vip-card__title">VIP 等级</text>
-        <text class="vip-card__sub">距离 V{{ nextLevel }} 还差 {{ remainingPerformance }} 业绩</text>
+        <text class="vip-card__sub">距 V{{ nextLevel }} 还差 {{ remainingPerformance }}</text>
       </view>
       <view class="energy-orbs">
         <view
@@ -87,7 +87,7 @@
       </view>
     </view>
 
-    <!-- ========== 4. 订单入口 ========== -->
+    <!-- 订单入口 -->
     <view class="order-section">
       <view class="order-section__head">
         <text class="section-title">我的订单</text>
@@ -114,7 +114,7 @@
       </view>
     </view>
 
-    <!-- ========== 5. 功能网格 ========== -->
+    <!-- 功能网格 -->
     <view class="tools-grid">
       <view
         v-for="tool in toolItems"
@@ -130,14 +130,16 @@
       </view>
     </view>
 
-    <!-- ========== 6. 退出登录 ========== -->
+    <!-- 退出登录 -->
     <view v-if="loggedIn" class="logout-section">
       <view class="logout-btn" @click="logout">
         <text>退出登录</text>
       </view>
     </view>
 
-    <view class="safe-area-bottom" />
+    <view class="safe-area-bottom" :style="{ height: (100 + safeAreaBottom) + 'px' }" />
+
+    <LuxuryTabbar />
   </view>
 </template>
 
@@ -148,8 +150,10 @@ import { checkAuth, clearAuth } from '@/utils/auth'
 import { resolveAvatar } from '@/utils/media'
 import { assetStore } from '@/store/asset'
 import { userApi } from '@/utils/api'
+import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 
 const statusBarHeight = ref(20)
+const safeAreaBottom = ref(0)
 const loggedIn = ref(checkAuth())
 const userInfo = ref<any>({})
 const orderCounts = ref<Record<string, number>>({})
@@ -194,7 +198,9 @@ const toolItems = [
 ]
 
 onMounted(() => {
-  statusBarHeight.value = uni.getSystemInfoSync().statusBarHeight || 20
+  const sys = uni.getSystemInfoSync()
+  statusBarHeight.value = sys.statusBarHeight || 20
+  safeAreaBottom.value = sys.safeAreaInsets?.bottom || 0
   loadUserInfo()
   loadOrderCounts()
 })
@@ -221,41 +227,19 @@ async function loadOrderCounts() {
   } catch {}
 }
 
-function goProfile() {
-  if (!checkAuth()) return
-  uni.navigateTo({ url: '/pages/user/profile' })
-}
-function goInvite() {
-  if (!checkAuth()) return
-  uni.navigateTo({ url: '/pages/user/invite' })
-}
-function goSignIn() {
-  if (!checkAuth()) return
-  uni.navigateTo({ url: '/pages/user/sign-in' })
-}
+function goProfile() { if (!checkAuth()) return; uni.navigateTo({ url: '/pages/user/profile' }) }
+function goInvite() { if (!checkAuth()) return; uni.navigateTo({ url: '/pages/user/invite' }) }
+function goSignIn() { if (!checkAuth()) return; uni.navigateTo({ url: '/pages/user/sign-in' }) }
 function goOrderList(key = '') {
   if (!checkAuth()) return
   const url = key ? `/pages/order/list?tab=${key}` : '/pages/order/list'
   uni.navigateTo({ url })
 }
-function goAddress() {
-  if (!checkAuth()) return
-  uni.navigateTo({ url: '/pages/address/list' })
-}
-function goExchange() {
-  if (!checkAuth()) return
-  uni.navigateTo({ url: '/pages/exchange/list' })
-}
-function goWealth() {
-  if (!checkAuth()) return
-  uni.navigateTo({ url: '/pages/wealth/my-invest' })
-}
-function goHelp() {
-  uni.showToast({ title: '帮助中心开发中', icon: 'none' })
-}
-function goAbout() {
-  uni.showToast({ title: '关于我们开发中', icon: 'none' })
-}
+function goAddress() { if (!checkAuth()) return; uni.navigateTo({ url: '/pages/address/list' }) }
+function goExchange() { if (!checkAuth()) return; uni.navigateTo({ url: '/pages/exchange/list' }) }
+function goWealth() { if (!checkAuth()) return; uni.navigateTo({ url: '/pages/wealth/my-invest' }) }
+function goHelp() { uni.showToast({ title: '帮助中心开发中', icon: 'none' }) }
+function goAbout() { uni.showToast({ title: '关于我们开发中', icon: 'none' }) }
 function logout() {
   uni.showModal({
     title: '提示',
@@ -279,12 +263,12 @@ function logout() {
 .page-container {
   min-height: 100vh;
   background: radial-gradient(ellipse 80% 60% at 50% 0%, #F9F9F9 0%, #F0EDE8 100%);
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
 }
 
-.safe-area-top { width: 100%; }
+.status-bar { width: 100%; }
 
-// ========== 1. 深色用户头部 ==========
+// ========== 深色用户头部 ==========
 .user-header {
   margin: $spacing-base;
   border-radius: $radius-2xl;
@@ -381,19 +365,10 @@ function logout() {
   border-radius: 20rpx;
   flex-shrink: 0;
 
-  .invite-icon {
-    font-size: 22rpx;
-    font-weight: 700;
-    color: $bronze-light;
-  }
-
-  .invite-label {
-    font-size: 18rpx;
-    color: rgba(255, 255, 255, 0.6);
-  }
+  .invite-icon { font-size: 22rpx; font-weight: 700; color: $bronze-light; }
+  .invite-label { font-size: 18rpx; color: rgba(255, 255, 255, 0.6); }
 }
 
-// 资产摘要行
 .asset-strip {
   position: relative;
   z-index: 1;
@@ -405,25 +380,25 @@ function logout() {
 
   .asset-item {
     text-align: center;
-  }
 
-  .asset-value {
-    display: block;
-    font-family: $asset-balance-font;
-    font-size: 32rpx;
-    font-weight: 700;
-    color: #fff;
-    font-variant-numeric: tabular-nums;
+    .asset-value {
+      display: block;
+      font-family: $asset-balance-font;
+      font-size: 32rpx;
+      font-weight: 700;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
 
-    &.accent { color: $bronze-light; }
-    &.gold { color: $bronze-gold; }
-  }
+      &.accent { color: $bronze-light; }
+      &.gold { color: $bronze-gold; }
+    }
 
-  .asset-label {
-    display: block;
-    font-size: 20rpx;
-    color: rgba(255, 255, 255, 0.45);
-    margin-top: 4rpx;
+    .asset-label {
+      display: block;
+      font-size: 20rpx;
+      color: rgba(255, 255, 255, 0.45);
+      margin-top: 4rpx;
+    }
   }
 
   .asset-divider {
@@ -433,7 +408,7 @@ function logout() {
   }
 }
 
-// ========== 2. 分红 Banner ==========
+// ========== 分红 Banner ==========
 .dividend-banner {
   margin: 0 $spacing-base $spacing-base;
   padding: $spacing-base $spacing-lg;
@@ -458,44 +433,21 @@ function logout() {
     flex-shrink: 0;
   }
 
-  .dividend-icon {
-    font-size: 22rpx;
-    font-weight: 700;
-    color: $accent-dark;
-  }
-
-  .dividend-info {
-    flex: 1;
-
-    .dividend-title {
-      display: block;
-      font-size: 22rpx;
-      color: $text-muted;
-    }
-
-    .dividend-value {
-      display: block;
-      font-size: 32rpx;
-      font-weight: 700;
-      color: $accent-dark;
-      font-variant-numeric: tabular-nums;
-    }
-  }
+  .dividend-icon { font-size: 22rpx; font-weight: 700; color: $accent-dark; }
+  .dividend-info { flex: 1; }
+  .dividend-title { display: block; font-size: 22rpx; color: $text-muted; }
+  .dividend-value { display: block; font-size: 32rpx; font-weight: 700; color: $accent-dark; font-variant-numeric: tabular-nums; }
 
   .dividend-btn {
     padding: 10rpx 28rpx;
     background: $mineral-gray;
     border-radius: $radius-full;
 
-    text {
-      font-size: 24rpx;
-      color: $bronze-light;
-      font-weight: 600;
-    }
+    text { font-size: 24rpx; color: $bronze-light; font-weight: 600; }
   }
 }
 
-// ========== 3. VIP 进度 ==========
+// ========== VIP 进度 ==========
 .vip-card {
   margin: 0 $spacing-base $spacing-base;
   padding: $spacing-base $spacing-lg;
@@ -512,16 +464,8 @@ function logout() {
     margin-bottom: $spacing-base;
   }
 
-  &__title {
-    font-size: 28rpx;
-    font-weight: 700;
-    color: $text-primary;
-  }
-
-  &__sub {
-    font-size: 22rpx;
-    color: $text-muted;
-  }
+  &__title { font-size: 28rpx; font-weight: 700; color: $text-primary; }
+  &__sub { font-size: 22rpx; color: $text-muted; }
 }
 
 .energy-orbs {
@@ -542,17 +486,12 @@ function logout() {
   border: 2rpx solid rgba(47, 53, 66, 0.12);
   transition: all 0.3s ease;
 
-  text {
-    font-size: 18rpx;
-    font-weight: 700;
-    color: $text-muted;
-  }
+  text { font-size: 18rpx; font-weight: 700; color: $text-muted; }
 
   &.active {
     background: $bronze-gradient;
     border-color: $bronze-gold;
     box-shadow: 0 0 12rpx rgba(184, 152, 118, 0.4);
-
     text { color: #fff; }
   }
 }
@@ -589,7 +528,7 @@ function logout() {
   }
 }
 
-// ========== 4. 订单入口 ==========
+// ========== 订单入口 ==========
 .order-section {
   margin: 0 $spacing-base $spacing-base;
 
@@ -601,11 +540,7 @@ function logout() {
   }
 }
 
-.section-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: $text-primary;
-}
+.section-title { font-size: 30rpx; font-weight: 700; color: $text-primary; }
 
 .section-more {
   display: flex;
@@ -635,9 +570,7 @@ function logout() {
   gap: 8rpx;
   padding: 24rpx 0;
 
-  & + & {
-    border-left: 1rpx solid $border-light;
-  }
+  & + & { border-left: 1rpx solid $border-light; }
 
   &__icon-wrap {
     position: relative;
@@ -650,11 +583,7 @@ function logout() {
     border-radius: $radius-md;
   }
 
-  &__icon {
-    font-size: 22rpx;
-    font-weight: 700;
-    color: $accent-dark;
-  }
+  &__icon { font-size: 22rpx; font-weight: 700; color: $accent-dark; }
 
   &__badge {
     position: absolute;
@@ -673,14 +602,10 @@ function logout() {
     font-weight: 700;
   }
 
-  &__label {
-    font-size: 24rpx;
-    color: $text-secondary;
-    font-weight: 500;
-  }
+  &__label { font-size: 24rpx; color: $text-secondary; font-weight: 500; }
 }
 
-// ========== 5. 功能网格 ==========
+// ========== 功能网格 ==========
 .tools-grid {
   margin: 0 $spacing-base;
   display: grid;
@@ -700,12 +625,9 @@ function logout() {
   align-items: center;
   gap: 10rpx;
   position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
 
-  &:active {
-    transform: scale(0.97);
-    box-shadow: 0 4rpx 16rpx rgba(47, 53, 66, 0.06);
-  }
+  &:active { transform: scale(0.97); }
 
   .tool-icon-wrap {
     width: 72rpx;
@@ -717,17 +639,8 @@ function logout() {
     margin-bottom: 4rpx;
   }
 
-  .tool-icon {
-    font-size: 28rpx;
-    font-weight: 700;
-    color: $accent-dark;
-  }
-
-  .tool-label {
-    font-size: 24rpx;
-    color: $text-secondary;
-    font-weight: 500;
-  }
+  .tool-icon { font-size: 28rpx; font-weight: 700; color: $accent-dark; }
+  .tool-label { font-size: 24rpx; color: $text-secondary; font-weight: 500; }
 
   .tool-tag {
     position: absolute;
@@ -742,7 +655,7 @@ function logout() {
   }
 }
 
-// ========== 6. 退出登录 ==========
+// ========== 退出登录 ==========
 .logout-section {
   margin: $spacing-lg $spacing-base 0;
   padding-bottom: $spacing-lg;
@@ -761,8 +674,6 @@ function logout() {
   font-weight: 600;
   color: $text-muted;
 
-  &:active {
-    background: rgba(47, 53, 66, 0.04);
-  }
+  &:active { background: rgba(47, 53, 66, 0.04); }
 }
 </style>
