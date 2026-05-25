@@ -125,7 +125,9 @@ import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 const statusBarHeight = ref(20)
 const loggedIn = ref(checkAuth())
 const currentTab = ref('0')
-const orders = ref<any[]>([])
+interface OrderItem { productId?: string; id?: string; productName?: string; name?: string; coverImage?: string; image?: string; specs?: string; skuInfo?: string; quantity: number; price?: string; points?: string }
+interface Order { orderNo: string; orderType: number; status: number; totalAmount: string; totalPoints: string; items?: OrderItem[]; createdAt?: string; [k: string]: unknown }
+const orders = ref<Order[]>([])
 const loading = ref(false)
 const page = ref(1)
 const limit = 20
@@ -201,9 +203,9 @@ function statusName(status: number) {
 
 function goBack() { uni.navigateBack() }
 function goCatalog() { uni.switchTab({ url: '/pages/index/index' }) }
-function goDetail(order: any) { uni.navigateTo({ url: `/pages/order/detail?orderNo=${order.orderNo}` }) }
+function goDetail(order: Order) { uni.navigateTo({ url: `/pages/order/detail?orderNo=${order.orderNo}` }) }
 
-async function cancelOrder(order: any) {
+async function cancelOrder(order: Order) {
   uni.showModal({
     title: '确认取消',
     content: '确定取消该订单吗？',
@@ -213,35 +215,35 @@ async function cancelOrder(order: any) {
         await orderApi.cancel(order.orderNo)
         uni.showToast({ title: '已取消', icon: 'success' })
         loadOrders(true)
-      } catch (e: any) {
-        uni.showToast({ title: e.message || '取消失败', icon: 'none' })
+      } catch (err: { message?: string }) {
+        uni.showToast({ title: err?.message || '取消失败', icon: 'none' })
       }
     },
   })
 }
 
-async function payOrder(order: any) {
+async function payOrder(order: Order) {
   try {
     await orderApi.pay(order.orderNo)
     uni.showToast({ title: '付款成功', icon: 'success' })
     loadOrders(true)
-  } catch (e: any) {
-    uni.showToast({ title: e.message || '付款失败', icon: 'none' })
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '付款失败', icon: 'none' })
   }
 }
 
-async function confirmReceive(order: any) {
+async function confirmReceive(order: Order) {
   uni.showModal({
     title: '确认收货',
     content: '确认已收到商品吗？',
     success: async (res) => {
       if (!res.confirm) return
       try {
-        await orderApi.confirmReceive(order.orderNo)
+        await orderApi.confirm(order.orderNo)
         uni.showToast({ title: '已确认收货', icon: 'success' })
         loadOrders(true)
-      } catch (e: any) {
-        uni.showToast({ title: e.message || '操作失败', icon: 'none' })
+      } catch (err: { message?: string }) {
+        uni.showToast({ title: err?.message || '操作失败', icon: 'none' })
       }
     },
   })

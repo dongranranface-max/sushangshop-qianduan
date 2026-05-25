@@ -66,13 +66,14 @@ import { checkAuth } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)
-const list = ref<any[]>([])
+interface FavoriteItem { favoriteId: string; productId: string; productType: number; name?: string; coverImage?: string; price?: string | number; [k: string]: unknown }
+const list = ref<FavoriteItem[]>([])
 const loading = ref(false)
 const page = ref(1)
 const hasMore = ref(true)
 let reqSeq = 0
 
-function getTypeName(item: any): string {
+function getTypeName(item: FavoriteItem): string {
   const map: Record<number, string> = { 1: '消费', 2: '换购', 3: '兑换' }
   return map[item.productType] || '商品'
 }
@@ -111,19 +112,18 @@ function loadMore() {
 
 function goBack() { uni.navigateBack() }
 
-function goDetail(item: any) {
-  const modeMap: Record<number, string> = { 2: 'exchange', 3: 'redeem' }
-  const mode = modeMap[item.productType] || 'consume'
-  uni.navigateTo({ url: `/pages/product/detail?id=${item.productId}&mode=${mode}` })
+function goDetail(item: FavoriteItem) {
+  if (!item.productId) return
+  uni.navigateTo({ url: `/pages/product/detail?id=${item.productId}&type=${item.productType || 1}` })
 }
 
-async function remove(item: any) {
+async function remove(item: FavoriteItem) {
   try {
     await favoriteApi.remove(item.productId)
     list.value = list.value.filter(i => i.favoriteId !== item.favoriteId)
     uni.showToast({ title: '已取消', icon: 'none' })
-  } catch (e: any) {
-    uni.showToast({ title: e?.message || '操作失败', icon: 'none' })
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '操作失败', icon: 'none' })
   }
 }
 </script>

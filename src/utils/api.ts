@@ -309,6 +309,33 @@ export const productApi = {
 //  订单模块 /orders
 // --------------------------------------------
 export const orderApi = {
+  // 订单详情
+  getDetail: (orderNo: string) =>
+    request<{
+      orderNo: string
+      orderType: number
+      status: number
+      createdAt: string
+      totalAmount: string
+      totalPoints: string
+      freightAmount: string
+      discountAmount: string
+      payAmount: string
+      pointsEarned: string
+      remark: string
+      qrCode: string
+      expireAt: string
+      address: {
+        consignee: string; phone: string
+        province: string; city: string; district: string; detail: string
+      }
+      items: Array<{
+        productId: string; productName: string; coverImage: string
+        specs: string; quantity: number; price: string; points: string
+      }>
+      logistics?: { company: string; trackingNo: string; status: string; traces: Array<{ time: string; desc: string }> }
+    }>({ url: `/orders/${orderNo}` }),
+
   // 创建订单
   create: (data: {
     orderType: number
@@ -359,6 +386,10 @@ export const orderApi = {
   // 确认收货
   confirm: (orderNo: string) =>
     request<any>({ url: '/orders/confirm', method: 'POST', data: { orderNo } }),
+
+  // 模拟支付（前端自测用，正式需接第三方支付渠道）
+  pay: (orderNo: string) =>
+    request<any>({ url: `/orders/callback/${orderNo}`, method: 'POST', data: { payType: 'mock' } }),
 
   // 支付回调（换购/消费模拟支付或渠道回调）
   paymentCallback: (orderNo: string, payType: string) =>

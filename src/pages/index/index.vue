@@ -157,7 +157,8 @@ const safeAreaBottom = ref(0)
 const loggedIn = ref(checkAuth())
 const currentBanner = ref(0)
 const loading = ref(false)
-const products = ref<any[]>([])
+interface Product { id: number | string; name: string; coverImage?: string; image?: string; price?: string | number; requiredPoints?: number; type?: number; salesCount?: number; [k: string]: unknown }
+const products = ref<Product[]>([])
 
 const banners = ref([
   { image: '/static/logo.png', title: '集享生活', sub: '品质生活 从集享开始' },
@@ -247,20 +248,20 @@ async function loadProducts() {
   }
 }
 
-function onBannerChange(e: any) {
+function onBannerChange(e: { detail: { current: number } }) {
   currentBanner.value = e.detail.current
 }
 
 function goSearch() { uni.navigateTo({ url: '/pages/search/index' }) }
 function goCatalog() { uni.switchTab({ url: '/pages/catalog/index' }) }
-function goMall(mall: any) {
+function goMall(mall: { type: number }) {
   uni.navigateTo({ url: `/pages/catalog/index?type=${mall.type}` })
 }
-function goCatalogCategory(cat: any) {
-  uni.navigateTo({ url: `/pages/catalog/index?categoryId=${cat.id}` })
+function goCatalogCategory(cat: { id: string }) {
+  if (cat.id) uni.navigateTo({ url: `/pages/catalog/index?categoryId=${cat.id}` })
 }
-function goProduct(p: any) {
-  uni.navigateTo({ url: `/pages/product/detail?id=${p.id}&type=${p.type || 1}` })
+function goProduct(p: Product) {
+  if (p.id) uni.navigateTo({ url: `/pages/product/detail?id=${p.id}&type=${p.type || 1}` })
 }
 </script>
 

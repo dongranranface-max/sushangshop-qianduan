@@ -101,8 +101,10 @@ const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)
 const loggedIn = ref(checkAuth())
 const currentTab = ref('all')
-const products = ref<any[]>([])
-const categories = ref<any[]>([])
+interface Category { id: string; name: string; [k: string]: unknown }
+interface Product { id: string; name: string; coverImage?: string; price?: string | number; requiredPoints?: number; categoryId?: string; [k: string]: unknown }
+const products = ref<Product[]>([])
+const categories = ref<Category[]>([])
 const loading = ref(false)
 const page = ref(1)
 const hasMore = ref(true)
@@ -110,13 +112,13 @@ let reqSeq = 0
 
 const tabs = computed(() => {
   const base = [{ key: 'all', label: '全部' }]
-  const cats = categories.value.map((c: any) => ({ key: c.id, label: c.name }))
+  const cats = categories.value.map((c: Category) => ({ key: c.id, label: c.name }))
   return [...base, ...cats]
 })
 
 const filteredProducts = computed(() => {
   if (currentTab.value === 'all') return products.value
-  return products.value.filter((p: any) => p.categoryId === currentTab.value)
+  return products.value.filter((p: Product) => p.categoryId === currentTab.value)
 })
 
 onMounted(() => {
@@ -174,8 +176,8 @@ function loadMore() {
 }
 
 function goSearch() { uni.navigateTo({ url: '/pages/search/index' }) }
-function goDetail(item: any) {
-  uni.navigateTo({ url: `/pages/product/detail?id=${item.id}&type=2` })
+function goDetail(item: Product) {
+  if (item.id) uni.navigateTo({ url: `/pages/product/detail?id=${item.id}&type=2` })
 }
 </script>
 

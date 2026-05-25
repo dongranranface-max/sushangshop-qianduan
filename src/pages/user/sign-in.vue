@@ -127,7 +127,7 @@ const signRecords = computed(() =>
 async function loadSignedDays() {
   try {
     const res = await signInApi.getMonthly({ year: currentYear.value, month: currentMonth.value })
-    signedDays.value = res?.records?.map((r: any) => parseInt(r.date.split('-')[2], 10)) || []
+    signedDays.value = res?.records?.map((r: { date: string }) => parseInt(r.date.split('-')[2], 10)) || []
     isSigned.value = signedDays.value.includes(todayDate.value)
   } catch {
     const key = `signin_${currentYear.value}_${currentMonth.value}`

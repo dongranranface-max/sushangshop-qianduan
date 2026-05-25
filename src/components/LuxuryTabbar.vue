@@ -51,6 +51,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 
 const currentIndex = ref(0)
 
@@ -63,6 +64,10 @@ const tabs = [
 ]
 
 onMounted(() => {
+  updateCurrentIndex()
+})
+
+onShow(() => {
   updateCurrentIndex()
 })
 

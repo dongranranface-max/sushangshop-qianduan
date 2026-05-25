@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="page-container">
     <!-- 搜索栏 -->
     <view class="search-header">
@@ -104,17 +104,19 @@
 import { ref, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { productApi } from '@/utils/api'
-import { HOME_CATEGORY_FALLBACK } from '@/utils/category'
 import HomeProductCard from '@/components/HomeProductCard.vue'
 
+interface HotItem { keyword: string; desc?: string; isNew?: boolean }
+interface Product { id: string; name: string; coverImage?: string; image?: string; price: string | number; requiredPoints?: number; type?: number; salesCount?: number; [k: string]: unknown }
+
 const keyword = ref('')
-const searchResult = ref<any[]>([])
+const searchResult = ref<Product[]>([])
 const statusBarHeight = ref(20)
 const loading = ref(false)
 const currentType = ref(1)
 const historyList = ref<string[]>([])
-const hotList = ref<any[]>([
-  { keyword: '手机', desc: '热门' },
+const hotList = ref<HotItem[]>(
+  [{ keyword: '手机', desc: '热门' },
   { keyword: '电脑', desc: '办公' },
   { keyword: '耳机', desc: '影音' },
   { keyword: '积分', desc: '换购' },
@@ -126,7 +128,13 @@ onMounted(() => {
 })
 
 onShow(() => {
-  currentType.value = Number(uni.getStorageSync('search_type') || 1)
+  const pages = getCurrentPages()
+  const current = pages[pages.length - 1] as { options?: { type?: string } }
+  if (current.options?.type) {
+    currentType.value = Number(current.options.type)
+  } else {
+    currentType.value = Number(uni.getStorageSync('search_type') || 1)
+  }
 })
 
 function loadHistory() {
@@ -205,10 +213,8 @@ function goBack() {
   }
 }
 
-function goProduct(p: any) {
-  uni.navigateTo({
-    url: `/pages/product/detail?id=${p.id}&type=${currentType.value}`,
-  })
+function goProduct(p: Product) {
+  if (p.id) uni.navigateTo({ url: `/pages/product/detail?id=${p.id}&type=${p.type || currentType.value}` })
 }
 </script>
 
@@ -433,12 +439,7 @@ function goProduct(p: any) {
   }
 }
 
-.shimmer { animation: shim 1.4s ease-in-out infinite; }
-
-@keyframes shim {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.7; }
-}
+// 骨架屏扫光动画已全局定义在 page-shell.scss
 
 .result-count {
   text-align: center;

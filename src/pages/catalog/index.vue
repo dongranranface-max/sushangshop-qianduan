@@ -122,9 +122,12 @@ const safeAreaBottom = ref(0)
 const loggedIn = ref(checkAuth())
 const currentType = ref(1)
 const currentService = ref('consume')
-const services = ref<any[]>([])
-const categories = ref<any[]>([])
-const products = ref<any[]>([])
+interface Category { id: string; name: string; icon?: string; parentId?: string; [k: string]: unknown }
+interface Product { id: string; name: string; coverImage?: string; image?: string; price?: string | number; requiredPoints?: number; type?: number; categoryId?: string; salesCount?: number; [k: string]: unknown }
+interface Service { id: string; name: string; abbr?: string; label?: string; type?: number; [k: string]: unknown }
+const services = ref<Service[]>([])
+const categories = ref<Category[]>([])
+const products = ref<Product[]>([])
 const defaultCover = DEFAULT_PRODUCT_COVER
 const loading = ref(false)
 const page = ref(1)
@@ -215,7 +218,7 @@ function switchType(type: number) {
   }
 }
 
-function selectService(svc: any) {
+function selectService(svc: Service) {
   currentService.value = svc.id
   if (svc.id === 'products') {
     loadProducts(true)
@@ -235,10 +238,12 @@ function loadMore() {
   }
 }
 
-function goSearch() { uni.navigateTo({ url: '/pages/search/index' }) }
-function goProduct(p: any) { uni.navigateTo({ url: `/pages/product/detail?id=${p.id}&type=${currentType.value}` }) }
-function goCategoryProducts(cat: any) {
-  uni.navigateTo({ url: `/pages/catalog/index?categoryId=${cat.id}&type=${currentType.value}` })
+function goSearch() {
+  uni.navigateTo({ url: `/pages/search/index?type=${currentType.value}` })
+}
+function goProduct(p: Product) { if (p.id) uni.navigateTo({ url: `/pages/product/detail?id=${p.id}&type=${p.type || currentType.value}` }) }
+function goCategoryProducts(cat: Category) {
+  if (cat.id) uni.navigateTo({ url: `/pages/catalog/index?categoryId=${cat.id}&type=${currentType.value}` })
 }
 </script>
 
