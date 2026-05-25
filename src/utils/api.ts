@@ -582,6 +582,16 @@ export const referralApi = {
 //  营销模块 /marketing
 // --------------------------------------------
 export const marketingApi = {
+  // 首页 Banner
+  getBanners: () =>
+    request<Array<{
+      id: number; title: string; sub: string; image: string; link?: string; type?: number
+    }>>({ url: '/marketing/banners' }),
+
+  // 热门搜索词
+  getHotKeywords: () =>
+    request<Array<{ keyword: string; desc?: string; isNew?: boolean }>>({ url: '/marketing/hot-keywords' }),
+
   // 可领取优惠券列表
   getAvailableCoupons: () => request<any[]>({ url: '/marketing/coupons' }),
 

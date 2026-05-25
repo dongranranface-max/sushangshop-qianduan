@@ -147,7 +147,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { productApi } from '@/utils/api'
+import { productApi, marketingApi } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
 import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
@@ -158,13 +158,15 @@ const loggedIn = ref(checkAuth())
 const currentBanner = ref(0)
 const loading = ref(false)
 interface Product { id: number | string; name: string; coverImage?: string; image?: string; price?: string | number; requiredPoints?: number; type?: number; salesCount?: number; [k: string]: unknown }
+interface Banner { id: number; title: string; sub: string; image: string; link?: string; [k: string]: unknown }
 const products = ref<Product[]>([])
 
-const banners = ref([
-  { image: '/static/logo.png', title: '集享生活', sub: '品质生活 从集享开始' },
-  { image: '/static/logo.png', title: '消费即返', sub: '购买商品 积分双重收益' },
-  { image: '/static/logo.png', title: '增值理财', sub: '算力增值 稳健收益' },
-])
+const DEFAULT_BANNERS: Banner[] = [
+  { id: 0, image: '/static/logo.png', title: '集享生活', sub: '品质生活 从集享开始' },
+  { id: 1, image: '/static/logo.png', title: '消费即返', sub: '购买商品 积分双重收益' },
+  { id: 2, image: '/static/logo.png', title: '增值理财', sub: '算力增值 稳健收益' },
+]
+const banners = ref<Banner[]>([...DEFAULT_BANNERS])
 
 const tickerText = ref('')
 const tickerQueue = [
@@ -219,6 +221,7 @@ onMounted(() => {
   statusBarHeight.value = sys.statusBarHeight || 20
   safeAreaBottom.value = sys.safeAreaInsets?.bottom || 0
   loadProducts()
+  loadBanners()
   startTicker()
 })
 
@@ -245,6 +248,17 @@ async function loadProducts() {
     products.value = []
   } finally {
     loading.value = false
+  }
+}
+
+async function loadBanners() {
+  try {
+    const res = await marketingApi.getBanners()
+    if (res && res.length > 0) {
+      banners.value = res
+    }
+  } catch {
+    // 使用默认 banner
   }
 }
 

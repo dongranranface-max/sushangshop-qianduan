@@ -103,7 +103,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { productApi } from '@/utils/api'
+import { productApi, marketingApi } from '@/utils/api'
 import HomeProductCard from '@/components/HomeProductCard.vue'
 
 interface HotItem { keyword: string; desc?: string; isNew?: boolean }
@@ -115,16 +115,18 @@ const statusBarHeight = ref(20)
 const loading = ref(false)
 const currentType = ref(1)
 const historyList = ref<string[]>([])
-const hotList = ref<HotItem[]>(
-  [{ keyword: '手机', desc: '热门' },
+const DEFAULT_HOT: HotItem[] = [
+  { keyword: '手机', desc: '热门' },
   { keyword: '电脑', desc: '办公' },
   { keyword: '耳机', desc: '影音' },
   { keyword: '积分', desc: '换购' },
-])
+]
+const hotList = ref<HotItem[]>([...DEFAULT_HOT])
 
 onMounted(() => {
   statusBarHeight.value = uni.getSystemInfoSync().statusBarHeight || 20
   loadHistory()
+  loadHotKeywords()
 })
 
 onShow(() => {
@@ -144,6 +146,17 @@ function loadHistory() {
       historyList.value = JSON.parse(raw)
     }
   } catch {}
+}
+
+async function loadHotKeywords() {
+  try {
+    const res = await marketingApi.getHotKeywords()
+    if (res && res.length > 0) {
+      hotList.value = res
+    }
+  } catch {
+    // 使用默认热门词
+  }
 }
 
 function saveHistory(kw: string) {

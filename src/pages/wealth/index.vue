@@ -122,6 +122,7 @@ import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
+import { financialApi } from '@/utils/api'
 import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 
 const statusBarHeight = ref(20)
@@ -162,6 +163,7 @@ const services = [
 
 interface InvestRecord { id: number; name: string; icon: string; date: string; profit: number; [k: string]: unknown }
 interface ServiceItem { id: string; name: string; icon: string; desc: string; tag: string; gradient: string; [k: string]: unknown }
+interface EarningsRecord { id: number; productName: string; profit: string; createdAt: string; [k: string]: unknown }
 const investRecords = ref<InvestRecord[]>([])
 
 onMounted(() => {
@@ -177,11 +179,20 @@ onShow(() => {
 })
 
 function loadInvestRecords() {
-  // Mock data - replace with API call
-  investRecords.value = [
-    { id: 1, icon: '🧮', name: '算力增值计划A', date: '2026-05-20', profit: 128.5 },
-    { id: 2, icon: '📊', name: '量化策略Beta', date: '2026-05-18', profit: 86.3 },
-  ]
+  financialApi.getEarnings({ limit: 5 })
+    .then((res) => {
+      const list = (res.list || []).slice(0, 5)
+      investRecords.value = list.map((item: EarningsRecord, idx: number) => ({
+        id: item.id || idx,
+        icon: '🧮',
+        name: item.productName || '投资收益',
+        date: item.createdAt ? item.createdAt.slice(0, 10) : '',
+        profit: Number(item.profit || 0),
+      }))
+    })
+    .catch(() => {
+      investRecords.value = []
+    })
 }
 
 function toggleAsset() {
