@@ -260,7 +260,7 @@ async function removeItem(item: CartItem) {
       } catch (err: { message?: string }) {
         uni.showToast({ title: err?.message || '删除失败', icon: 'none' })
       }
-    }
+    },
   })
 }
 
@@ -278,7 +278,7 @@ async function removeSelected() {
       } catch (err: { message?: string }) {
         uni.showToast({ title: err?.message || '删除失败', icon: 'none' })
       }
-    }
+    },
   })
 }
 
