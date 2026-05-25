@@ -580,9 +580,162 @@ $code-btn-text-counting:  $text-muted;
   50% { box-shadow: $shadow-fire; }
 }
 
+// 骨架屏扫光动画（温暖渐变扫过）
+@keyframes shimmer-sweep {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+// 按压反馈（缩放 + 微弱震动）
+@keyframes btn-tap {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(0.955); }
+  100% { transform: scale(0.98); }
+}
+
+// 淡入动画
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(16rpx); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// 滑入动画（用于页面内容）
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(40rpx); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// 淡入弹出（用于 Modal/Card 出现）
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+// 卡片按压涟漪
+@keyframes ripple {
+  0%   { transform: scale(0); opacity: 0.5; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
 .fire-portal, .clay-portal-glow {
   animation: premium-glow-anim 4s ease-in-out infinite;
 }
+
+// ===========================================
+//  Skeleton 骨架屏
+// ===========================================
+
+.skeleton-wrap {
+  display: grid;
+  gap: $spacing-base;
+}
+
+.skeleton-card {
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: $radius-lg;
+  overflow: hidden;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.72) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-sweep 1.4s ease-in-out infinite;
+  }
+}
+
+.skeleton-line {
+  height: 28rpx;
+  border-radius: $radius-sm;
+  background: rgba(47, 53, 66, 0.07);
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.72) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-sweep 1.4s ease-in-out infinite;
+  }
+
+  &--short { width: 60%; }
+  &--xs    { height: 20rpx; }
+}
+
+.skeleton-circle {
+  border-radius: 50%;
+  background: rgba(47, 53, 66, 0.07);
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.72) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-sweep 1.4s ease-in-out infinite;
+  }
+}
+
+// ===========================================
+//  Button Press 统一按压反馈
+// ===========================================
+
+// 统一按压 mixin（用于所有可点击元素）
+@mixin btn-press {
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.18s ease,
+              opacity 0.18s ease;
+  &:active {
+    transform: scale(0.965) translateY(1rpx);
+    opacity: 0.88;
+  }
+}
+
+// 按压涟漪效果
+.ripple-wrap {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    width: 100%;
+    padding-bottom: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: ripple 0.45s ease-out forwards;
+    pointer-events: none;
+  }
+}
+
+// 全局动画类
+.anim-fade-in  { animation: fade-in 0.35s ease both; }
+.anim-slide-up { animation: slide-up 0.38s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.anim-pop-in   { animation: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 
 // ===========================================
 //  Utilities

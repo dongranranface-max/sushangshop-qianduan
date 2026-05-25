@@ -437,12 +437,7 @@ function goDetail(item: any) {
   }
 }
 
-.shimmer { animation: shim 1.4s ease-in-out infinite; }
-
-@keyframes shim {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.7; }
-}
+// 扫光骨架屏动画已全局定义在 page-shell.scss（shimmer-sweep）
 
 // ========== 加载/空状态 ==========
 .load-more {

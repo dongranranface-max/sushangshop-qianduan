@@ -73,4 +73,97 @@ page {
   z-index: 9999;
   pointer-events: none;
 }
+
+/* ============================================
+   页面过渡动画（uni-app H5 Vue Router）
+   ============================================ */
+
+// 页面容器统一过渡
+uni-page-body,
+#app > view,
+page {
+  animation-fill-mode: both;
+}
+
+/* 页面进入：向上滑入 */
+.page-enter-from,
+.page-enter {
+  opacity: 0;
+  transform: translateY(32rpx);
+}
+.page-enter-to,
+.page-enter-active {
+  animation: page-slide-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 页面离开：向下收起 */
+.page-leave-to,
+.page-leave-active {
+  animation: page-slide-down 0.24s ease-in both;
+}
+.page-leave-from { opacity: 1; }
+
+@keyframes page-slide-up {
+  from { opacity: 0; transform: translateY(32rpx); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes page-slide-down {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(20rpx); }
+}
+
+/* Tab 切换：无动画（即时切换） */
+.tab-switch-enter-active,
+.tab-switch-leave-active { transition: none; }
+
+/* Modal / 弹窗类页面：从底部滑出 */
+.modal-enter-to,
+.modal-enter-active {
+  animation: modal-slide-up 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.modal-leave-to,
+.modal-leave-active {
+  animation: modal-slide-down 0.22s ease-in both;
+}
+
+@keyframes modal-slide-up {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modal-slide-down {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(60rpx); }
+}
+
+/* 卡片 / 列表项逐个入场 */
+.list-item {
+  animation: fade-slide-in 0.3s ease both;
+  @for $i from 1 through 12 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{($i - 1) * 0.06}s;
+    }
+  }
+}
+
+@keyframes fade-slide-in {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 骨架屏列表项延迟动画 */
+.skeleton-list-item {
+  animation: skeleton-fade-in 0.4s ease both;
+  @for $i from 1 through 8 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{($i - 1) * 0.07}s;
+    }
+  }
+}
+
+@keyframes skeleton-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 </style>
