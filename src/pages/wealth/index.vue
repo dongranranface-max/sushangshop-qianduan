@@ -120,7 +120,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { checkAuth, requireAuth } from '@/utils/auth'
+import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
 import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 
@@ -160,7 +160,9 @@ const services = [
   },
 ]
 
-const investRecords = ref<any[]>([])
+interface InvestRecord { id: number; name: string; icon: string; date: string; profit: number; [k: string]: unknown }
+interface ServiceItem { id: string; name: string; icon: string; desc: string; tag: string; gradient: string; [k: string]: unknown }
+const investRecords = ref<InvestRecord[]>([])
 
 onMounted(() => {
   statusBarHeight.value = uni.getSystemInfoSync().statusBarHeight || 20
@@ -187,8 +189,8 @@ function toggleAsset() {
 }
 
 function goLogin() { uni.navigateTo({ url: '/pages/auth/login' }) }
-function goService(svc: any) {
-  if (!requireAuth()) return
+function goService(svc: ServiceItem) {
+  if (!checkAuth()) return
   if (svc.id === 'compute') {
     uni.navigateTo({ url: '/pages/wealth/my-invest' })
   } else {
@@ -196,7 +198,7 @@ function goService(svc: any) {
   }
 }
 function goMyInvest() {
-  if (!requireAuth()) return
+  if (!checkAuth()) return
   uni.navigateTo({ url: '/pages/wealth/my-invest' })
 }
 </script>

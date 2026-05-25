@@ -55,16 +55,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { financialApi } from '@/utils/api'
-import { requireAuth } from '@/utils/auth'
+import { checkAuth } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
-const holdings = ref<any[]>([])
+interface Holding { holdingId?: string; id: string; name: string; icon?: string; date?: string; profit?: number; status?: number; annualRate?: number; [k: string]: unknown }
+const holdings = ref<Holding[]>([])
 const loading = ref(false)
 
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
-  if (!requireAuth()) return
+  if (!checkAuth()) return
   loadData()
 })
 
@@ -73,8 +74,8 @@ async function loadData() {
   try {
     const res = await financialApi.getHoldings({ limit: 50 })
     holdings.value = res.list || []
-  } catch (e: any) {
-    uni.showToast({ title: e.message || '加载失败', icon: 'none' })
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '加载失败', icon: 'none' })
   } finally {
     loading.value = false
   }
@@ -89,7 +90,7 @@ function goInvest() {
   uni.navigateTo({ url: '/pages/wealth/invest' })
 }
 
-async function doRedeem(h: any, early: boolean) {
+async function doRedeem(h: Holding, early: boolean) {
   uni.showModal({
     title: '确认赎回',
     content: early ? '提前赎回将收取手续费，确认赎回？' : '确认到期赎回？',
@@ -100,8 +101,8 @@ async function doRedeem(h: any, early: boolean) {
         await financialApi.redeem({ holdingId: h.holdingId || h.id, early })
         uni.showToast({ title: '赎回成功', icon: 'success' })
         loadData()
-      } catch (e: any) {
-        uni.showToast({ title: e.message || '赎回失败', icon: 'none' })
+      } catch (err: { message?: string }) {
+        uni.showToast({ title: err?.message || '赎回失败', icon: 'none' })
       } finally {
         uni.hideLoading()
       }

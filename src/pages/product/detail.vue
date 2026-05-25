@@ -120,13 +120,14 @@
 import { ref, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { productApi, cartApi } from '@/utils/api'
-import { checkAuth, requireAuth } from '@/utils/auth'
+import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
 
 const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)
 const loading = ref(false)
-const product = ref<any>({})
+interface Product { id: number; name: string; coverImage?: string; images?: string | string[]; detailImages?: string | string[]; description?: string; price?: string | number; requiredPoints?: number; type?: number; isFavorite?: boolean; salesCount?: number; [k: string]: unknown }
+const product = ref<Product>({})
 const images = ref<string[]>([])
 const detailImages = ref<string[]>([])
 const currentImg = ref(0)
@@ -177,8 +178,8 @@ async function loadProduct(id: number, type: number) {
     }
     images.value = allImages.length ? allImages : ['/static/logo.png']
     isFavorite.value = res.isFavorite || false
-  } catch (e: any) {
-    uni.showToast({ title: e.message || '加载失败', icon: 'none' })
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '加载失败', icon: 'none' })
   } finally {
     loading.value = false
   }
@@ -192,29 +193,29 @@ async function loadCartCount() {
 }
 
 async function toggleFavorite() {
-  if (!requireAuth()) return
+  if (!checkAuth()) return
   try {
     await productApi.toggleFavorite(productId.value)
     isFavorite.value = !isFavorite.value
     uni.showToast({ title: isFavorite.value ? '已收藏' : '已取消', icon: 'success' })
-  } catch (e: any) {
-    uni.showToast({ title: e.message || '操作失败', icon: 'none' })
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '操作失败', icon: 'none' })
   }
 }
 
 async function addToCart() {
-  if (!requireAuth()) return
+  if (!checkAuth()) return
   try {
     await cartApi.add({ productId: productId.value, quantity: 1, type: productType.value })
     cartCount.value++
     uni.showToast({ title: '已加入购物车', icon: 'success' })
-  } catch (e: any) {
-    uni.showToast({ title: e.message || '添加失败', icon: 'none' })
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '添加失败', icon: 'none' })
   }
 }
 
 function buyNow() {
-  if (!requireAuth()) return
+  if (!checkAuth()) return
   uni.navigateTo({ url: `/pages/order/confirm?productId=${productId.value}&quantity=1&type=${productType.value}` })
 }
 
@@ -222,7 +223,7 @@ function goBack() { uni.navigateBack() }
 function goCatalog() { uni.switchTab({ url: '/pages/index/index' }) }
 function goCart() { uni.switchTab({ url: '/pages/cart/index' }) }
 function share() { uni.showShareMenu({ menus: ['shareTimeline', 'shareAppMessage'] }) }
-function onSwiperChange(e: any) { currentImg.value = e.detail.current }
+function onSwiperChange(e: { detail: { current: number } }) { currentImg.value = e.detail.current }
 </script>
 
 <style lang="scss" scoped>

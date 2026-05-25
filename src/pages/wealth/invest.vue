@@ -96,10 +96,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { financialApi, walletApi } from '@/utils/api'
-import { requireAuth } from '@/utils/auth'
+import { checkAuth } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
-const product = ref<any>(null)
+interface FinancialProduct { id: string; name: string; type?: string; annualRate?: number; displayRate?: string; cycleDays?: number; minAmount?: string | number; maxAmount?: string | number; rateValue?: string; cycle?: number; [k: string]: unknown }
+const product = ref<FinancialProduct | null>(null)
 const amount = ref('')
 const ecoPoints = ref(0)
 const loading = ref(false)
@@ -107,7 +108,7 @@ const loading = ref(false)
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
-  if (!requireAuth()) return
+  if (!checkAuth()) return
   loadData()
 })
 
@@ -127,7 +128,7 @@ async function loadData() {
     ecoPoints.value = Number(bal.ecoPoints || 0)
 
     if (pid) {
-      product.value = (products || []).find((p: any) => p.id === pid) || null
+      product.value = (products || []).find((p: FinancialProduct) => p.id === pid) || null
     } else {
       product.value = products?.[0] || null
     }
@@ -138,8 +139,8 @@ async function loadData() {
       product.value.annualRate = parseFloat(product.value.displayRate) / 100
       product.value.cycleDays = product.value.cycleDays || product.value.cycle || 30
     }
-  } catch (e: any) {
-    uni.showToast({ title: e.message || '加载失败', icon: 'none' })
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '加载失败', icon: 'none' })
   } finally {
     loading.value = false
   }
@@ -172,8 +173,8 @@ async function doSubscribe() {
     })
     uni.showToast({ title: '申购成功', icon: 'success' })
     setTimeout(() => uni.navigateBack(), 1500)
-  } catch (e: any) {
-    uni.showToast({ title: e.message || '申购失败', icon: 'none' })
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '申购失败', icon: 'none' })
   } finally {
     uni.hideLoading()
   }

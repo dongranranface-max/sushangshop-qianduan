@@ -169,15 +169,17 @@
 import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { orderApi, addressApi } from '@/utils/api'
-import { checkAuth, requireAuth } from '@/utils/auth'
+import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
 
 const statusBarHeight = ref(20)
 const loggedIn = ref(checkAuth())
 const loading = ref(false)
 const submitting = ref(false)
-const orderItems = ref<any[]>([])
-const address = ref<any>(null)
+interface OrderItem { productId: string; name: string; coverImage?: string; price: string | number; quantity: number; ecoPoints?: number; requiredPoints?: number; type: number; [k: string]: unknown }
+interface Address { id: string; consignee: string; phone: string; province: string; city: string; district: string; detail: string; isDefault?: number; [k: string]: unknown }
+const orderItems = ref<OrderItem[]>([])
+const address = ref<Address | null>(null)
 const remark = ref('')
 const mode = ref<'consume' | 'exchange' | 'redeem'>('consume')
 
@@ -256,8 +258,8 @@ async function loadAddress() {
   if (!checkAuth()) return
   try {
     const list = await addressApi.list()
-    const def = list.find((a: any) => a.isDefault === 1) || list[0]
-    if (def) address.value = def
+    const def = list.find((a: Address) => a.isDefault === 1) || list[0]
+    if (def) address.value = def as Address
   } catch {}
 }
 
@@ -274,12 +276,12 @@ function loadSelectedAddress() {
 }
 
 function selectAddress() {
-  if (!requireAuth()) return
+  if (!checkAuth()) return
   uni.navigateTo({ url: '/pages/address/list' })
 }
 
 async function handleSubmit() {
-  if (!requireAuth()) return
+  if (!checkAuth()) return
   if (!address.value) {
     uni.showToast({ title: '请选择收货地址', icon: 'none' })
     return
@@ -292,7 +294,7 @@ async function handleSubmit() {
     const options = current?.options || {}
     const { cartIds, productId, quantity } = options
 
-    const payload: any = {
+    const payload = {
       addressId: address.value.id,
       remark: remark.value,
     }
@@ -302,8 +304,8 @@ async function handleSubmit() {
     const res = await orderApi.create(payload)
     uni.redirectTo({ url: '/' + 'pages/order/list?tab=1' })
     uni.showToast({ title: '下单成功', icon: 'success' })
-  } catch (e: any) {
-    uni.showToast({ title: e.message || '下单失败', icon: 'none' })
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '下单失败', icon: 'none' })
   } finally {
     submitting.value = false
   }

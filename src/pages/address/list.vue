@@ -57,18 +57,19 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { addressApi } from '@/utils/api'
-import { requireAuth } from '@/utils/auth'
+import { checkAuth } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)
-const addresses = ref<any[]>([])
+interface Address { id: string; consignee: string; phone: string; province: string; city: string; district: string; detail: string; isDefault: number; [k: string]: unknown }
+const addresses = ref<Address[]>([])
 const loading = ref(false)
 
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
   safeAreaBottom.value = sys.safeAreaInsets?.bottom || 0
-  if (!requireAuth()) return
+  if (!checkAuth()) return
   loadData()
 })
 
@@ -77,8 +78,8 @@ async function loadData() {
   try {
     const list = await addressApi.list()
     addresses.value = list || []
-  } catch (e: any) {
-    uni.showToast({ title: e.message || '加载失败', icon: 'none' })
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '加载失败', icon: 'none' })
   } finally {
     loading.value = false
   }
@@ -87,25 +88,25 @@ async function loadData() {
 function goBack() { uni.navigateBack() }
 
 function goAdd() { uni.navigateTo({ url: '/pages/address/edit' }) }
-function goEdit(addr: any) { uni.navigateTo({ url: `/pages/address/edit?id=${addr.id}` }) }
+function goEdit(addr: Address) { uni.navigateTo({ url: `/pages/address/edit?id=${addr.id}` }) }
 
-function selectAddr(addr: any) {
+function selectAddr(addr: Address) {
   uni.setStorageSync('selectedAddress', addr)
   uni.navigateBack()
 }
 
-async function setDefault(addr: any) {
+async function setDefault(addr: Address) {
   if (addr.isDefault === 1) return
   try {
     await addressApi.setDefault(addr.id)
     uni.showToast({ title: '设置成功', icon: 'success' })
     loadData()
-  } catch (e: any) {
-    uni.showToast({ title: e.message || '设置失败', icon: 'none' })
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '设置失败', icon: 'none' })
   }
 }
 
-function deleteAddr(addr: any) {
+function deleteAddr(addr: Address) {
   uni.showModal({
     title: '确认删除',
     content: '确定删除该地址吗？',
@@ -115,8 +116,8 @@ function deleteAddr(addr: any) {
         await addressApi.delete(addr.id)
         uni.showToast({ title: '已删除', icon: 'success' })
         loadData()
-      } catch (e: any) {
-        uni.showToast({ title: e.message || '删除失败', icon: 'none' })
+      } catch (err: { message?: string }) {
+        uni.showToast({ title: err?.message || '删除失败', icon: 'none' })
       }
     },
   })

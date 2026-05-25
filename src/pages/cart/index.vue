@@ -145,7 +145,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { cartApi } from '@/utils/api'
-import { checkAuth, requireAuth } from '@/utils/auth'
+import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
 import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 import AssetStatusBar from '@/components/AssetStatusBar.vue'
@@ -153,7 +153,8 @@ import AssetStatusBar from '@/components/AssetStatusBar.vue'
 const statusBarHeight = ref(20)
 const loggedIn = ref(checkAuth())
 const currentGroup = ref(1)
-const cartItems = ref<any[]>([])
+interface CartItem { id: string; productId: string; type: number; name: string; coverImage?: string; product?: { name: string; coverImage: string }; price: string | number; requiredPoints?: number; quantity: number; selected?: boolean; [k: string]: unknown }
+const cartItems = ref<CartItem[]>([])
 const loading = ref(false)
 
 const groups = [
@@ -171,19 +172,19 @@ function getGroupCount(type: number) {
 }
 
 const allSelected = computed(() =>
-  filteredItems.value.length > 0 && filteredItems.value.every((i: any) => i.selected)
+  filteredItems.value.length > 0 && filteredItems.value.every((i: CartItem) => i.selected)
 )
 
-const selectedItems = computed(() => filteredItems.value.filter((i: any) => i.selected))
+const selectedItems = computed(() => filteredItems.value.filter((i: CartItem) => i.selected))
 
 const selectedCount = computed(() => selectedItems.value.length)
 
 const totalCash = computed(() =>
-  selectedItems.value.reduce((s: number, i: any) => s + Number(i.price) * i.quantity, 0)
+  selectedItems.value.reduce((s: number, i: CartItem) => s + Number(i.price) * i.quantity, 0)
 )
 
 const totalPoints = computed(() =>
-  selectedItems.value.reduce((s: number, i: any) => s + ((i.requiredPoints || 0) * i.quantity), 0)
+  selectedItems.value.reduce((s: number, i: CartItem) => s + ((i.requiredPoints || 0) * i.quantity), 0)
 )
 
 const hasSelected = computed(() => selectedCount.value > 0)
@@ -204,7 +205,7 @@ async function loadCart() {
   loading.value = true
   try {
     const res = await cartApi.list()
-    cartItems.value = (res || []).map((item: any) => ({ ...item, selected: item.selected ?? false }))
+    cartItems.value = (res || []).map((item: CartItem) => ({ ...item, selected: item.selected ?? false }))
   } catch {
     cartItems.value = []
   } finally {
@@ -212,18 +213,18 @@ async function loadCart() {
   }
 }
 
-async function changeQty(item: any, delta: number) {
+async function changeQty(item: CartItem, delta: number) {
   const newQty = item.quantity + delta
   if (newQty < 1) return
   try {
     await cartApi.updateQuantity(item.id, newQty)
     item.quantity = newQty
-  } catch (e: any) {
-    uni.showToast({ title: e.message || '修改失败', icon: 'none' })
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '修改失败', icon: 'none' })
   }
 }
 
-async function toggleSelect(item: any) {
+async function toggleSelect(item: CartItem) {
   try {
     await cartApi.updateSelected(item.id, !item.selected)
     item.selected = !item.selected
@@ -234,14 +235,14 @@ async function toggleSelectAll() {
   const all = allSelected.value
   try {
     await cartApi.selectAll(!all)
-    filteredItems.value.forEach((item: any) => { item.selected = !all })
+    filteredItems.value.forEach((item: CartItem) => { item.selected = !all })
   } catch {}
 }
 
-async function removeItem(item: any) {
+async function removeItem(item: CartItem) {
   try {
     await cartApi.remove(item.id)
-    cartItems.value = cartItems.value.filter((i: any) => i.id !== item.id)
+    cartItems.value = cartItems.value.filter((i: CartItem) => i.id !== item.id)
   } catch {}
 }
 
@@ -255,8 +256,8 @@ function goCatalog() { uni.switchTab({ url: '/pages/catalog/index' }) }
 
 function goSettle() {
   if (!hasSelected.value) return
-  if (!requireAuth()) return
-  const ids = selectedItems.value.map((i: any) => i.id).join(',')
+  if (!checkAuth()) return
+  const ids = selectedItems.value.map((i: CartItem) => i.id).join(',')
   uni.navigateTo({ url: `/pages/order/confirm?cartIds=${ids}` })
 }
 </script>
