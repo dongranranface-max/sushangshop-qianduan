@@ -301,7 +301,7 @@ async function handleSubmit() {
     if (cartIds) payload.cartIds = cartIds
     if (productId) { payload.productId = Number(productId); payload.quantity = Number(quantity || 1) }
 
-    const res = await orderApi.create(payload)
+    await orderApi.create(payload)
     uni.redirectTo({ url: '/' + 'pages/order/list?tab=1' })
     uni.showToast({ title: '下单成功', icon: 'success' })
   } catch (err: { message?: string }) {

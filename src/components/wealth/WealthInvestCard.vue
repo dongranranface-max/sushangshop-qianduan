@@ -53,7 +53,8 @@ const props = defineProps<{
   project: Partial<FinancialProduct>
 }>()
 
-const emit = defineEmits<{
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+defineEmits<{
   (e: 'click', project: Partial<FinancialProduct>): void
   (e: 'invest', project: Partial<FinancialProduct>): void
 }>()

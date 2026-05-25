@@ -285,13 +285,13 @@ function goCart() { uni.switchTab({ url: '/pages/cart/index' }) }
 function share() { uni.showShareMenu({ menus: ['shareTimeline', 'shareAppMessage'] }) }
 function onSwiperChange(e: { detail: { current: number } }) { currentImg.value = e.detail.current }
 
-function handleImgError(index: number, e: { detail: { errMsg?: string } }) {
+function handleImgError(index: number, _e: unknown) {
   if (images.value[index] !== DEFAULT_PRODUCT_COVER) {
     images.value[index] = DEFAULT_PRODUCT_COVER
   }
 }
 
-function handleDetailImgError(index: number, e: { detail: { errMsg?: string } }) {
+function handleDetailImgError(index: number, _e: unknown) {
   if (detailImages.value[index] !== DEFAULT_PRODUCT_COVER) {
     detailImages.value[index] = DEFAULT_PRODUCT_COVER
   }

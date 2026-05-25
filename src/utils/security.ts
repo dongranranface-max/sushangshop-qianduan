@@ -44,3 +44,24 @@ export function formatPoints(value: unknown): string {
   if (isNaN(num)) return '0'
   return num.toLocaleString('zh-CN')
 }
+
+/**
+ * 搜索关键词清理（防 XSS）
+ */
+export function sanitizeKeyword(kw: string): string {
+  return String(kw || '').replace(/[<>'"`;\\]/g, '').trim().slice(0, 100)
+}
+
+/**
+ * 订单号清理
+ */
+export function sanitizeOrderNo(no: string): string {
+  return String(no || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 32)
+}
+
+/**
+ * ID 清理（只留数字+字母）
+ */
+export function sanitizeId(id: string): string {
+  return String(id || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64)
+}

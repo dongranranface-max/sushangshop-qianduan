@@ -4,7 +4,7 @@
 //  认证方式: Bearer Token（从本地存储获取）
 // ============================================
 import { API_BASE_URL } from '@/config'
-import { sanitizeKeyword, sanitizeOrderNo, sanitizeId, escapeHtml } from './security'
+import { escapeHtml } from './security'
 import { generateSignHeaders, needsSign } from './signature'
 
 const BASE_URL = API_BASE_URL
@@ -25,7 +25,8 @@ function clearToken() {
   uni.removeStorageSync('userId')
 }
 
-function getUserId(): string {
+// getUserId kept for future use-cases; not currently called internally
+function _getUserId(): string {
   return uni.getStorageSync('userId') || ''
 }
 

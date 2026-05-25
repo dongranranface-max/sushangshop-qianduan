@@ -65,7 +65,7 @@ onMounted(() => {
   }, 100)
 })
 
-function onSelect(type: PortalType, index: number) {
+function onSelect(type: PortalType, _index: number) {
   emit('select', type)
 }
 </script>

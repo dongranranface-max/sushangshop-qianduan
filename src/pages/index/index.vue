@@ -169,7 +169,7 @@ import { onShow } from '@dcloudio/uni-app'
 import { productApi, marketingApi } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
-import { DEFAULT_PRODUCT_COVER, resolveProductCover } from '@/utils/media'
+import { resolveProductCover } from '@/utils/media'
 import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 
 const statusBarHeight = ref(20)

@@ -111,7 +111,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { onShow } from '@dcloudio/uni-app'
 import { productApi } from '@/utils/api'
 
 const statusBarHeight = ref(20)

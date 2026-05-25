@@ -86,7 +86,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { walletApi } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
 
