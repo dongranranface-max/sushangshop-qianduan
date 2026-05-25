@@ -69,10 +69,10 @@
         </view>
 
         <!-- SKU 规格选择 -->
-        <view class="sku-section" @click="showSkuPicker">
+        <view class="sku-section" @click.stop="openSkuSheet">
           <text class="sku-label">规格</text>
-          <text class="sku-value" :class="{ 'sku-placeholder': !skuSelected.color || !skuSelected.size }">
-            {{ skuSelected.color && skuSelected.size ? `${skuSelected.color} / ${skuSelected.size}` : '请选择规格' }}
+          <text class="sku-value" :class="{ 'sku-placeholder': !selectedSkuId }">
+            {{ selectedText || '请选择规格' }}
           </text>
           <text class="sku-arrow">›</text>
         </view>
@@ -122,11 +122,46 @@
     </view>
 
     <view class="safe-area-bottom" :style="{ height: safeAreaBottom + 'px' }" />
+    <!-- SKU 底部弹窗 -->
+    <view v-if="skuSheetVisible" class="sku-overlay" @click="closeSkuSheet">
+      <view class="sku-sheet" @click.stop>
+        <view class="sku-sheet__header">
+          <image class="sku-sheet__cover" :src="product.coverImage || DEFAULT_PRODUCT_COVER" mode="aspectFill" />
+          <view class="sku-sheet__info">
+            <text class="sku-sheet__price">{{ currentSkuPrice }}</text>
+            <text class="sku-sheet__stock">库存 {{ currentSkuStock }} 件</text>
+            <text class="sku-sheet__tips">{{ selectedText }}</text>
+          </view>
+          <view class="sku-sheet__close" @click="closeSkuSheet">×</view>
+        </view>
+        <scroll-view scroll-y class="sku-sheet__body">
+          <view v-for="spec in skuSpecs" :key="spec.name" class="spec-group">
+            <text class="spec-group__name">{{ spec.name }}</text>
+            <view class="spec-group__options">
+              <view
+                v-for="opt in spec.options"
+                :key="opt"
+                class="spec-option"
+                :class="{ 'is-selected': selectedOptions[spec.name] === opt, 'is-disabled': !isOptionAvailable(spec.name, opt) }"
+                @click="selectOption(spec.name, opt)">
+                <text>{{ opt }}</text>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+        <view class="sku-sheet__footer">
+          <view class="sku-confirm-btn" :class="{ 'is-disabled': !selectedSkuId }" @click="confirmSku">
+            <text>确认</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { productApi, cartApi, favoriteApi } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
@@ -148,7 +183,82 @@ const deliveryDays = ref(3)
 const productId = ref(0)
 const productType = ref(1)
 
-const skuSelected = ref({ color: '', size: '' })
+const skuSelected = ref({ color: '', size: '' }); void skuSelected
+
+// ---- SKU选择器状态 ----
+interface SkuSpec { name: string; options: string[] }
+interface SkuItem { id: string; specs: string; price: string; points: string; stock: number }
+const skuSpecs = ref<SkuSpec[]>([])
+const skuList = ref<SkuItem[]>([])
+const selectedOptions = ref<Record<string, string>>({})
+const skuSheetVisible = ref(false)
+const selectedSkuId = ref<string | null>(null)
+
+const selectedText = computed(() => {
+  if (!selectedSkuId.value) return ''
+  const sku = skuList.value.find((s) => s.id === selectedSkuId.value)
+  if (!sku) return ''
+  try {
+    const p = JSON.parse(sku.specs) as Record<string, string>
+    return Object.entries(p).map(([k, v]) => `${k  }:${  v}`).join(' / ')
+  } catch { return '' }
+})
+
+const currentSkuPrice = computed(() => {
+  const sku = skuList.value.find((s) => s.id === selectedSkuId.value)
+  if (!sku) return product.value.price ? `¥${  product.value.price}` : '¥--'
+  const t = (product.value as Record<string, unknown>).productType
+  if (t === 3) return `${sku.points  }积分`
+  if (t === 2) return `¥${  sku.price  } + ${  sku.points  }积分`
+  return `¥${  sku.price}`
+})
+
+const currentSkuStock = computed(() => {
+  return skuList.value.find((s) => s.id === selectedSkuId.value)?.stock ?? 0
+})
+
+function isOptionAvailable(name: string, opt: string): boolean {
+  if (!skuSpecs.value.length) return true
+  const probe = { ...selectedOptions.value, [name]: opt }
+  if (!skuSpecs.value.every((s) => probe[s.name] !== undefined)) return true
+  return skuList.value.some((sku) => {
+    try {
+      const p = JSON.parse(sku.specs) as Record<string, string>
+      return Object.entries(probe).every(([k, v]) => p[k] === v) && sku.stock > 0
+    } catch { return false }
+  })
+}
+
+function selectOption(name: string, opt: string) {
+  if (!isOptionAvailable(name, opt)) return
+  selectedOptions.value = { ...selectedOptions.value, [name]: opt }
+  const matched = skuList.value.find((sku) => {
+    try {
+      const p = JSON.parse(sku.specs) as Record<string, string>
+      return Object.entries(selectedOptions.value).every(([k, v]) => p[k] === v)
+    } catch { return false }
+  })
+  selectedSkuId.value = matched?.id ?? null
+}
+
+function openSkuSheet() {
+  const res = product.value as Record<string, unknown>
+  skuSpecs.value = (res['specs'] as SkuSpec[]) ?? []
+  skuList.value = (res['skus'] as SkuItem[]) ?? []
+  selectedOptions.value = {}
+  selectedSkuId.value = null
+  skuSheetVisible.value = true
+}
+
+function closeSkuSheet() { skuSheetVisible.value = false }
+
+function confirmSku() {
+  if (!selectedSkuId.value) {
+    uni.showToast({ title: '请选择完整规格', icon: 'none' })
+    return
+  }
+  skuSheetVisible.value = false
+}
 
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
@@ -225,46 +335,13 @@ async function toggleFavorite() {
   }
 }
 
-function showSkuPicker() {
-  uni.showModal({
-    title: '选择规格',
-    confirmText: '确定',
-    cancelText: '取消',
-    success: async (res) => {
-      if (!res.confirm) return
-      // 颜色选择
-      const colorRes = await new Promise<{ confirm: boolean; tapIndex?: number }>((resolve) => {
-        uni.showActionSheet({
-          itemList: ['红色', '蓝色'],
-          success: (r) => resolve({ confirm: true, tapIndex: r.tapIndex }),
-          fail: () => resolve({ confirm: false }),
-        })
-      })
-      if (!colorRes.confirm) return
-      const colors = ['红色', '蓝色']
-      const selectedColor = colors[colorRes.tapIndex!]
-
-      // 尺码选择
-      const sizeRes = await new Promise<{ confirm: boolean; tapIndex?: number }>((resolve) => {
-        uni.showActionSheet({
-          itemList: ['S', 'M', 'L'],
-          success: (r) => resolve({ confirm: true, tapIndex: r.tapIndex }),
-          fail: () => resolve({ confirm: false }),
-        })
-      })
-      if (!sizeRes.confirm) return
-      const sizes = ['S', 'M', 'L']
-      const selectedSize = sizes[sizeRes.tapIndex!]
-
-      skuSelected.value = { color: selectedColor, size: selectedSize }
-    },
-  })
-}
+function showSkuPicker() { openSkuSheet() } void showSkuPicker
 
 async function addToCart() {
   if (!checkAuth()) return
+  if (skuList.value.length > 0 && !selectedSkuId.value) { openSkuSheet(); return }
   try {
-    await cartApi.add({ productId: String(productId.value), quantity: 1, skuId: undefined })
+    await cartApi.add({ productId: String(productId.value), quantity: 1, skuId: selectedSkuId.value ?? undefined })
     const countRes = await cartApi.count()
     cartCount.value = countRes?.count ?? 0
     uni.showToast({ title: '已加入购物车', icon: 'success' })
@@ -276,7 +353,8 @@ async function addToCart() {
 
 function buyNow() {
   if (!checkAuth()) return
-  uni.navigateTo({ url: `/pages/order/confirm?productId=${productId.value}&quantity=1&type=${productType.value}` })
+  if (skuList.value.length > 0 && !selectedSkuId.value) { openSkuSheet(); return }
+  const _navUrl = selectedSkuId.value ? `/pages/order/confirm?productId=${productId.value}&quantity=1&type=${productType.value}&skuId=${selectedSkuId.value}` : `/pages/order/confirm?productId=${productId.value}&quantity=1&type=${productType.value}`; uni.navigateTo({ url: _navUrl })
 }
 
 function goBack() { uni.navigateBack() }
@@ -748,4 +826,47 @@ function handleDetailImgError(index: number, _e: unknown) {
     }
   }
 }
+
+// ========== SKU 底部弹窗 ==========
+.sku-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+  display: flex; align-items: flex-end;
+}
+.sku-sheet {
+  width: 100%; max-height: 72vh; background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  display: flex; flex-direction: column; overflow: hidden;
+  &__header { display: flex; align-items: center; padding: 32rpx; gap: 24rpx;
+    border-bottom: 1rpx solid $border-light; flex-shrink: 0; }
+  &__cover { width: 160rpx; height: 160rpx; border-radius: $radius-md; background: $bg-tertiary; flex-shrink: 0; }
+  &__info { flex: 1; display: flex; flex-direction: column; gap: 8rpx; }
+  &__price { font-size: 40rpx; font-weight: 800; color: $accent-dark; }
+  &__stock { font-size: 24rpx; color: $text-muted; }
+  &__tips { font-size: 24rpx; color: $text-secondary; }
+  &__close { width: 56rpx; height: 56rpx; display: flex; align-items: center;
+    justify-content: center; font-size: 40rpx; color: $text-muted; flex-shrink: 0; }
+  &__body { flex: 1; padding: 32rpx; overflow-y: auto; }
+  &__footer { padding: 24rpx 32rpx calc(24rpx + env(safe-area-inset-bottom));
+    flex-shrink: 0; border-top: 1rpx solid $border-light; }
+}
+.spec-group { margin-bottom: 32rpx;
+  &__name { display: block; font-size: 26rpx; font-weight: 600; color: $text-primary; margin-bottom: 16rpx; }
+  &__options { display: flex; flex-wrap: wrap; gap: 16rpx; }
+}
+.spec-option {
+  min-width: 100rpx; padding: 12rpx 24rpx; border: 2rpx solid $border-light;
+  border-radius: $radius-md; font-size: 26rpx; text-align: center;
+  color: $text-primary; background: #fff; transition: border-color .18s, color .18s, background .18s;
+  &.is-selected { border-color: $accent-dark; color: $accent-dark;
+    background: rgba(184,152,118,0.08); font-weight: 600; }
+  &.is-disabled { opacity: 0.35; text-decoration: line-through; pointer-events: none; }
+}
+.sku-confirm-btn {
+  height: 88rpx; background: $btn-gold-gradient; border-radius: $radius-full;
+  box-shadow: $btn-gold-shadow; display: flex; align-items: center;
+  justify-content: center; font-size: 32rpx; font-weight: 700; color: #fff; letter-spacing: 2rpx;
+  &.is-disabled { opacity: 0.45; pointer-events: none; }
+}
+
 </style>
