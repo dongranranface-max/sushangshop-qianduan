@@ -109,6 +109,16 @@ function request<T = unknown>(options: RequestOptions): Promise<T> {
 }
 
 // --------------------------------------------
+//  通用类型
+// --------------------------------------------
+export interface PageResult<T> {
+  list: T[]
+  total: number
+  page: number
+  limit: number
+}
+
+// --------------------------------------------
 //  认证模块 /auth
 // --------------------------------------------
 export const authApi = {
@@ -194,66 +204,119 @@ export const authApi = {
 // --------------------------------------------
 //  用户模块 /users
 // --------------------------------------------
+export interface UserProfile {
+  userId?: string
+  id?: string
+  phone: string
+  nickname: string
+  avatar: string
+  level: number
+  levelName: string
+  createdAt: string
+  teamPerformance: string
+  inviteCode: string
+  parentInviteCode: string
+  bankCard: { bankName: string; bankCard: string; realName: string } | null
+}
+
+export interface UserAsset {
+  ecoPoints: string
+  consumerPoints: string
+  balance: string
+  todayEarnings: string
+  totalEarnings: string
+}
+
+export interface TeamMember {
+  userId: string
+  nickname: string
+  avatar: string
+  level: number
+  levelName: string
+  createdAt: string
+  teamPerformance: string
+  parentInviteCode: string
+}
+
+export interface UserTeam {
+  teamSize: number
+  directCount: number
+  teamPerformance: string
+  currentLevel: number
+  nextLevel: number
+  upgradeNeed: string
+  teamList: TeamMember[]
+}
+
+export interface OrderCounts {
+  all: number
+  pending: number
+  paid: number
+  shipped: number
+  completed: number
+  refunded: number
+}
+
 export const userApi = {
+  // 获取用户信息（调用 getProfile）
+  getUserInfo: (): Promise<UserProfile> => userApi.getProfile(),
+
+  // 订单各状态数量
+  getOrderCounts: (): Promise<OrderCounts> =>
+    request<OrderCounts>({ url: '/users/order-counts' }),
+
   // 个人资料
   getProfile: () =>
-    request<{
-      userId?: string
-      id?: string
-      phone: string
-      nickname: string
-      avatar: string
-      level: number
-      levelName: string
-      createdAt: string
-      teamPerformance: string
-      inviteCode: string
-      parentInviteCode: string
-      bankCard: { bankName: string; bankCard: string; realName: string } | null
-    }>({ url: '/users/profile' }),
+    request<UserProfile>({ url: '/users/profile' }),
 
   // 更新资料
   updateProfile: (data: { nickname?: string; avatar?: string }) =>
     request<any>({ url: '/users/profile', method: 'PUT', data }),
 
   // 个人资产
-  getAsset: () =>
-    request<{
-      ecoPoints: string
-      consumerPoints: string
-      balance: string
-      todayEarnings: string
-      totalEarnings: string
-    }>({ url: '/users/asset' }),
+  getAsset: (): Promise<UserAsset> =>
+    request<UserAsset>({ url: '/users/asset' }),
 
   // 绑定银行卡
   bindBankCard: (data: { bankCard: string; bankName: string; realName: string }) =>
     request<any>({ url: '/users/bank-card', method: 'POST', data }),
 
   // 团队信息
-  getTeam: () =>
-    request<{
-      teamSize: number
-      directCount: number
-      teamPerformance: string
-      currentLevel: number
-      nextLevel: number
-      upgradeNeed: string
-      teamList: any[]
-    }>({ url: '/users/team' }),
+  getTeam: (): Promise<UserTeam> =>
+    request<UserTeam>({ url: '/users/team' }),
 }
 
 // --------------------------------------------
 //  积分钱包模块 /wallet
 // --------------------------------------------
+export interface WalletLogItem {
+  id: string
+  type: number
+  typeName: string
+  amount: string
+  balanceBefore: string
+  balanceAfter: string
+  remark: string
+  createdAt: string
+}
+
+export interface WalletBalance {
+  ecoPoints: string
+  consumerPoints: string
+  frozenEcoPoints: string
+}
+
+export interface WalletLogsResult {
+  list: WalletLogItem[]
+  total: number
+  page: number
+  limit: number
+}
+
 export const walletApi = {
   // 积分余额
-  getBalance: () =>
-    request<{
-      ecoPoints: string
-      consumerPoints: string
-      frozenEcoPoints: string
-    }>({ url: '/wallet/balance' }),
+  getBalance: (): Promise<WalletBalance> =>
+    request<WalletBalance>({ url: '/wallet/balance' }),
 
   // 积分变动明细
   getLogs: (params: { type?: number; page?: number; limit?: number } = {}) => {
@@ -261,22 +324,62 @@ export const walletApi = {
     if (params.type) q.append('type', String(params.type))
     if (params.page) q.append('page', String(params.page))
     if (params.limit) q.append('limit', String(params.limit))
-    return request<{
-      list: any[]
-      total: number
-      page: number
-      limit: number
-    }>({ url: `/wallet/logs?${q.toString()}` })
+    return request<WalletLogsResult>({ url: `/wallet/logs?${q.toString()}` })
   },
 }
 
 // --------------------------------------------
 //  商品模块 /products
 // --------------------------------------------
+export interface ProductCategory {
+  id: string
+  name: string
+  icon?: string
+  sort: number
+}
+
+export interface ProductListItem {
+  id: string
+  name: string
+  coverImage: string
+  price: string
+  originalPrice: string
+  points: string
+  type: number
+  categoryId: string
+  stock: number
+  sales: number
+  tags?: string[]
+}
+
+export interface ProductDetail {
+  id: string
+  name: string
+  coverImage: string
+  images: string[]
+  price: string
+  originalPrice: string
+  points: string
+  type: number
+  categoryId: string
+  stock: number
+  sales: number
+  description: string
+  specs: Array<{ name: string; options: string[] }>
+  skus: Array<{
+    id: string
+    specs: string
+    price: string
+    points: string
+    stock: number
+  }>
+  tags?: string[]
+}
+
 export const productApi = {
   // 分类列表
-  getCategories: () =>
-    request<any[]>({ url: '/products/categories' }),
+  getCategories: (): Promise<ProductCategory[]> =>
+    request<ProductCategory[]>({ url: '/products/categories' }),
 
   // 商品列表
   getList: (params: {
@@ -292,49 +395,114 @@ export const productApi = {
     if (params.keyword) q.append('keyword', params.keyword)
     if (params.page) q.append('page', String(params.page))
     if (params.limit) q.append('limit', String(params.limit))
-    return request<{
-      list: any[]
-      total: number
-      page: number
-      limit: number
-    }>({ url: `/products?${q.toString()}` })
+    return request<PageResult<ProductListItem>>({ url: `/products?${q.toString()}` })
   },
 
-  // 商品详情
-  getDetail: <T = unknown>(id: string) =>
-    request<T>({ url: `/products/${id}` }),
+  // 商品详情（支持 optional type 参数）
+  getDetail: (id: string, type?: number) => {
+    const q = new URLSearchParams()
+    if (type !== undefined) q.append('type', String(type))
+    const qs = q.toString()
+    return request<ProductDetail>({
+      url: `/products/${id}${qs ? `?${qs}` : ''}`,
+    })
+  },
+
+  // 切换收藏状态：先 check，再 add 或 remove
+  toggleFavorite: (productId: string): Promise<{ favorited: boolean; favoriteId: string | null }> => {
+    return favoriteApi.check(productId).then((checkResult) => {
+      if (checkResult.favorited && checkResult.favoriteId) {
+        return favoriteApi.remove(productId).then(() => ({ favorited: false, favoriteId: null }))
+      } else {
+        return favoriteApi.add(productId).then(() => ({ favorited: true, favoriteId: productId }))
+      }
+    })
+  },
 }
 
 // --------------------------------------------
 //  订单模块 /orders
 // --------------------------------------------
+export interface OrderAddress {
+  consignee: string
+  phone: string
+  province: string
+  city: string
+  district: string
+  detail: string
+}
+
+export interface OrderItem {
+  productId: string
+  productName: string
+  coverImage: string
+  specs: string
+  quantity: number
+  price: string
+  points: string
+}
+
+export interface OrderLogisticsTrace {
+  time: string
+  desc: string
+}
+
+export interface OrderLogistics {
+  company: string
+  trackingNo: string
+  status: string
+  traces: OrderLogisticsTrace[]
+}
+
+export interface OrderDetail {
+  orderNo: string
+  orderType: number
+  status: number
+  createdAt: string
+  totalAmount: string
+  totalPoints: string
+  freightAmount: string
+  discountAmount: string
+  payAmount: string
+  pointsEarned: string
+  remark: string
+  qrCode: string
+  expireAt: string
+  address: OrderAddress
+  items: OrderItem[]
+  logistics?: OrderLogistics
+}
+
+export interface OrderListItem {
+  orderNo: string
+  orderType: number
+  status: number
+  statusName: string
+  createdAt: string
+  totalAmount: string
+  totalPoints: string
+  payAmount: string
+  itemCount: number
+  coverImage: string
+  productName: string
+}
+
+export interface CreateOrderResult {
+  orderNo: string
+  orderType: number
+  totalAmount: string
+  payAmount: string
+  pointsEarned: string
+  status: number
+  statusName: string
+  expireAt: string
+  qrCode: string
+}
+
 export const orderApi = {
   // 订单详情
-  getDetail: (orderNo: string) =>
-    request<{
-      orderNo: string
-      orderType: number
-      status: number
-      createdAt: string
-      totalAmount: string
-      totalPoints: string
-      freightAmount: string
-      discountAmount: string
-      payAmount: string
-      pointsEarned: string
-      remark: string
-      qrCode: string
-      expireAt: string
-      address: {
-        consignee: string; phone: string
-        province: string; city: string; district: string; detail: string
-      }
-      items: Array<{
-        productId: string; productName: string; coverImage: string
-        specs: string; quantity: number; price: string; points: string
-      }>
-      logistics?: { company: string; trackingNo: string; status: string; traces: Array<{ time: string; desc: string }> }
-    }>({ url: `/orders/${orderNo}` }),
+  getDetail: (orderNo: string): Promise<OrderDetail> =>
+    request<OrderDetail>({ url: `/orders/${orderNo}` }),
 
   // 创建订单
   create: (data: {
@@ -347,17 +515,8 @@ export const orderApi = {
     }>
     remark?: string
     couponId?: string
-  }) => request<{
-    orderNo: string
-    orderType: number
-    totalAmount: string
-    payAmount: string
-    pointsEarned: string
-    status: number
-    statusName: string
-    expireAt: string
-    qrCode: string
-  }>({ url: '/orders', method: 'POST', data }),
+  }): Promise<CreateOrderResult> =>
+    request<CreateOrderResult>({ url: '/orders', method: 'POST', data }),
 
   // 订单列表
   getList: (params: {
@@ -371,12 +530,7 @@ export const orderApi = {
     if (params.status) q.append('status', String(params.status))
     if (params.page) q.append('page', String(params.page))
     if (params.limit) q.append('limit', String(params.limit))
-    return request<{
-      list: any[]
-      total: number
-      page: number
-      limit: number
-    }>({ url: `/orders?${q.toString()}` })
+    return request<PageResult<OrderListItem>>({ url: `/orders?${q.toString()}` })
   },
 
   // 取消订单
@@ -397,7 +551,7 @@ export const orderApi = {
 
   // 物流信息
   getLogistics: (orderNo: string) =>
-    request<any>({ url: `/orders/${orderNo}/logistics` }),
+    request<OrderLogistics>({ url: `/orders/${orderNo}/logistics` }),
 
   // 申请退款
   applyRefund: (orderNo: string, data: { reason: number; description?: string; images?: string[] }) =>
@@ -411,9 +565,20 @@ export const orderApi = {
 // --------------------------------------------
 //  收货地址模块 /address
 // --------------------------------------------
+export interface AddressItem {
+  id: string
+  consignee: string
+  phone: string
+  province: string
+  city: string
+  district: string
+  detail: string
+  isDefault: number
+}
+
 export const addressApi = {
   // 地址列表
-  list: <T = unknown[]>() => request<T>({ url: '/address' }),
+  list: (): Promise<AddressItem[]> => request<AddressItem[]>({ url: '/address' }),
 
   // 新建地址
   create: (data: {
@@ -424,7 +589,7 @@ export const addressApi = {
     district: string
     detail: string
     isDefault?: number
-  }) => request<any>({ url: '/address', method: 'POST', data }),
+  }) => request<AddressItem>({ url: '/address', method: 'POST', data }),
 
   // 更新地址
   update: (id: string, data: Partial<{
@@ -435,7 +600,7 @@ export const addressApi = {
     district: string
     detail: string
     isDefault: number
-  }>) => request<any>({ url: `/address/${id}`, method: 'PUT', data }),
+  }>) => request<AddressItem>({ url: `/address/${id}`, method: 'PUT', data }),
 
   // 删除地址
   delete: (id: string) => request<any>({ url: `/address/${id}`, method: 'DELETE' }),
@@ -445,46 +610,82 @@ export const addressApi = {
     request<any>({ url: `/address/${id}/default`, method: 'POST' }),
 
   // 获取默认地址
-  getDefault: <T = unknown>() => request<T>({ url: '/address/default' }),
+  getDefault: (): Promise<AddressItem | null> => request<AddressItem | null>({ url: '/address/default' }),
 
-  getDetail: <T = unknown>(id: string) => request<T>({ url: `/address/${id}` }),
+  getDetail: (id: string): Promise<AddressItem> => request<AddressItem>({ url: `/address/${id}` }),
 }
 
 // --------------------------------------------
 //  理财模块 /financial
 // --------------------------------------------
+export interface FinancialProduct {
+  id: string
+  name: string
+  annualRate: string
+  minAmount: string
+  maxAmount: string
+  cycle: number
+  cycleName: string
+  riskLevel: number
+  tags?: string[]
+}
+
+export interface SubscribeResult {
+  holdingId: string
+  productName: string
+  amount: string
+  annualRate: string
+  dailyProfit: string
+  cycle: number
+  expectedProfit: string
+  expireAt: string
+  autoRenew: boolean
+  status: number
+  statusName: string
+}
+
+export interface FinancialHolding {
+  holdingId: string
+  productId: string
+  productName: string
+  amount: string
+  annualRate: string
+  dailyProfit: string
+  expectedProfit: string
+  earnedProfit: string
+  cycle: number
+  cycleName: string
+  startDate: string
+  expireAt: string
+  autoRenew: boolean
+  status: number
+  statusName: string
+}
+
+export interface FinancialEarning {
+  id: string
+  holdingId: string
+  productName: string
+  amount: string
+  profit: string
+  createdAt: string
+}
+
 export const financialApi = {
   // 理财项目列表
-  getProducts: () =>
-    request<any[]>({ url: '/financial/products' }),
+  getProducts: (): Promise<FinancialProduct[]> =>
+    request<FinancialProduct[]>({ url: '/financial/products' }),
 
   // 申购理财
-  subscribe: (data: { productId: string; amount: string; autoRenew?: boolean }) =>
-    request<{
-      holdingId: string
-      productName: string
-      amount: string
-      annualRate: string
-      dailyProfit: string
-      cycle: number
-      expectedProfit: string
-      expireAt: string
-      autoRenew: boolean
-      status: number
-      statusName: string
-    }>({ url: '/financial/subscribe', method: 'POST', data }),
+  subscribe: (data: { productId: string; amount: string; autoRenew?: boolean }): Promise<SubscribeResult> =>
+    request<SubscribeResult>({ url: '/financial/subscribe', method: 'POST', data }),
 
   // 我的持仓
   getHoldings: (params: { page?: number; limit?: number } = {}) => {
     const q = new URLSearchParams()
     if (params.page) q.append('page', String(params.page))
     if (params.limit) q.append('limit', String(params.limit))
-    return request<{
-      list: any[]
-      total: number
-      page: number
-      limit: number
-    }>({ url: `/financial/holdings?${q.toString()}` })
+    return request<PageResult<FinancialHolding>>({ url: `/financial/holdings?${q.toString()}` })
   },
 
   // 赎回理财
@@ -503,55 +704,96 @@ export const financialApi = {
     const q = new URLSearchParams()
     if (params.page) q.append('page', String(params.page))
     if (params.limit) q.append('limit', String(params.limit))
-    return request<{ list: any[]; total: number; page: number; limit: number }>(
-      { url: `/financial/earnings?${q.toString()}` }
-    )
+    return request<PageResult<FinancialEarning>>({ url: `/financial/earnings?${q.toString()}` })
   },
 }
 
 // --------------------------------------------
 //  会员等级模块 /level
 // --------------------------------------------
+export interface LevelConfig {
+  level: number
+  levelName: string
+  icon: string
+  minPerformance: string
+  dailyBonus: string
+  teamBonus: string
+  privileges: string[]
+}
+
+export interface MyLevel {
+  level: number
+  levelName: string
+  icon: string
+  teamPerformance: string
+  minPerformance: string
+  dailyBonus: string
+  totalBonus: string
+  nextLevel: number
+  nextLevelName: string
+  nextMinPerformance: string
+  upgradeNeed: string
+}
+
 export const levelApi = {
   // 等级配置
-  getConfigs: () =>
-    request<any[]>({ url: '/level/configs' }),
+  getConfigs: (): Promise<LevelConfig[]> =>
+    request<LevelConfig[]>({ url: '/level/configs' }),
 
   // 我的等级
-  getMyLevel: () =>
-    request<{
-      level: number
-      levelName: string
-      icon: string
-      teamPerformance: string
-      minPerformance: string
-      dailyBonus: string
-      totalBonus: string
-      nextLevel: number
-      nextLevelName: string
-      nextMinPerformance: string
-      upgradeNeed: string
-    }>({ url: '/level/my' }),
+  getMyLevel: (): Promise<MyLevel> =>
+    request<MyLevel>({ url: '/level/my' }),
 }
 
 // --------------------------------------------
 //  推荐模块 /referral
 // --------------------------------------------
+export interface ReferralChild {
+  userId: string
+  nickname: string
+  avatar: string
+  level: number
+  levelName: string
+  createdAt: string
+  teamPerformance: string
+  parentInviteCode: string
+}
+
+export interface ReferralBonusItem {
+  id: string
+  userId: string
+  userNickname: string
+  orderNo: string
+  amount: string
+  reward: string
+  createdAt: string
+}
+
+export interface InviteCodeInfo {
+  inviteCode: string
+  inviteUrl: string
+  qrCode: string
+}
+
+export interface RewardConfig {
+  registerReward: string
+  registerRewardUnit: string
+  referralRewardRate: string
+  referralRewardUnit: string
+  referralRewardCondition: string
+}
+
 export const referralApi = {
   // 我的邀请码
-  getInviteCode: () =>
-    request<{ inviteCode: string; inviteUrl: string; qrCode: string }>({
-      url: '/referral/invite-code',
-    }),
+  getInviteCode: (): Promise<InviteCodeInfo> =>
+    request<InviteCodeInfo>({ url: '/referral/invite-code' }),
 
   // 直属下级列表
   getChildren: (params: { page?: number; limit?: number } = {}) => {
     const q = new URLSearchParams()
     if (params.page) q.append('page', String(params.page))
     if (params.limit) q.append('limit', String(params.limit))
-    return request<{ list: any[]; total: number; page: number; limit: number }>(
-      { url: `/referral/children?${q.toString()}` }
-    )
+    return request<PageResult<ReferralChild>>({ url: `/referral/children?${q.toString()}` })
   },
 
   // 推荐奖励明细
@@ -559,41 +801,62 @@ export const referralApi = {
     const q = new URLSearchParams()
     if (params.page) q.append('page', String(params.page))
     if (params.limit) q.append('limit', String(params.limit))
-    return request<{ list: any[]; total: number; page: number; limit: number }>(
-      { url: `/referral/bonus?${q.toString()}` }
-    )
+    return request<PageResult<ReferralBonusItem>>({ url: `/referral/bonus?${q.toString()}` })
   },
 
   // 推荐关系树
   getTree: () => request<any>({ url: '/referral/tree' }),
 
   // 奖励规则
-  getRewardConfig: () =>
-    request<{
-      registerReward: string
-      registerRewardUnit: string
-      referralRewardRate: string
-      referralRewardUnit: string
-      referralRewardCondition: string
-    }>({ url: '/referral/reward-config' }),
+  getRewardConfig: (): Promise<RewardConfig> =>
+    request<RewardConfig>({ url: '/referral/reward-config' }),
 }
 
 // --------------------------------------------
 //  营销模块 /marketing
 // --------------------------------------------
+export interface Banner {
+  id: number
+  title: string
+  sub: string
+  image: string
+  link?: string
+  type?: number
+}
+
+export interface HotKeyword {
+  keyword: string
+  desc?: string
+  isNew?: boolean
+}
+
+export interface CouponItem {
+  id: string
+  name: string
+  type: number
+  value: string
+  minAmount: string
+  validFrom: string
+  validTo: string
+  status: number
+}
+
+export interface MyCouponItem extends CouponItem {
+  claimedAt: string
+}
+
 export const marketingApi = {
   // 首页 Banner
-  getBanners: () =>
-    request<Array<{
-      id: number; title: string; sub: string; image: string; link?: string; type?: number
-    }>>({ url: '/marketing/banners' }),
+  getBanners: (): Promise<Banner[]> =>
+    request<Banner[]>({ url: '/marketing/banners' }),
 
   // 热门搜索词
-  getHotKeywords: () =>
-    request<Array<{ keyword: string; desc?: string; isNew?: boolean }>>({ url: '/marketing/hot-keywords' }),
+  getHotKeywords: (): Promise<HotKeyword[]> =>
+    request<HotKeyword[]>({ url: '/marketing/hot-keywords' }),
 
   // 可领取优惠券列表
-  getAvailableCoupons: () => request<any[]>({ url: '/marketing/coupons' }),
+  getAvailableCoupons: (): Promise<CouponItem[]> =>
+    request<CouponItem[]>({ url: '/marketing/coupons' }),
 
   // 领取优惠券
   claimCoupon: (couponId: string) =>
@@ -603,7 +866,7 @@ export const marketingApi = {
   getMyCoupons: (params: { status?: number } = {}) => {
     const q = new URLSearchParams()
     if (params.status) q.append('status', String(params.status))
-    return request<{ list: any[]; total: number }>({
+    return request<{ list: MyCouponItem[]; total: number }>({
       url: `/marketing/coupons/my?${q.toString()}`,
     })
   },
@@ -612,10 +875,34 @@ export const marketingApi = {
 // --------------------------------------------
 //  购物车 /cart
 // --------------------------------------------
-export const cartApi = {
-  list: () => request<{ list: any[]; totalCount: number }>({ url: '/cart' }),
+export interface CartItem {
+  id: string
+  productId: string
+  productName: string
+  coverImage: string
+  specs: string
+  price: string
+  points: string
+  quantity: number
+  selected: boolean
+  stock: number
+  skuId?: string
+}
 
-  count: () => request<{ count: number }>({ url: '/cart/count' }),
+export interface CartListResult {
+  list: CartItem[]
+  totalCount: number
+  totalAmount: string
+  totalPoints: string
+}
+
+export const cartApi = {
+  // 列表（包含 count）
+  list: (): Promise<CartListResult> =>
+    request<CartListResult>({ url: '/cart' }),
+
+  count: (): Promise<{ count: number }> =>
+    request<{ count: number }>({ url: '/cart/count' }),
 
   add: (data: { productId: string; quantity?: number; skuId?: string }) =>
     request<{ id: string; cartCount: number }>({ url: '/cart', method: 'POST', data }),
@@ -637,21 +924,35 @@ export const cartApi = {
 // --------------------------------------------
 //  收藏 /favorites
 // --------------------------------------------
+export interface FavoriteItem {
+  id: string
+  productId: string
+  productName: string
+  coverImage: string
+  price: string
+  points: string
+  type: number
+  createdAt: string
+}
+
+export interface FavoriteCheckResult {
+  favorited: boolean
+  favoriteId: string | null
+}
+
 export const favoriteApi = {
   list: (params?: { page?: number; limit?: number }) => {
     const q = new URLSearchParams()
     if (params?.page) q.append('page', String(params.page))
     if (params?.limit) q.append('limit', String(params.limit))
     const qs = q.toString()
-    return request<{ list: any[]; total: number }>({
+    return request<PageResult<FavoriteItem>>({
       url: `/favorites${qs ? `?${qs}` : ''}`,
     })
   },
 
-  check: (productId: string) =>
-    request<{ favorited: boolean; favoriteId: string | null }>({
-      url: `/favorites/check/${productId}`,
-    }),
+  check: (productId: string): Promise<FavoriteCheckResult> =>
+    request<FavoriteCheckResult>({ url: `/favorites/check/${productId}` }),
 
   add: (productId: string) =>
     request<any>({ url: `/favorites/${productId}`, method: 'POST' }),
@@ -663,6 +964,41 @@ export const favoriteApi = {
 // --------------------------------------------
 //  工单模块 /tickets
 // --------------------------------------------
+export interface TicketReply {
+  id: string
+  content: string
+  images?: string[]
+  isCustomer: boolean
+  createdAt: string
+}
+
+export interface TicketDetail {
+  id: string
+  ticketNo: string
+  type: number
+  title: string
+  content: string
+  images?: string[]
+  status: number
+  statusName: string
+  createdAt: string
+  updatedAt: string
+  replies: TicketReply[]
+}
+
+export interface TicketListItem {
+  id: string
+  ticketNo: string
+  type: number
+  typeName: string
+  title: string
+  status: number
+  statusName: string
+  createdAt: string
+  updatedAt: string
+  lastReplyAt?: string
+}
+
 export const ticketApi = {
   getOnline: () =>
     request<{ online: boolean; workTime: string; hotline?: string; tip: string }>({
@@ -676,7 +1012,8 @@ export const ticketApi = {
     content: string
     orderNo?: string
     images?: string[]
-  }) => request<{ ticketId: string; ticketNo: string }>({ url: '/tickets', method: 'POST', data }),
+  }): Promise<{ ticketId: string; ticketNo: string }> =>
+    request<{ ticketId: string; ticketNo: string }>({ url: '/tickets', method: 'POST', data }),
 
   // 工单列表
   getList: (params: { status?: number; type?: number; page?: number; limit?: number } = {}) => {
@@ -685,17 +1022,15 @@ export const ticketApi = {
     if (params.type) q.append('type', String(params.type))
     if (params.page) q.append('page', String(params.page))
     if (params.limit) q.append('limit', String(params.limit))
-    return request<{ list: any[]; total: number; page: number; limit: number }>(
-      { url: `/tickets?${q.toString()}` }
-    )
+    return request<PageResult<TicketListItem>>({ url: `/tickets?${q.toString()}` })
   },
 
   // 工单详情
-  getDetail: <T = unknown>(id: string) => request<T>({ url: `/tickets/${id}` }),
+  getDetail: (id: string): Promise<TicketDetail> => request<TicketDetail>({ url: `/tickets/${id}` }),
 
   // 回复工单
-  reply: <T = unknown>(id: string, data: { content: string; images?: string[] }) =>
-    request<T>({ url: `/tickets/${id}/reply`, method: 'POST', data }),
+  reply: (id: string, data: { content: string; images?: string[] }): Promise<TicketDetail> =>
+    request<TicketDetail>({ url: `/tickets/${id}/reply`, method: 'POST', data }),
 
   // 确认解决
   confirm: (id: string) =>
@@ -705,17 +1040,34 @@ export const ticketApi = {
 // --------------------------------------------
 //  签到模块 /sign-in
 // --------------------------------------------
+export interface SignInRecord {
+  date: string
+  points: number
+  bonus: number
+  streak: number
+}
+
+export interface SignInResult {
+  success: boolean
+  message?: string
+  streak: number
+  points: number
+  bonus: number
+}
+
+export interface SignInMonthly {
+  records: SignInRecord[]
+  total: number
+}
+
 export const signInApi = {
   // 签到
-  signIn: () =>
-    request<{ success: boolean; message?: string; streak: number; points: number; bonus: number }>({
-      url: '/sign-in',
-      method: 'POST',
-    }),
+  signIn: (): Promise<SignInResult> =>
+    request<SignInResult>({ url: '/sign-in', method: 'POST' }),
 
   // 获取当月签到记录
-  getMonthly: (params: { year: number; month: number }) =>
-    request<{ records: Array<{ date: string; points: number; bonus: number; streak: number }>; total: number }>({
+  getMonthly: (params: { year: number; month: number }): Promise<SignInMonthly> =>
+    request<SignInMonthly>({
       url: `/sign-in/monthly?year=${params.year}&month=${params.month}`,
     }),
 }

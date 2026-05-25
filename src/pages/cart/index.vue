@@ -30,7 +30,7 @@
     <!-- 购物车列表 -->
     <scroll-view class="cart-scroll" scroll-y>
       <!-- 骨架屏 -->
-      <view v-if="loading && !filteredItems.length" class="cart-list">
+      <view v-if="loading" class="cart-list">
         <view v-for="i in 2" :key="i" class="sk-item">
           <view class="sk-check shimmer" />
           <view class="sk-img shimmer" />
@@ -127,6 +127,11 @@
         </view>
       </view>
 
+      <!-- 批量删除按钮（选中时显示） -->
+      <view v-if="hasSelected" class="bottom-bar__delete" @click="removeSelected">
+        <text>删除选中</text>
+      </view>
+
       <!-- 结算按钮 -->
       <view class="bottom-bar__btn" :class="{ 'is-disabled': !hasSelected }" @click="goSettle">
         <text>结算 ({{ selectedCount }})</text>
@@ -204,8 +209,9 @@ async function loadCart() {
   try {
     const res = await cartApi.list()
     cartItems.value = (res || []).map((item: CartItem) => ({ ...item, selected: item.selected ?? false }))
-  } catch {
+  } catch (err: { message?: string }) {
     cartItems.value = []
+    uni.showToast({ title: err?.message || '加载购物车失败', icon: 'none' })
   } finally {
     loading.value = false
   }
@@ -226,7 +232,9 @@ async function toggleSelect(item: CartItem) {
   try {
     await cartApi.updateSelected(item.id, !item.selected)
     item.selected = !item.selected
-  } catch {}
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '选择失败', icon: 'none' })
+  }
 }
 
 async function toggleSelectAll() {
@@ -234,14 +242,44 @@ async function toggleSelectAll() {
   try {
     await cartApi.selectAll(!all)
     filteredItems.value.forEach((item: CartItem) => { item.selected = !all })
-  } catch {}
+  } catch (err: { message?: string }) {
+    uni.showToast({ title: err?.message || '全选失败', icon: 'none' })
+  }
 }
 
 async function removeItem(item: CartItem) {
-  try {
-    await cartApi.remove(item.id)
-    cartItems.value = cartItems.value.filter((i: CartItem) => i.id !== item.id)
-  } catch {}
+  uni.showModal({
+    title: '确认删除',
+    content: '确定要从购物车中移除该商品吗？',
+    confirmColor: '#c0392b',
+    success: async (res) => {
+      if (!res.confirm) return
+      try {
+        await cartApi.remove(item.id)
+        cartItems.value = cartItems.value.filter((i: CartItem) => i.id !== item.id)
+      } catch (err: { message?: string }) {
+        uni.showToast({ title: err?.message || '删除失败', icon: 'none' })
+      }
+    }
+  })
+}
+
+async function removeSelected() {
+  if (!hasSelected.value) return
+  uni.showModal({
+    title: '确认删除',
+    content: `确定要删除选中的 ${selectedCount.value} 件商品吗？`,
+    confirmColor: '#c0392b',
+    success: async (res) => {
+      if (!res.confirm) return
+      try {
+        await cartApi.removeSelected()
+        await loadCart()
+      } catch (err: { message?: string }) {
+        uni.showToast({ title: err?.message || '删除失败', icon: 'none' })
+      }
+    }
+  })
 }
 
 function switchGroup(type: number) {
@@ -255,6 +293,23 @@ function goCatalog() { uni.switchTab({ url: '/pages/catalog/index' }) }
 function goSettle() {
   if (!hasSelected.value) return
   if (!checkAuth()) return
+
+  // 换购订单需校验余额和积分是否足够
+  const hasExchangeItems = selectedItems.value.some((i: CartItem) => i.type === 2)
+  if (hasExchangeItems) {
+    const requiredPoints = totalPoints.value
+    const requiredCash = totalCash.value
+    const { ecoPoints = 0, balance = 0 } = assetStore as { ecoPoints?: number; balance?: number }
+    if (ecoPoints < requiredPoints) {
+      uni.showToast({ title: '积分不足，无法换购', icon: 'none' })
+      return
+    }
+    if (balance < requiredCash) {
+      uni.showToast({ title: '余额不足，无法换购', icon: 'none' })
+      return
+    }
+  }
+
   const ids = selectedItems.value.map((i: CartItem) => i.id).join(',')
   uni.navigateTo({ url: `/pages/order/confirm?cartIds=${ids}` })
 }
@@ -630,6 +685,23 @@ function goSettle() {
     flex-direction: column;
     align-items: flex-end;
     gap: 4rpx;
+  }
+
+  &__delete {
+    height: 64rpx;
+    padding: 0 24rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1rpx solid rgba(192, 57, 43, 0.3);
+    border-radius: $radius-full;
+    flex-shrink: 0;
+
+    text {
+      font-size: 26rpx;
+      font-weight: 600;
+      color: $danger;
+    }
   }
 
   &__btn {

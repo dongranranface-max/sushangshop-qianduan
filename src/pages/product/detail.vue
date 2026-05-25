@@ -16,7 +16,7 @@
         indicator-color="rgba(255,255,255,0.4)"
         indicator-active-color="#B89876">
         <swiper-item v-for="(img, i) in images" :key="i">
-          <image class="gallery-img" :src="img" mode="aspectFill" />
+          <image class="gallery-img" :src="img" mode="aspectFill" @error="handleImgError(i, $event)" />
         </swiper-item>
       </swiper>
       <view class="gallery-count">
@@ -67,6 +67,15 @@
           <text class="delivery-icon">发</text>
           <text class="delivery-text">免运费 · 预计 {{ deliveryDays }}日内送达</text>
         </view>
+
+        <!-- SKU 规格选择 -->
+        <view class="sku-section" @click="showSkuPicker">
+          <text class="sku-label">规格</text>
+          <text class="sku-value" :class="{ 'sku-placeholder': !skuSelected.color || !skuSelected.size }">
+            {{ skuSelected.color && skuSelected.size ? `${skuSelected.color} / ${skuSelected.size}` : '请选择规格' }}
+          </text>
+          <text class="sku-arrow">›</text>
+        </view>
       </view>
 
       <!-- 商品详情 -->
@@ -75,7 +84,7 @@
           <text class="detail-section__title">商品详情</text>
         </view>
         <view v-for="(img, i) in detailImages" :key="i" class="detail-img-wrap">
-          <image class="detail-img" :src="img" mode="widthFix" />
+          <image class="detail-img" :src="img" mode="widthFix" @error="handleDetailImgError(i, $event)" />
         </view>
         <view v-if="product.detail" class="detail-text" v-html="product.detail" />
       </view>
@@ -119,9 +128,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { productApi, cartApi } from '@/utils/api'
+import { productApi, cartApi, favoriteApi } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
+
+const DEFAULT_PRODUCT_COVER = '/static/logo.png'
 
 const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)
@@ -136,6 +147,8 @@ const cartCount = ref(0)
 const deliveryDays = ref(3)
 const productId = ref(0)
 const productType = ref(1)
+
+const skuSelected = ref({ color: '', size: '' })
 
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
@@ -154,13 +167,13 @@ function loadFromRoute() {
   const options = (current as any)?.options || {}
   const id = Number(options.id || 0)
   const type = Number(options.type || 1)
-  if (id) { productId.value = id; productType.value = type; loadProduct(id, type) }
+  if (id) { productId.value = id; productType.value = type; loadProduct(id) }
 }
 
-async function loadProduct(id: number, type: number) {
+async function loadProduct(id: number) {
   loading.value = true
   try {
-    const res = await productApi.getDetail(id, type)
+    const res = await productApi.getDetail(id)
     product.value = res || {}
     const allImages: string[] = []
     if (res.coverImage) allImages.push(res.coverImage)
@@ -176,10 +189,11 @@ async function loadProduct(id: number, type: number) {
         detailImages.value = Array.isArray(di) ? di : []
       } catch {}
     }
-    images.value = allImages.length ? allImages : ['/static/logo.png']
+    images.value = allImages.length ? allImages : [DEFAULT_PRODUCT_COVER]
     isFavorite.value = res.isFavorite || false
-  } catch (err: { message?: string }) {
-    uni.showToast({ title: err?.message || '加载失败', icon: 'none' })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : '加载失败'
+    uni.showToast({ title: message, icon: 'none' })
   } finally {
     loading.value = false
   }
@@ -187,30 +201,76 @@ async function loadProduct(id: number, type: number) {
 
 async function loadCartCount() {
   try {
-    const res = await cartApi.list()
-    cartCount.value = Array.isArray(res) ? res.length : 0
+    const res = await cartApi.count()
+    cartCount.value = res?.count ?? 0
   } catch {}
 }
 
 async function toggleFavorite() {
   if (!checkAuth()) return
   try {
-    await productApi.toggleFavorite(productId.value)
-    isFavorite.value = !isFavorite.value
-    uni.showToast({ title: isFavorite.value ? '已收藏' : '已取消', icon: 'success' })
-  } catch (err: { message?: string }) {
-    uni.showToast({ title: err?.message || '操作失败', icon: 'none' })
+    const checkRes = await favoriteApi.check(String(productId.value))
+    if (checkRes?.favorited) {
+      await favoriteApi.remove(String(productId.value))
+      isFavorite.value = false
+      uni.showToast({ title: '已取消', icon: 'success' })
+    } else {
+      await favoriteApi.add(String(productId.value))
+      isFavorite.value = true
+      uni.showToast({ title: '已收藏', icon: 'success' })
+    }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : '操作失败'
+    uni.showToast({ title: message, icon: 'none' })
   }
+}
+
+function showSkuPicker() {
+  uni.showModal({
+    title: '选择规格',
+    confirmText: '确定',
+    cancelText: '取消',
+    success: async (res) => {
+      if (!res.confirm) return
+      // 颜色选择
+      const colorRes = await new Promise<{ confirm: boolean; tapIndex?: number }>((resolve) => {
+        uni.showActionSheet({
+          itemList: ['红色', '蓝色'],
+          success: (r) => resolve({ confirm: true, tapIndex: r.tapIndex }),
+          fail: () => resolve({ confirm: false }),
+        })
+      })
+      if (!colorRes.confirm) return
+      const colors = ['红色', '蓝色']
+      const selectedColor = colors[colorRes.tapIndex!]
+
+      // 尺码选择
+      const sizeRes = await new Promise<{ confirm: boolean; tapIndex?: number }>((resolve) => {
+        uni.showActionSheet({
+          itemList: ['S', 'M', 'L'],
+          success: (r) => resolve({ confirm: true, tapIndex: r.tapIndex }),
+          fail: () => resolve({ confirm: false }),
+        })
+      })
+      if (!sizeRes.confirm) return
+      const sizes = ['S', 'M', 'L']
+      const selectedSize = sizes[sizeRes.tapIndex!]
+
+      skuSelected.value = { color: selectedColor, size: selectedSize }
+    },
+  })
 }
 
 async function addToCart() {
   if (!checkAuth()) return
   try {
-    await cartApi.add({ productId: productId.value, quantity: 1, type: productType.value })
-    cartCount.value++
+    await cartApi.add({ productId: String(productId.value), quantity: 1, skuId: undefined })
+    const countRes = await cartApi.count()
+    cartCount.value = countRes?.count ?? 0
     uni.showToast({ title: '已加入购物车', icon: 'success' })
-  } catch (err: { message?: string }) {
-    uni.showToast({ title: err?.message || '添加失败', icon: 'none' })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : '添加失败'
+    uni.showToast({ title: message, icon: 'none' })
   }
 }
 
@@ -224,6 +284,18 @@ function goCatalog() { uni.switchTab({ url: '/pages/index/index' }) }
 function goCart() { uni.switchTab({ url: '/pages/cart/index' }) }
 function share() { uni.showShareMenu({ menus: ['shareTimeline', 'shareAppMessage'] }) }
 function onSwiperChange(e: { detail: { current: number } }) { currentImg.value = e.detail.current }
+
+function handleImgError(index: number, e: { detail: { errMsg?: string } }) {
+  if (images.value[index] !== DEFAULT_PRODUCT_COVER) {
+    images.value[index] = DEFAULT_PRODUCT_COVER
+  }
+}
+
+function handleDetailImgError(index: number, e: { detail: { errMsg?: string } }) {
+  if (detailImages.value[index] !== DEFAULT_PRODUCT_COVER) {
+    detailImages.value[index] = DEFAULT_PRODUCT_COVER
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -383,6 +455,42 @@ function onSwiperChange(e: { detail: { current: number } }) { currentImg.value =
   color: $text-secondary;
   line-height: 1.6;
   margin-bottom: $spacing-base;
+}
+
+// ========== SKU 规格选择 ==========
+.sku-section {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: $spacing-base;
+  padding: 16rpx $spacing-base;
+  background: rgba(47, 53, 66, 0.04);
+  border: 1rpx solid $border-light;
+  border-radius: $radius-lg;
+
+  .sku-label {
+    font-size: 26rpx;
+    font-weight: 600;
+    color: $text-secondary;
+    flex-shrink: 0;
+  }
+
+  .sku-value {
+    flex: 1;
+    font-size: 26rpx;
+    color: $text-primary;
+    font-weight: 500;
+
+    &.sku-placeholder {
+      color: #ff7c31;
+    }
+  }
+
+  .sku-arrow {
+    font-size: 32rpx;
+    color: $text-muted;
+    flex-shrink: 0;
+  }
 }
 
 // ========== 换购公式 ==========

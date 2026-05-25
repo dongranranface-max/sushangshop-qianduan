@@ -23,7 +23,14 @@
         duration="400"
       >
         <swiper-item v-for="(banner, idx) in banners" :key="idx" class="banner-item">
-          <image class="banner-img" :src="banner.image" mode="aspectFill" />
+          <image
+            v-if="banner.image"
+            class="banner-img"
+            :src="banner.image"
+            mode="aspectFill"
+            @error="onBannerImgError(idx)"
+          />
+          <view v-else class="banner-gradient" :class="`banner-gradient--${banner.theme || 'default'}`" />
           <view class="banner-overlay">
             <text class="banner-title">{{ banner.title }}</text>
             <text class="banner-sub">{{ banner.sub }}</text>
@@ -46,7 +53,10 @@
       <view class="ticker-left">
         <text class="ticker-tag">实时</text>
         <view class="ticker-content">
-          <text class="ticker-text">{{ tickerText }}</text>
+          <view class="ticker-track">
+            <text class="ticker-text">{{ tickerText }}</text>
+            <text class="ticker-text ticker-text--gap">{{ tickerText }}</text>
+          </view>
         </view>
       </view>
       <text class="ticker-arrow">›</text>
@@ -111,7 +121,9 @@
           <text class="section-title">精品推荐</text>
         </view>
       </view>
-      <view v-if="loading && !products.length" class="boutique-grid">
+
+      <!-- 骨架屏 + loading 遮罩 -->
+      <view v-if="loading && products.length === 0" class="boutique-grid">
         <view v-for="i in 4" :key="i" class="boutique-skeleton shimmer" />
       </view>
       <view v-else class="boutique-grid">
@@ -121,7 +133,11 @@
           class="boutique-card"
           @click="goProduct(p)"
         >
-          <image class="boutique-img" :src="p.coverImage || p.image" mode="aspectFill" />
+          <image
+            class="boutique-img"
+            :src="resolveProductCover(p)"
+            mode="aspectFill"
+          />
           <view class="boutique-info">
             <text class="boutique-name">{{ p.name }}</text>
             <view class="boutique-price">
@@ -134,6 +150,9 @@
           <view v-else class="boutique-badge boutique-badge--dark">兑</view>
         </view>
       </view>
+
+      <!-- Loading 遮罩层：骨架屏展示时覆盖整个区块 -->
+      <view v-if="loading && products.length === 0" class="loading-overlay" />
     </view>
 
     <!-- 底部安全区 -->
@@ -145,11 +164,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { productApi, marketingApi } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
+import { DEFAULT_PRODUCT_COVER, resolveProductCover } from '@/utils/media'
 import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 
 const statusBarHeight = ref(20)
@@ -157,14 +177,44 @@ const safeAreaBottom = ref(0)
 const loggedIn = ref(checkAuth())
 const currentBanner = ref(0)
 const loading = ref(false)
-interface Product { id: number | string; name: string; coverImage?: string; image?: string; price?: string | number; requiredPoints?: number; type?: number; salesCount?: number; [k: string]: unknown }
-interface Banner { id: number; title: string; sub: string; image: string; link?: string; [k: string]: unknown }
+
+interface Product {
+  id: number | string
+  name: string
+  coverImage?: string
+  image?: string
+  price?: string | number
+  requiredPoints?: number
+  type?: number
+  salesCount?: number
+  [k: string]: unknown
+}
+
+interface Banner {
+  id: number
+  title: string
+  sub: string
+  image: string
+  link?: string
+  theme?: string
+  [k: string]: unknown
+}
+
+interface Category {
+  id: number | string
+  name: string
+  icon: string
+  bg: string
+  [k: string]: unknown
+}
+
 const products = ref<Product[]>([])
 
+// 静态默认轮播（网络失败时使用；image 为空字符串，模板会渲染渐变占位）
 const DEFAULT_BANNERS: Banner[] = [
-  { id: 0, image: '/static/logo.png', title: '集享生活', sub: '品质生活 从集享开始' },
-  { id: 1, image: '/static/logo.png', title: '消费即返', sub: '购买商品 积分双重收益' },
-  { id: 2, image: '/static/logo.png', title: '增值理财', sub: '算力增值 稳健收益' },
+  { id: 0, image: '', title: '集享生活', sub: '品质生活 从集享开始', theme: 'consume' },
+  { id: 1, image: '', title: '消费即返', sub: '购买商品 积分双重收益', theme: 'exchange' },
+  { id: 2, image: '', title: '增值理财', sub: '算力增值 稳健收益', theme: 'wealth' },
 ]
 const banners = ref<Banner[]>([...DEFAULT_BANNERS])
 
@@ -205,16 +255,8 @@ const mallPortals = [
   },
 ]
 
-const hotCategories = [
-  { id: 1, name: '手机数码', icon: '📱', bg: 'rgba(184,152,118,0.10)' },
-  { id: 2, name: '电脑办公', icon: '💻', bg: 'rgba(65,75,94,0.08)' },
-  { id: 3, name: '家居生活', icon: '🏠', bg: 'rgba(142,116,89,0.10)' },
-  { id: 4, name: '美妆护肤', icon: '💄', bg: 'rgba(65,75,94,0.08)' },
-  { id: 5, name: '食品生鲜', icon: '🍎', bg: 'rgba(142,116,89,0.10)' },
-  { id: 6, name: '服饰鞋帽', icon: '👟', bg: 'rgba(184,152,118,0.10)' },
-  { id: 7, name: '母婴用品', icon: '🍼', bg: 'rgba(65,75,94,0.08)' },
-  { id: 8, name: '图书文具', icon: '📚', bg: 'rgba(142,116,89,0.10)' },
-]
+// 热门分类（动态加载，API 未返回前展示空）
+const hotCategories = ref<Category[]>([])
 
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
@@ -222,6 +264,7 @@ onMounted(() => {
   safeAreaBottom.value = sys.safeAreaInsets?.bottom || 0
   loadProducts()
   loadBanners()
+  loadHotCategories()
   startTicker()
 })
 
@@ -257,8 +300,30 @@ async function loadBanners() {
     if (res && res.length > 0) {
       banners.value = res
     }
+    // 网络失败时 banners.value 保持 DEFAULT_BANNERS（image='' → 渐变占位）
   } catch {
-    // 使用默认 banner
+    // 网络失败时 banners.value 保持 DEFAULT_BANNERS
+  }
+}
+
+async function loadHotCategories() {
+  try {
+    const res = await productApi.getCategories()
+    // 最多取前 8 个分类，按固定背景色轮询
+    const bgPalettes = [
+      'rgba(184,152,118,0.10)',
+      'rgba(65,75,94,0.08)',
+      'rgba(142,116,89,0.10)',
+      'rgba(65,75,94,0.08)',
+    ]
+    hotCategories.value = (res || []).slice(0, 8).map((cat: { id: number | string; name: string; icon?: string; [k: string]: unknown }, idx: number) => ({
+      id: cat.id,
+      name: cat.name,
+      icon: (cat as { icon?: string }).icon || '📦',
+      bg: bgPalettes[idx % bgPalettes.length],
+    }))
+  } catch {
+    hotCategories.value = []
   }
 }
 
@@ -266,12 +331,19 @@ function onBannerChange(e: { detail: { current: number } }) {
   currentBanner.value = e.detail.current
 }
 
+// 轮播图片加载失败时静默降级为渐变（image 置空，模板自动切换）
+function onBannerImgError(idx: number) {
+  if (banners.value[idx]) {
+    banners.value[idx].image = ''
+  }
+}
+
 function goSearch() { uni.navigateTo({ url: '/pages/search/index' }) }
 function goCatalog() { uni.switchTab({ url: '/pages/catalog/index' }) }
 function goMall(mall: { type: number }) {
   uni.navigateTo({ url: `/pages/catalog/index?type=${mall.type}` })
 }
-function goCatalogCategory(cat: { id: string }) {
+function goCatalogCategory(cat: { id: string | number }) {
   if (cat.id) uni.navigateTo({ url: `/pages/catalog/index?categoryId=${cat.id}` })
 }
 function goProduct(p: Product) {
@@ -347,6 +419,28 @@ function goProduct(p: Product) {
   background: $bg-tertiary;
 }
 
+// 轮播图加载失败时的渐变占位
+.banner-gradient {
+  width: 100%;
+  height: 100%;
+
+  &--consume {
+    background: linear-gradient(135deg, #2F3542 0%, #414B5E 50%, #4F5D73 100%);
+  }
+
+  &--exchange {
+    background: linear-gradient(135deg, #3D3024 0%, #5C4A32 50%, #7A6040 100%);
+  }
+
+  &--wealth {
+    background: linear-gradient(135deg, #1E2530 0%, #2F3A4A 50%, #3D4D60 100%);
+  }
+
+  &--default {
+    background: linear-gradient(135deg, #2F3542 0%, #3D4656 100%);
+  }
+}
+
 .banner-overlay {
   position: absolute;
   bottom: 0;
@@ -392,7 +486,7 @@ function goProduct(p: Product) {
   }
 }
 
-// ========== 数据滚动条 ==========
+// ========== 数据滚动条（Marquee） ==========
 .ticker-strip {
   margin: $spacing-base $spacing-base 0;
   display: flex;
@@ -429,16 +523,27 @@ function goProduct(p: Product) {
   flex: 1;
 }
 
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker-marquee 12s linear infinite;
+}
+
 .ticker-text {
   font-size: 24rpx;
   color: rgba(255, 255, 255, 0.9);
   white-space: nowrap;
-  animation: ticker-scroll 8s linear infinite;
+  padding-right: 60rpx; // 两段文字之间的间距
 }
 
-@keyframes ticker-scroll {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+.ticker-text--gap {
+  padding-right: 0;
+  padding-left: 60rpx;
+}
+
+@keyframes ticker-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .ticker-arrow {
@@ -473,7 +578,6 @@ function goProduct(p: Product) {
     .mall-name { color: $bronze-light; }
     .mall-desc { color: rgba(255, 255, 255, 0.55); }
     .mall-arrow { color: rgba(255, 255, 255, 0.4); }
-    .ticker-tag { color: $bronze-gold; }
   }
 }
 
@@ -541,6 +645,7 @@ function goProduct(p: Product) {
 // ========== 通用区块 ==========
 .section-block {
   padding: $spacing-lg $spacing-base 0;
+  position: relative; // 为 loading-overlay 提供定位上下文
 }
 
 .section-head {
@@ -554,8 +659,6 @@ function goProduct(p: Product) {
     align-items: center;
     gap: 12rpx;
   }
-
-  &__right {}
 }
 
 .section-title {
@@ -723,6 +826,20 @@ function goProduct(p: Product) {
 @keyframes shim {
   0%, 100% { opacity: 0.35; }
   50% { opacity: 0.7; }
+}
+
+// ========== Loading 遮罩层 ==========
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(247, 245, 242, 0.6);
+  backdrop-filter: blur(4px);
+  border-radius: $radius-lg;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .safe-area-bottom {

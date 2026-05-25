@@ -19,6 +19,22 @@ export interface AssetState {
   lastUpdate: number
 }
 
+export interface Product {
+  id: number | string
+  name: string
+  price: number
+  image: string
+  description?: string
+  stock?: number
+  unit?: string
+}
+
+export interface CartItem {
+  product: Product
+  quantity: number
+  note?: string
+}
+
 class AssetStore {
   private state: AssetState = reactive({
     ecoPoints: 0,
@@ -140,6 +156,26 @@ class AssetStore {
     this.state.ecoPoints -= amount
     this.state.lastUpdate = Date.now()
     return true
+  }
+
+  formatEco(pts?: number): string {
+    return this.fmt(pts ?? this.state.ecoPoints)
+  }
+
+  formatConsumer(pts?: number): string {
+    return this.fmt(pts ?? this.state.consumerPoints)
+  }
+
+  formatBalance(bal?: number): string {
+    return this.fmt(bal ?? this.state.balance, 2)
+  }
+
+  formatProfit(profit?: number): string {
+    return this.fmt(profit ?? this.state.todayEarnings)
+  }
+
+  formatTotalAssets(): string {
+    return this.fmt(this.totalAssets)
   }
 
   reset() {

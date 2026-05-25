@@ -7,7 +7,12 @@
       <view class="user-header__bg" />
       <view class="user-header__inner">
         <view class="user-avatar-wrap">
-          <image class="user-avatar" :src="avatarSrc" mode="aspectFill" />
+          <image
+            class="user-avatar"
+            :src="avatarSrc"
+            mode="aspectFill"
+            @error="onAvatarError"
+          />
           <view class="user-avatar-ring" />
         </view>
         <view class="user-info">
@@ -26,7 +31,7 @@
       </view>
 
       <!-- 资产摘要行 -->
-      <view class="asset-strip">
+      <view class="asset-strip" v-if="loggedIn">
         <view class="asset-item">
           <text class="asset-value">{{ ecoPointsDisplay }}</text>
           <text class="asset-label">生态积分</text>
@@ -42,6 +47,11 @@
           <text class="asset-label">账户余额</text>
         </view>
       </view>
+
+      <!-- 未登录时显示资产提示 -->
+      <view v-if="!loggedIn" class="asset-strip asset-strip--guest">
+        <text class="asset-strip__guest-text">登录后查看资产详情</text>
+      </view>
     </view>
 
     <!-- 昨日分红 Banner -->
@@ -51,7 +61,7 @@
       </view>
       <view class="dividend-info">
         <text class="dividend-title">昨日分红</text>
-        <text class="dividend-value">+{{ yesterdayProfit }}积分</text>
+        <text class="dividend-value">+{{ yesterdayProfitDisplay }}积分</text>
       </view>
       <view class="dividend-btn">
         <text>签到领积分</text>
@@ -105,9 +115,6 @@
         >
           <view class="order-tab__icon-wrap">
             <text class="order-tab__icon">{{ tab.icon }}</text>
-            <view v-if="orderCounts[tab.key] > 0" class="order-tab__badge">
-              {{ orderCounts[tab.key] > 99 ? '99+' : orderCounts[tab.key] }}
-            </view>
           </view>
           <text class="order-tab__label">{{ tab.label }}</text>
         </view>
@@ -152,18 +159,19 @@ import { assetStore } from '@/store/asset'
 import { userApi } from '@/utils/api'
 import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 
+const DEFAULT_AVATAR = '/static/images/default-avatar.png'
+
 const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)
 const loggedIn = ref(checkAuth())
 const userInfo = ref<any>({})
-const orderCounts = ref<Record<string, number>>({})
 
-const ecoPointsDisplay = computed(() => assetStore.formatEco(assetStore.ecoPoints))
-const consumerPointsDisplay = computed(() => assetStore.formatConsumer(assetStore.consumerPoints))
-const balanceDisplay = computed(() => assetStore.formatBalance(assetStore.balance))
-const yesterdayProfit = computed(() => assetStore.formatProfit(assetStore.yesterdayProfit))
+const ecoPointsDisplay = computed(() => assetStore.ecoPointsDisplay)
+const consumerPointsDisplay = computed(() => assetStore.consumerPointsDisplay)
+const balanceDisplay = computed(() => assetStore.balanceDisplay)
+const yesterdayProfitDisplay = computed(() => assetStore.yesterdayProfitDisplay)
 
-const avatarSrc = computed(() => resolveAvatar(userInfo.value.avatar))
+const avatarSrc = ref('')
 const shortId = computed(() => {
   const id = userInfo.value.id || ''
   return id.length > 6 ? id.slice(-6) : id
@@ -202,7 +210,6 @@ onMounted(() => {
   statusBarHeight.value = sys.statusBarHeight || 20
   safeAreaBottom.value = sys.safeAreaInsets?.bottom || 0
   loadUserInfo()
-  loadOrderCounts()
 })
 
 onShow(() => {
@@ -214,17 +221,14 @@ onShow(() => {
 async function loadUserInfo() {
   if (!checkAuth()) return
   try {
-    const res = await userApi.getUserInfo()
+    const res = await userApi.getProfile()
     userInfo.value = res || {}
+    avatarSrc.value = resolveAvatar(userInfo.value.avatar)
   } catch {}
 }
 
-async function loadOrderCounts() {
-  if (!checkAuth()) return
-  try {
-    const res = await userApi.getOrderCounts()
-    orderCounts.value = res || {}
-  } catch {}
+function onAvatarError() {
+  avatarSrc.value = DEFAULT_AVATAR
 }
 
 function goProfile() { if (!checkAuth()) return; uni.navigateTo({ url: '/pages/user/profile' }) }
@@ -248,8 +252,8 @@ function logout() {
       if (res.confirm) {
         clearAuth()
         userInfo.value = {}
-        orderCounts.value = {}
         loggedIn.value = false
+        avatarSrc.value = ''
         uni.showToast({ title: '已退出', icon: 'none' })
       }
     },
@@ -404,6 +408,16 @@ function logout() {
     width: 1rpx;
     height: 40rpx;
     background: rgba(47, 53, 66, 0.08);
+  }
+
+  &--guest {
+    justify-content: center;
+
+    .asset-strip__guest-text {
+      font-size: 26rpx;
+      color: $text-muted;
+      font-weight: 500;
+    }
   }
 }
 

@@ -1,250 +1,206 @@
 <template>
   <view class="page-container">
+    <!-- 毛玻璃状态栏 -->
     <view class="status-bar" :style="{ height: statusBarHeight + 'px' }" />
 
-    <!-- 顶部标题 -->
-    <view class="page-header">
-      <text class="page-title">商品分类</text>
-      <view class="page-search-icon" @click="goSearch">⌕</view>
+    <!-- 页面导航 -->
+    <view class="page-nav">
+      <view class="page-nav__back" @click="goBack"><text>←</text></view>
+      <text class="page-nav__title">{{ navTitle }}</text>
     </view>
 
-    <!-- Tab 切换（三大商城） -->
-    <view class="mall-tabs">
+    <!-- Tab 切换：全部分类 / 商品 -->
+    <view class="service-tabs">
       <view
-        v-for="tab in mallTabs"
-        :key="tab.key"
-        class="mall-tab"
-        :class="{ active: currentType === tab.key }"
-        @click="switchType(tab.key)"
+        class="service-tab"
+        :class="{ active: currentService === 'categories' }"
+        @click="switchType('categories')"
       >
-        <text class="mall-tab__abbr">{{ tab.abbr }}</text>
-        <text class="mall-tab__label">{{ tab.label }}</text>
+        <text>全部分类</text>
+      </view>
+      <view
+        class="service-tab"
+        :class="{ active: currentService === 'products' }"
+        @click="switchType('products')"
+      >
+        <text>全部商品</text>
       </view>
     </view>
 
-    <!-- 主内容 -->
-    <view class="content-layout">
-      <!-- 左侧商城服务入口 -->
-      <scroll-view class="service-nav" scroll-y>
+    <!-- 分类视图 -->
+    <template v-if="currentService === 'categories'">
+      <!-- 骨架屏 -->
+      <view v-if="loading" class="category-grid">
+        <view v-for="i in 10" :key="i" class="sk-category">
+          <view class="sk-category__icon shimmer" />
+          <view class="sk-category__name shimmer" />
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view v-else-if="!categories.length" class="empty-state">
+        <view class="empty-state__icon">📦</view>
+        <text class="empty-state__text">暂无分类</text>
+      </view>
+
+      <!-- 分类网格 -->
+      <view v-else class="category-grid">
         <view
-          v-for="svc in services"
-          :key="svc.id"
-          class="service-item"
-          :class="{ active: currentService === svc.id }"
-          @click="selectService(svc)"
+          v-for="item in categories"
+          :key="item.id"
+          class="category-item"
+          @click="goCategory(item)"
         >
-          <view class="service-icon-wrap">
-            <text class="service-icon">{{ svc.icon }}</text>
-          </view>
-          <view class="service-info">
-            <text class="service-name">{{ svc.name }}</text>
-            <text class="service-sub">{{ svc.desc }}</text>
+          <image class="category-item__icon" :src="item.icon" mode="aspectFill" />
+          <text class="category-item__name">{{ item.name }}</text>
+        </view>
+      </view>
+    </template>
+
+    <!-- 商品列表视图 -->
+    <template v-else>
+      <!-- 骨架屏 -->
+      <view v-if="loading" class="product-grid">
+        <view v-for="i in 10" :key="i" class="sk-product">
+          <view class="sk-product__img shimmer" />
+          <view class="sk-product__info">
+            <view class="sk-product__line shimmer" />
+            <view class="sk-product__line sk-product__line--short shimmer" />
           </view>
         </view>
-      </scroll-view>
+      </view>
 
-      <!-- 右侧产品分类 -->
-      <scroll-view class="product-area" scroll-y @scrolltolower="loadMore">
-        <!-- 骨架屏 -->
-        <view v-if="loading && !categories.length" class="category-grid">
-          <view v-for="i in 6" :key="i" class="sk-card">
-            <view class="sk-img shimmer" />
-            <view class="sk-info">
-              <view class="sk-line shimmer" />
-              <view class="sk-line sk-short shimmer" />
+      <!-- 空状态：只对 products 视图展示 -->
+      <view v-else-if="!products.length" class="empty-state">
+        <view class="empty-state__icon">🛍️</view>
+        <text class="empty-state__text">暂无商品</text>
+      </view>
+
+      <!-- 商品网格 -->
+      <view v-else class="product-grid">
+        <view
+          v-for="item in products"
+          :key="item.id"
+          class="product-item"
+          @click="goProduct(item)"
+        >
+          <image class="product-item__img" :src="item.coverImage" mode="aspectFill" />
+          <view class="product-item__info">
+            <text class="product-item__name">{{ item.name }}</text>
+            <view class="product-item__price">
+              <text class="product-item__price-text">¥{{ item.price }}</text>
+              <text v-if="item.requiredPoints" class="product-item__points">+{{ item.requiredPoints }}积分</text>
             </view>
           </view>
         </view>
 
-        <!-- 产品分类 -->
-        <view v-else-if="currentService === 'products'" class="category-grid">
-          <HomeProductCard
-            v-for="p in products"
-            :key="p.id"
-            :product="p"
-            :type="currentType"
-            :default-cover="defaultCover"
-            @click="goProduct(p)"
-          />
-        </view>
-
-        <!-- 商城服务下的分类列表 -->
-        <view v-else class="category-list">
-          <view
-            v-for="cat in categories"
-            :key="cat.id"
-            class="cat-card"
-            @click="goCategoryProducts(cat)"
-          >
-            <image class="cat-img" :src="cat.coverImage || '/static/logo.png'" mode="aspectFill" />
-            <view class="cat-info">
-              <text class="cat-name">{{ cat.name }}</text>
-              <text class="cat-count">{{ cat.productCount || 0 }} 件商品</text>
-            </view>
-            <text class="cat-arrow">›</text>
-          </view>
-        </view>
-
-        <!-- 空状态 -->
-        <view v-if="!loading && currentService !== 'products' && !categories.length" class="empty-state">
-          <view class="empty-state__icon">分</view>
-          <text class="empty-state__text">暂无分类</text>
-        </view>
-
+        <!-- 加载更多 -->
         <view v-if="hasMore && !loading" class="load-more" @click="loadMore">
           <text>加载更多</text>
         </view>
-        <view v-if="!hasMore && categories.length > 0" class="no-more">
+        <view v-if="!hasMore && products.length" class="no-more">
           <text>— 没有更多了 —</text>
         </view>
-      </scroll-view>
-    </view>
+      </view>
+    </template>
 
-    <view class="safe-area-bottom" :style="{ height: (100 + safeAreaBottom) + 'px' }" />
-
-    <LuxuryTabbar />
+    <!-- 安全区 -->
+    <view class="safe-area-bottom" />
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { productApi } from '@/utils/api'
-import { checkAuth } from '@/utils/auth'
-import { assetStore } from '@/store/asset'
-import { HOME_CATEGORY_FALLBACK, flattenCategories, normalizeCategoryTree } from '@/utils/category'
-import { DEFAULT_PRODUCT_COVER } from '@/utils/media'
-import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
-import HomeProductCard from '@/components/HomeProductCard.vue'
 
 const statusBarHeight = ref(20)
-const safeAreaBottom = ref(0)
-const loggedIn = ref(checkAuth())
-const currentType = ref(1)
-const currentService = ref('consume')
-interface Category { id: string; name: string; icon?: string; parentId?: string; [k: string]: unknown }
-interface Product { id: string; name: string; coverImage?: string; image?: string; price?: string | number; requiredPoints?: number; type?: number; categoryId?: string; salesCount?: number; [k: string]: unknown }
-interface Service { id: string; name: string; abbr?: string; label?: string; type?: number; [k: string]: unknown }
-const services = ref<Service[]>([])
-const categories = ref<Category[]>([])
-const products = ref<Product[]>([])
-const defaultCover = DEFAULT_PRODUCT_COVER
+const currentService = ref<'categories' | 'products'>('categories')
+const categories = ref<Record<string, unknown>[]>([])
+const products = ref<Record<string, unknown>[]>([])
 const loading = ref(false)
+const loadMoreLoading = ref(false)
 const page = ref(1)
-const limit = 20
+const pageSize = ref(20)
 const hasMore = ref(true)
-let categorySeq = 0
 
-const mallTabs = [
-  { key: 1, abbr: '消', label: '消费' },
-  { key: 2, abbr: '换', label: '换购' },
-  { key: 3, abbr: '兑', label: '兑换' },
-]
+const navTitle = computed(() =>
+  currentService.value === 'categories' ? '全部分类' : '全部商品'
+)
 
 onMounted(() => {
-  const sys = uni.getSystemInfoSync()
-  statusBarHeight.value = sys.statusBarHeight || 20
-  safeAreaBottom.value = sys.safeAreaInsets?.bottom || 0
-  loadPreset()
-  loadServices()
+  statusBarHeight.value = uni.getSystemInfoSync().statusBarHeight || 20
   loadCategories()
 })
 
-onShow(() => {
-  loggedIn.value = checkAuth()
-  if (loggedIn.value) assetStore.fetchBalance()
-})
-
-function loadPreset() {
-  try {
-    const preset = uni.getStorageSync('CATALOG_PRESET_KEY')
-    if (preset) {
-      if (preset.type) currentType.value = preset.type
-      if (preset.service) currentService.value = preset.service
-      uni.removeStorageSync('CATALOG_PRESET_KEY')
-    }
-  } catch {}
-}
-
-async function loadServices() {
-  services.value = [
-    { id: 'consume', name: '消费分类', icon: '购', desc: '精选好物' },
-    { id: 'exchange', name: '换购分类', icon: '换', desc: '积分抵现' },
-    { id: 'redeem', name: '兑换分类', icon: '兑', desc: '零元兑换' },
-    { id: 'products', name: '全部商品', icon: '◆', desc: '查看所有商品' },
-  ]
-}
-
-async function loadCategories() {
-  const seq = ++categorySeq
-  try {
-    const res = await productApi.getCategories()
-    if (seq !== categorySeq) return
-    const tree = normalizeCategoryTree(res)
-    const flat = flattenCategories(tree)
-    categories.value = flat.length ? flat : HOME_CATEGORY_FALLBACK
-  } catch {
-    if (seq !== categorySeq) return
-    categories.value = HOME_CATEGORY_FALLBACK
+async function loadCategories(reset = false) {
+  if (reset) {
+    page.value = 1
   }
-}
-
-async function loadProducts(reset = false) {
-  if (loading.value) return
-  if (reset) { page.value = 1; hasMore.value = true }
-  if (!hasMore.value) return
   loading.value = true
   try {
-    const res = await productApi.getList({ type: currentType.value, page: page.value, limit })
-    const list = res.list || []
-    if (reset) products.value = list
-    else products.value.push(...list)
-    hasMore.value = list.length === limit
-    page.value++
+    const res = await productApi.getCategories()
+    categories.value = res || []
   } catch {
-    if (reset) products.value = []
+    categories.value = []
   } finally {
     loading.value = false
   }
 }
 
-function switchType(type: number) {
-  if (currentType.value === type) return
-  currentType.value = type
-  if (currentService.value === 'products') {
-    loadProducts(true)
-  } else {
-    loadCategories()
+async function loadProducts(reset = false) {
+  if (reset) {
+    page.value = 1
+  }
+  loading.value = true
+  try {
+    const res = await productApi.getList({ page: page.value, limit: pageSize.value })
+    const list: Record<string, unknown>[] = res?.list || []
+    if (page.value === 1) {
+      products.value = list
+    } else {
+      products.value.push(...list)
+    }
+    const total = res?.total || 0
+    hasMore.value = products.value.length < total
+  } catch {
+    products.value = []
+    hasMore.value = false
+  } finally {
+    loading.value = false
   }
 }
 
-function selectService(svc: Service) {
-  currentService.value = svc.id
-  if (svc.id === 'products') {
-    loadProducts(true)
+function switchType(type: 'categories' | 'products') {
+  if (currentService.value === type) return
+  currentService.value = type
+  if (type === 'categories') {
+    page.value = 1
+    loadCategories(true)
   } else {
-    // 切换商城类型
-    const typeMap: Record<string, number> = { consume: 1, exchange: 2, redeem: 3 }
-    if (typeMap[svc.id]) {
-      currentType.value = typeMap[svc.id]
-    }
-    loadCategories()
+    page.value = 1
+    loadProducts(true)
   }
 }
 
 function loadMore() {
-  if (currentService.value === 'products' && hasMore.value && !loading.value) {
-    loadProducts(false)
-  }
+  if (loadMoreLoading.value || !hasMore.value) return
+  loadMoreLoading.value = true
+  page.value++
+  loadProducts(false).finally(() => {
+    loadMoreLoading.value = false
+  })
 }
 
-function goSearch() {
-  uni.navigateTo({ url: `/pages/search/index?type=${currentType.value}` })
+function goCategory(item: Record<string, unknown>) {
+  uni.navigateTo({ url: `/pages/catalog/category?id=${item.id}&name=${item.name}` })
 }
-function goProduct(p: Product) { if (p.id) uni.navigateTo({ url: `/pages/product/detail?id=${p.id}&type=${p.type || currentType.value}` }) }
-function goCategoryProducts(cat: Category) {
-  if (cat.id) uni.navigateTo({ url: `/pages/catalog/index?categoryId=${cat.id}&type=${currentType.value}` })
+
+function goProduct(item: Record<string, unknown>) {
+  uni.navigateTo({ url: `/pages/product/detail?id=${item.id}` })
 }
+
+function goBack() { uni.navigateBack() }
 </script>
 
 <style lang="scss" scoped>
@@ -258,195 +214,220 @@ function goCategoryProducts(cat: Category) {
 
 .status-bar { width: 100%; }
 
-// ========== 顶部标题 ==========
-.page-header {
+.page-nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 12rpx $spacing-base;
+  gap: 16rpx;
 
-  .page-title {
-    font-size: 36rpx;
-    font-weight: 700;
-    color: $mineral-gray;
-    letter-spacing: 0.5rpx;
-  }
-
-  .page-search-icon {
+  &__back {
     width: 64rpx;
     height: 64rpx;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.88);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(12px);
     border: 1rpx solid rgba(20, 20, 20, 0.06);
     border-radius: 50%;
-    font-size: 32rpx;
+    font-size: 28rpx;
     color: $mineral-gray;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    flex: 1;
+    font-size: 32rpx;
+    font-weight: 700;
+    color: $mineral-gray;
+    text-align: center;
+    letter-spacing: 0.5rpx;
   }
 }
 
-// ========== 三大商城 Tab ==========
-.mall-tabs {
+// ========== Tab 切换 ==========
+.service-tabs {
   display: flex;
   padding: 0 $spacing-base $spacing-base;
   gap: 12rpx;
 }
 
-.mall-tab {
+.service-tab {
   flex: 1;
-  height: 88rpx;
+  height: 72rpx;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4rpx;
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(8px);
   border: 1rpx solid rgba(20, 20, 20, 0.06);
   border-radius: $radius-lg;
   transition: all 0.25s ease;
 
+  text {
+    font-size: 28rpx;
+    font-weight: 600;
+    color: $text-muted;
+  }
+
   &.active {
     background: $warm-yellow;
     border-color: $border-primary;
     box-shadow: $shadow-gold;
 
-    .mall-tab__label { color: $accent-dark; font-weight: 700; }
-  }
-
-  &__abbr {
-    width: 36rpx;
-    height: 36rpx;
-    line-height: 36rpx;
-    text-align: center;
-    font-size: 20rpx;
-    font-weight: 800;
-    background: $bg-tertiary;
-    border-radius: 50%;
-    color: $mineral-gray;
-  }
-
-  &.active &__abbr {
-    background: $accent-dark;
-    color: $bronze-light;
-  }
-
-  &__label {
-    font-size: 22rpx;
-    font-weight: 500;
-    color: $text-muted;
+    text {
+      color: $accent-dark;
+      font-weight: 700;
+    }
   }
 }
 
-// ========== 内容布局 ==========
-.content-layout {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  height: calc(100vh - 320rpx);
+// ========== 分类网格 ==========
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-base;
+  padding: 0 $spacing-base;
 }
 
-// ========== 左侧服务导航 ==========
-.service-nav {
-  width: 180rpx;
-  height: 100%;
-  border-right: 1rpx solid rgba(20, 20, 20, 0.04);
-}
-
-.service-item {
+.category-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8rpx;
-  padding: 20rpx 12rpx;
-  border-left: 4rpx solid transparent;
-  transition: all 0.2s ease;
-  cursor: pointer;
-
-  &.active {
-    background: rgba(255, 255, 255, 0.9);
-    border-left-color: $accent-dark;
-
-    .service-name { color: $accent-dark; font-weight: 700; }
-  }
-}
-
-.service-icon-wrap {
-  width: 60rpx;
-  height: 60rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(184, 152, 118, 0.08);
-  border-radius: $radius-md;
-  border: 1rpx solid rgba(184, 152, 118, 0.12);
-
-  .service-icon {
-    font-size: 24rpx;
-    font-weight: 800;
-    color: $accent-dark;
-  }
-}
-
-.service-info {
-  text-align: center;
-
-  .service-name {
-    display: block;
-    font-size: 22rpx;
-    font-weight: 600;
-    color: $text-secondary;
-    line-height: 1.3;
-  }
-
-  .service-sub {
-    display: block;
-    font-size: 18rpx;
-    color: $text-muted;
-    line-height: 1.3;
-  }
-}
-
-// ========== 右侧产品区 ==========
-.product-area {
-  flex: 1;
-  height: 100%;
-  padding: $spacing-base;
-}
-
-.category-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: $spacing-base;
-}
-
-.sk-card {
+  gap: 12rpx;
+  padding: 24rpx 8rpx;
   background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1rpx solid rgba(20, 20, 20, 0.06);
   border-radius: $radius-lg;
-  overflow: hidden;
 
-  .sk-img {
-    width: 100%;
-    aspect-ratio: 1 / 1;
+  &__icon {
+    width: 96rpx;
+    height: 96rpx;
+    border-radius: $radius-md;
     background: $bg-tertiary;
   }
 
-  .sk-info {
-    padding: $spacing-base;
+  &__name {
+    font-size: 24rpx;
+    color: $text-secondary;
+    text-align: center;
+    max-width: 140rpx;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// ========== 商品网格 ==========
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-base;
+  padding: 0 $spacing-base;
+}
+
+.product-item {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1rpx solid rgba(255, 255, 255, 0.6);
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $clay-shadow;
+
+  &__img {
+    width: 100%;
+    height: 320rpx;
+    background: $bg-tertiary;
+  }
+
+  &__info {
+    padding: 16rpx;
+    display: flex;
+    flex-direction: column;
+    gap: 8rpx;
+  }
+
+  &__name {
+    font-size: 28rpx;
+    font-weight: 600;
+    color: $text-primary;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    line-height: 1.4;
+  }
+
+  &__price {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    flex-wrap: wrap;
+  }
+
+  &__price-text {
+    font-size: 30rpx;
+    font-weight: 700;
+    color: $mineral-gray;
+    font-family: $asset-balance-font;
+  }
+
+  &__points {
+    font-size: 22rpx;
+    color: $accent-dark;
+    font-weight: 600;
+  }
+}
+
+// ========== 骨架屏 ==========
+.sk-category {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  padding: 24rpx 8rpx;
+
+  &__icon {
+    width: 96rpx;
+    height: 96rpx;
+    border-radius: $radius-md;
+    background: $bg-tertiary;
+  }
+
+  &__name {
+    width: 100rpx;
+    height: 24rpx;
+    border-radius: 8rpx;
+    background: $bg-tertiary;
+  }
+}
+
+.sk-product {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1rpx solid rgba(255, 255, 255, 0.6);
+  border-radius: $radius-lg;
+  overflow: hidden;
+
+  &__img {
+    width: 100%;
+    height: 320rpx;
+    background: $bg-tertiary;
+  }
+
+  &__info {
+    padding: 16rpx;
     display: flex;
     flex-direction: column;
     gap: 10rpx;
   }
 
-  .sk-line {
-    height: 22rpx;
+  &__line {
+    height: 24rpx;
     border-radius: 8rpx;
     background: $bg-tertiary;
     width: 80%;
 
-    &.sk-short { width: 40%; }
+    &--short { width: 50%; }
   }
 }
 
@@ -457,96 +438,45 @@ function goCategoryProducts(cat: Category) {
   50% { opacity: 0.7; }
 }
 
-// ========== 分类卡片 ==========
-.category-list {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-sm;
-}
-
-.cat-card {
+// ========== 加载更多 ==========
+.load-more {
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  gap: $spacing-base;
-  padding: $spacing-base;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(16px);
-  border: 1rpx solid rgba(255, 255, 255, 0.6);
-  border-radius: $radius-lg;
-  box-shadow: $clay-shadow;
-  transition: transform 0.2s ease;
-
-  &:active { transform: scale(0.98); }
-}
-
-.cat-img {
-  width: 120rpx;
-  height: 120rpx;
-  border-radius: $radius-md;
-  background: $bg-tertiary;
-  flex-shrink: 0;
-}
-
-.cat-info {
-  flex: 1;
-
-  .cat-name {
-    display: block;
-    font-size: 28rpx;
-    font-weight: 700;
-    color: $text-primary;
-    margin-bottom: 6rpx;
-  }
-
-  .cat-count {
-    display: block;
-    font-size: 22rpx;
-    color: $text-muted;
-  }
-}
-
-.cat-arrow {
-  font-size: 36rpx;
+  justify-content: center;
+  padding: 32rpx;
   color: $text-muted;
-  flex-shrink: 0;
-}
-
-.load-more,
-.no-more {
-  text-align: center;
-  padding: $spacing-base 0;
   font-size: 26rpx;
-  color: $text-muted;
 }
 
+.no-more {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+  color: $text-muted;
+  font-size: 24rpx;
+}
+
+// ========== 空状态 ==========
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 120rpx 40rpx;
+  padding: 160rpx 40rpx;
   text-align: center;
 
   &__icon {
-    width: 120rpx;
-    height: 120rpx;
-    line-height: 120rpx;
-    text-align: center;
-    font-size: 48rpx;
-    font-weight: 800;
-    background: $warm-yellow;
-    border: 1rpx solid $border-primary;
-    border-radius: 50%;
-    color: $accent-dark;
+    font-size: 80rpx;
     margin-bottom: 24rpx;
   }
 
   &__text {
-    font-size: 30rpx;
+    font-size: 32rpx;
     font-weight: 600;
     color: $text-primary;
   }
 }
-
-.safe-area-bottom { width: 100%; }
 </style>

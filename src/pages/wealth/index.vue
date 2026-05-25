@@ -25,7 +25,7 @@
         </view>
         <view class="asset-overview__stats">
           <view class="stat-item">
-            <text class="stat-value">{{ showAsset ? yesterdayProfit : '****' }}</text>
+            <text class="stat-value">{{ showAsset ? yesterdayProfitDisplay : '****' }}</text>
             <text class="stat-label">昨日收益（积分）</text>
           </view>
           <view class="stat-divider" />
@@ -93,11 +93,23 @@
     </view>
 
     <!-- 投资记录 -->
-    <view class="invest-history" v-if="loggedIn && investRecords.length > 0">
+    <view class="invest-history" v-if="loggedIn">
       <view class="section-head">
         <text class="section-title">最近投资</text>
       </view>
-      <view class="record-list">
+
+      <!-- 加载中 -->
+      <view v-if="loadingInvestRecords" class="record-loading">
+        <text class="record-loading__text">加载中...</text>
+      </view>
+
+      <!-- 空状态 -->
+      <view v-else-if="investRecords.length === 0" class="record-empty">
+        <text class="record-empty__text">暂无投资记录</text>
+      </view>
+
+      <!-- 记录列表 -->
+      <view v-else class="record-list">
         <view v-for="record in investRecords.slice(0, 3)" :key="record.id" class="record-item">
           <view class="record-icon">{{ record.icon }}</view>
           <view class="record-info">
@@ -128,11 +140,12 @@ import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 const statusBarHeight = ref(20)
 const loggedIn = ref(checkAuth())
 const showAsset = ref(true)
+const loadingInvestRecords = ref(false)
 
-const ecoPointsDisplay = computed(() => assetStore.formatEco(assetStore.ecoPoints))
-const consumerPointsDisplay = computed(() => assetStore.formatConsumer(assetStore.consumerPoints))
-const balanceDisplay = computed(() => assetStore.formatBalance(assetStore.balance))
-const yesterdayProfit = computed(() => assetStore.formatProfit(assetStore.yesterdayProfit))
+const ecoPointsDisplay = computed(() => assetStore.ecoPointsDisplay)
+const consumerPointsDisplay = computed(() => assetStore.consumerPointsDisplay)
+const balanceDisplay = computed(() => assetStore.balanceDisplay)
+const yesterdayProfitDisplay = computed(() => assetStore.yesterdayProfitDisplay)
 
 const services = [
   {
@@ -179,6 +192,7 @@ onShow(() => {
 })
 
 function loadInvestRecords() {
+  loadingInvestRecords.value = true
   financialApi.getEarnings({ limit: 5 })
     .then((res) => {
       const list = (res.list || []).slice(0, 5)
@@ -193,6 +207,9 @@ function loadInvestRecords() {
     .catch(() => {
       investRecords.value = []
     })
+    .finally(() => {
+      loadingInvestRecords.value = false
+    })
 }
 
 function toggleAsset() {
@@ -204,6 +221,8 @@ function goService(svc: ServiceItem) {
   if (!checkAuth()) return
   if (svc.id === 'compute') {
     uni.navigateTo({ url: '/pages/wealth/my-invest' })
+  } else if (svc.id === 'crossborder' || svc.id === 'quant') {
+    // 开发中，阻止冒泡
   } else {
     uni.showToast({ title: `${svc.name}开发中`, icon: 'none' })
   }
@@ -545,6 +564,30 @@ function goMyInvest() {
 // ========== 投资记录 ==========
 .invest-history {
   padding: 0 $spacing-base;
+}
+
+.record-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40rpx 0;
+
+  .record-loading__text {
+    font-size: 26rpx;
+    color: $text-muted;
+  }
+}
+
+.record-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40rpx 0;
+
+  .record-empty__text {
+    font-size: 26rpx;
+    color: $text-muted;
+  }
 }
 
 .record-list {
