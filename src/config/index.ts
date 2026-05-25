@@ -1,6 +1,6 @@
 /** API 基础地址，可通过 .env 或构建时覆盖 */
 export const API_BASE_URL =
-  (import.meta as any).env?.VITE_API_BASE_URL || 'http://47.96.102.163/api/v1'
+  (import.meta.env as Record<string, string | undefined>)?.VITE_API_BASE_URL || 'http://47.96.102.163/api/v1'
 
 export const BRAND_NAME = '集享公社'
 

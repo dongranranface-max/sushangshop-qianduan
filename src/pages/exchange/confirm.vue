@@ -100,15 +100,15 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { productApi, addressApi, orderApi } from '@/utils/api'
+import { productApi, addressApi, orderApi, type ProductDetail, type AddressItem } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
 
 const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)
 const loading = ref(false)
 const productId = ref('')
-const product = ref<any>(null)
-const address = ref<any>(null)
+const product = ref<ProductDetail | null>(null)
+const address = ref<AddressItem | null>(null)
 const submitting = ref(false)
 
 const canSubmit = computed(() => !!address.value && !submitting.value)
@@ -120,7 +120,7 @@ onMounted(() => {
 
   const pages = getCurrentPages()
   const current = pages[pages.length - 1]
-  const opts = (current as any)?.options || {}
+  const opts = (current as unknown as { options?: Record<string, string> })?.options || {}
   productId.value = opts.productId || ''
 
   if (checkAuth() && productId.value) loadData()
@@ -164,8 +164,8 @@ async function doSubmit() {
     })
     uni.showToast({ title: '换购成功', icon: 'success' })
     setTimeout(() => uni.redirectTo({ url: '/pages/order/list' }), 1500)
-  } catch (e: any) {
-    uni.showToast({ title: e.message || '提交失败', icon: 'none' })
+  } catch (e: unknown) {
+    uni.showToast({ title: (e as Error)?.message || '提交失败', icon: 'none' })
   } finally {
     uni.hideLoading()
     submitting.value = false

@@ -117,8 +117,8 @@ async function loadData() {
   try {
     // 从页面参数获取 productId
     const pages = getCurrentPages()
-    const current = pages[pages.length - 1] as any
-    const pid = current?.options?.productId || ''
+    const current = pages[pages.length - 1]
+    const pid = (current as unknown as { options?: Record<string, string> })?.options?.productId || ''
 
     const [products, bal] = await Promise.all([
       financialApi.getProducts(),

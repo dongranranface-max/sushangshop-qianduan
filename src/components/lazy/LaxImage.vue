@@ -136,7 +136,7 @@ function onImgError() {
 }
 
 // 懒加载逻辑
-let intersectionObserver: any = null
+let intersectionObserver: Record<string, unknown> | null = null
 
 function setupLazyObserver() {
   if (!props.lazy || !props.src) {
@@ -147,13 +147,13 @@ function setupLazyObserver() {
   // 等 DOM 就绪后再建立观察器
   uni.nextTick(() => {
     try {
-      intersectionObserver = uni.createIntersectionObserver(null as any, {
+      intersectionObserver = uni.createIntersectionObserver(null, {
         thresholds: [0, 0.1],
         rootMargin: props.rootMargin,
       })
 
       // 通过 $el 观察当前组件根节点
-      intersectionObserver.observe('.lax-image', (res: any) => {
+      intersectionObserver.observe('.lax-image', (res: { intersectionRatio: number }) => {
         if (res.intersectionRatio > 0 || res.intersectionRatio >= 0) {
           shouldLoad.value = true
           loadImage(props.src)

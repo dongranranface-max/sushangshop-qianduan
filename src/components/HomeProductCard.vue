@@ -54,8 +54,19 @@
 import { ref, computed } from 'vue'
 import LaxImage from '@/components/lazy/LaxImage.vue'
 
+interface Product {
+  name: string
+  coverImage?: string
+  image?: string
+  price?: string | number
+  requiredPoints?: string | number
+  salesCount?: number | null
+  soldCount?: number | null
+  [k: string]: unknown
+}
+
 const props = defineProps<{
-  product: Record<string, any>
+  product: Product
   type: 1 | 2 | 3
   defaultCover?: string
 }>()

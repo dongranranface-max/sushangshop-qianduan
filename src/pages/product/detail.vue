@@ -164,7 +164,7 @@ onShow(() => {
 function loadFromRoute() {
   const pages = getCurrentPages()
   const current = pages[pages.length - 1]
-  const options = (current as any)?.options || {}
+  const options = (current as unknown as { options?: Record<string, string> })?.options || {}
   const id = Number(options.id || 0)
   const type = Number(options.type || 1)
   if (id) { productId.value = id; productType.value = type; loadProduct(id) }

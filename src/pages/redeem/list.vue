@@ -175,7 +175,7 @@ function loadMore() {
 }
 
 function goSearch() { uni.navigateTo({ url: '/pages/search/index' }) }
-function goDetail(item: any) {
+function goDetail(item: Product) {
   uni.navigateTo({ url: `/pages/product/detail?id=${item.id}&type=3` })
 }
 </script>

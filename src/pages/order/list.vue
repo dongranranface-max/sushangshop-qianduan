@@ -152,8 +152,8 @@ onShow(() => {
 
 function loadFromQuery() {
   const pages = getCurrentPages()
-  const current = pages[pages.length - 1] as any
-  const tab = current?.options?.tab
+  const current = pages[pages.length - 1]
+  const tab = (current as unknown as { options?: Record<string, string> })?.options?.tab
   if (tab) {
     currentTab.value = String(tab)
   }

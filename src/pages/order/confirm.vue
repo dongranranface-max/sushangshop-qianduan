@@ -230,8 +230,8 @@ async function loadData() {
   loading.value = true
   try {
     const pages = getCurrentPages()
-    const current = pages[pages.length - 1] as any
-    const options = current?.options || {}
+    const current = pages[pages.length - 1]
+    const options = (current as unknown as { options?: Record<string, string> })?.options || {}
     const { cartIds, productId, quantity } = options
 
     if (cartIds) {
@@ -290,8 +290,8 @@ async function handleSubmit() {
   submitting.value = true
   try {
     const pages = getCurrentPages()
-    const current = pages[pages.length - 1] as any
-    const options = current?.options || {}
+    const current = pages[pages.length - 1]
+    const options = (current as unknown as { options?: Record<string, string> })?.options || {}
     const { cartIds, productId, quantity } = options
 
     const payload = {

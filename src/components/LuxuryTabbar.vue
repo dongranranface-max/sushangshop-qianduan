@@ -79,7 +79,7 @@ function updateCurrentIndex() {
   const pages = getCurrentPages()
   if (!pages.length) return
   const current = pages[pages.length - 1]
-  const route = `/${(current as any).route || ''}`
+  const route = `/${(current as unknown as { route?: string }).route || ''}`
   const idx = tabs.findIndex(t => t.pagePath === route)
   if (idx !== -1) currentIndex.value = idx
 }

@@ -43,7 +43,7 @@ function setUserInfo(user: { id: string; phone: string; nickname?: string; avata
 interface RequestOptions {
   url: string
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
-  data?: any
+  data?: unknown
   header?: Record<string, string>
 }
 
@@ -73,9 +73,9 @@ function request<T = unknown>(options: RequestOptions): Promise<T> {
       method,
       data: options.data,
       header,
-      success: (res: any) => {
+      success: (res: { data: unknown; statusCode: number }) => {
         // 业务错误码：{ code, message, data }（API_SPEC v1.2）
-        const body = res.data as any
+        const body = res.data as unknown
         const errMsg = escapeHtml(body?.message || body?.msg || '请求失败')
         if (body && typeof body.code !== 'undefined') {
           if (body.code === 0 || body.code === 200) {
@@ -102,7 +102,7 @@ function request<T = unknown>(options: RequestOptions): Promise<T> {
         }
         reject(new Error(`HTTP ${res.statusCode}`))
       },
-      fail: (err: any) => {
+      fail: (err: { errMsg?: string }) => {
         const msg = err.errMsg || '网络请求失败'
         uni.showToast({ title: msg, icon: 'none', duration: 2000 })
         reject(new Error(msg))
@@ -274,7 +274,7 @@ export const userApi = {
 
   // 更新资料
   updateProfile: (data: { nickname?: string; avatar?: string }) =>
-    request<any>({ url: '/users/profile', method: 'PUT', data }),
+    request<unknown>({ url: '/users/profile', method: 'PUT', data }),
 
   // 个人资产
   getAsset: (): Promise<UserAsset> =>
@@ -282,7 +282,7 @@ export const userApi = {
 
   // 绑定银行卡
   bindBankCard: (data: { bankCard: string; bankName: string; realName: string }) =>
-    request<any>({ url: '/users/bank-card', method: 'POST', data }),
+    request<unknown>({ url: '/users/bank-card', method: 'POST', data }),
 
   // 团队信息
   getTeam: (): Promise<UserTeam> =>
@@ -538,19 +538,19 @@ export const orderApi = {
 
   // 取消订单
   cancel: (orderNo: string) =>
-    request<any>({ url: '/orders/cancel', method: 'POST', data: { orderNo } }),
+    request<unknown>({ url: '/orders/cancel', method: 'POST', data: { orderNo } }),
 
   // 确认收货
   confirm: (orderNo: string) =>
-    request<any>({ url: '/orders/confirm', method: 'POST', data: { orderNo } }),
+    request<unknown>({ url: '/orders/confirm', method: 'POST', data: { orderNo } }),
 
   // 模拟支付（前端自测用，正式需接第三方支付渠道）
   pay: (orderNo: string) =>
-    request<any>({ url: `/orders/callback/${orderNo}`, method: 'POST', data: { payType: 'mock' } }),
+    request<unknown>({ url: `/orders/callback/${orderNo}`, method: 'POST', data: { payType: 'mock' } }),
 
   // 支付回调（换购/消费模拟支付或渠道回调）
   paymentCallback: (orderNo: string, payType: string) =>
-    request<any>({ url: `/orders/callback/${orderNo}`, method: 'POST', data: { payType } }),
+    request<unknown>({ url: `/orders/callback/${orderNo}`, method: 'POST', data: { payType } }),
 
   // 物流信息
   getLogistics: (orderNo: string) =>
@@ -558,11 +558,11 @@ export const orderApi = {
 
   // 申请退款
   applyRefund: (orderNo: string, data: { reason: number; description?: string; images?: string[] }) =>
-    request<any>({ url: `/orders/${orderNo}/refund`, method: 'POST', data }),
+    request<unknown>({ url: `/orders/${orderNo}/refund`, method: 'POST', data }),
 
   // 退款详情
   getRefundDetail: (orderNo: string) =>
-    request<any>({ url: `/orders/${orderNo}/refund` }),
+    request<unknown>({ url: `/orders/${orderNo}/refund` }),
 }
 
 // --------------------------------------------
@@ -606,11 +606,11 @@ export const addressApi = {
   }>) => request<AddressItem>({ url: `/address/${id}`, method: 'PUT', data }),
 
   // 删除地址
-  delete: (id: string) => request<any>({ url: `/address/${id}`, method: 'DELETE' }),
+  delete: (id: string) => request<unknown>({ url: `/address/${id}`, method: 'DELETE' }),
 
   // 设为默认
   setDefault: (id: string) =>
-    request<any>({ url: `/address/${id}/default`, method: 'POST' }),
+    request<unknown>({ url: `/address/${id}/default`, method: 'POST' }),
 
   // 获取默认地址
   getDefault: (): Promise<AddressItem | null> => request<AddressItem | null>({ url: '/address/default' }),
@@ -808,7 +808,7 @@ export const referralApi = {
   },
 
   // 推荐关系树
-  getTree: () => request<any>({ url: '/referral/tree' }),
+  getTree: () => request<unknown>({ url: '/referral/tree' }),
 
   // 奖励规则
   getRewardConfig: (): Promise<RewardConfig> =>
@@ -863,7 +863,7 @@ export const marketingApi = {
 
   // 领取优惠券
   claimCoupon: (couponId: string) =>
-    request<any>({ url: '/marketing/coupons/claim', method: 'POST', data: { couponId } }),
+    request<unknown>({ url: '/marketing/coupons/claim', method: 'POST', data: { couponId } }),
 
   // 我的优惠券
   getMyCoupons: (params: { status?: number } = {}) => {
@@ -911,17 +911,17 @@ export const cartApi = {
     request<{ id: string; cartCount: number }>({ url: '/cart', method: 'POST', data }),
 
   updateQuantity: (id: string, quantity: number) =>
-    request<any>({ url: `/cart/${id}`, method: 'PUT', data: { quantity } }),
+    request<unknown>({ url: `/cart/${id}`, method: 'PUT', data: { quantity } }),
 
   updateSelected: (id: string, selected: boolean) =>
-    request<any>({ url: `/cart/${id}/selected`, method: 'PUT', data: { selected } }),
+    request<unknown>({ url: `/cart/${id}/selected`, method: 'PUT', data: { selected } }),
 
   selectAll: (selected: boolean, mall?: string) =>
-    request<any>({ url: '/cart/select-all', method: 'POST', data: { selected, mall } }),
+    request<unknown>({ url: '/cart/select-all', method: 'POST', data: { selected, mall } }),
 
-  remove: (id: string) => request<any>({ url: `/cart/${id}`, method: 'DELETE' }),
+  remove: (id: string) => request<unknown>({ url: `/cart/${id}`, method: 'DELETE' }),
 
-  removeSelected: () => request<any>({ url: '/cart/selected', method: 'DELETE' }),
+  removeSelected: () => request<unknown>({ url: '/cart/selected', method: 'DELETE' }),
 }
 
 // --------------------------------------------
@@ -958,10 +958,10 @@ export const favoriteApi = {
     request<FavoriteCheckResult>({ url: `/favorites/check/${productId}` }),
 
   add: (productId: string) =>
-    request<any>({ url: `/favorites/${productId}`, method: 'POST' }),
+    request<unknown>({ url: `/favorites/${productId}`, method: 'POST' }),
 
   remove: (productId: string) =>
-    request<any>({ url: `/favorites/${productId}`, method: 'DELETE' }),
+    request<unknown>({ url: `/favorites/${productId}`, method: 'DELETE' }),
 }
 
 // --------------------------------------------
@@ -1037,7 +1037,7 @@ export const ticketApi = {
 
   // 确认解决
   confirm: (id: string) =>
-    request<any>({ url: `/tickets/${id}/confirm`, method: 'POST' }),
+    request<unknown>({ url: `/tickets/${id}/confirm`, method: 'POST' }),
 }
 
 // --------------------------------------------

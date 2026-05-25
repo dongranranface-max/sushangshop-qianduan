@@ -16,7 +16,7 @@ export const HOME_CATEGORY_FALLBACK: HomeCategory[] = [
 ]
 
 /** 兼容 /products/categories 多种响应：数组或 { list | categories | data } */
-export function normalizeCategoryTree(res: unknown): any[] {
+export function normalizeCategoryTree(res: unknown): HomeCategory[] {
   if (Array.isArray(res)) return res
   if (res && typeof res === 'object') {
     const o = res as Record<string, unknown>
@@ -28,7 +28,7 @@ export function normalizeCategoryTree(res: unknown): any[] {
   return []
 }
 
-export function flattenCategories(list: any[]): { id: string; name: string; icon: string }[] {
+export function flattenCategories(list: HomeCategory[]): { id: string; name: string; icon: string }[] {
   const out: { id: string; name: string; icon: string }[] = []
   for (const c of list) {
     if (!c?.id || !c?.name) continue

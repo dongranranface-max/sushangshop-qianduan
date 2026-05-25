@@ -156,7 +156,7 @@ import { onShow } from '@dcloudio/uni-app'
 import { checkAuth, clearAuth } from '@/utils/auth'
 import { resolveAvatar } from '@/utils/media'
 import { assetStore } from '@/store/asset'
-import { userApi } from '@/utils/api'
+import { userApi, type UserProfile } from '@/utils/api'
 import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 
 const DEFAULT_AVATAR = '/static/images/default-avatar.png'
@@ -164,7 +164,7 @@ const DEFAULT_AVATAR = '/static/images/default-avatar.png'
 const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)
 const loggedIn = ref(checkAuth())
-const userInfo = ref<any>({})
+const userInfo = ref<Partial<UserProfile>>({})
 
 const ecoPointsDisplay = computed(() => assetStore.ecoPointsDisplay)
 const consumerPointsDisplay = computed(() => assetStore.consumerPointsDisplay)

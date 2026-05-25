@@ -100,7 +100,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { walletApi, productApi } from '@/utils/api'
+import { walletApi, productApi, type ProductListItem } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
 import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
@@ -110,13 +110,18 @@ const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)
 const loggedIn = ref(checkAuth())
 const balance = ref<{ consumerPoints?: string } | null>(null)
-const products = ref<any[]>([])
+interface Product extends ProductListItem {
+  requiredPoints?: string | number
+  [k: string]: unknown
+}
+
+const products = ref<Product[]>([])
 const loading = ref(false)
 const page = ref(1)
 const hasMore = ref(true)
 let reqSeq = 0
 
-function canRedeem(item: any): boolean {
+function canRedeem(item: Product): boolean {
   if (!balance.value) return false
   return Number(balance.value.consumerPoints || 0) >= Number(item.requiredPoints || 0)
 }
@@ -169,7 +174,7 @@ function loadMore() {
 }
 
 function goSearch() { uni.navigateTo({ url: '/pages/search/index' }) }
-function goExchange(item: any) {
+function goExchange(item: Product) {
   if (!canRedeem(item)) {
     uni.showToast({ title: '消费积分不足', icon: 'none' })
     return
