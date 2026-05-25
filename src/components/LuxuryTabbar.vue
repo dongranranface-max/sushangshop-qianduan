@@ -55,6 +55,10 @@ import { onShow } from '@dcloudio/uni-app'
 
 const currentIndex = ref(0)
 
+// 双击返回顶部
+let lastTapTime = 0
+let lastTapIndex = -1
+
 const tabs = [
   { pagePath: '/pages/index/index', text: '主页', icon: 'home' },
   { pagePath: '/pages/catalog/index', text: '分类', icon: 'catalog' },
@@ -81,6 +85,16 @@ function updateCurrentIndex() {
 }
 
 function switchTab(tab: typeof tabs[0], index: number) {
+  const now = Date.now()
+  // 双击检测：300ms 内点击同一 tab → 滚动到顶部
+  if (now - lastTapTime < 300 && lastTapIndex === index) {
+    uni.pageScrollTo({ scrollTop: 0, duration: 300 })
+    lastTapTime = 0
+    lastTapIndex = -1
+    return
+  }
+  lastTapTime = now
+  lastTapIndex = index
   currentIndex.value = index
   uni.switchTab({ url: tab.pagePath })
 }

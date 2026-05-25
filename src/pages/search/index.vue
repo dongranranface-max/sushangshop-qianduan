@@ -181,13 +181,26 @@ function clearKeyword() {
   searchResult.value = []
 }
 
+let searchTimer: ReturnType<typeof setTimeout> | null = null
+
 function onInput() {
   if (!keyword.value.trim()) {
     searchResult.value = []
+    return
   }
+  // 防抖：500ms 后自动搜索
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    performSearch(keyword.value.trim())
+  }, 500)
 }
 
 function doSearch() {
+  // 取消待执行的防抖搜索
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
+  }
   const kw = keyword.value.trim()
   if (!kw) return
   saveHistory(kw)

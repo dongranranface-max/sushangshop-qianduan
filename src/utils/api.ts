@@ -103,7 +103,9 @@ function request<T = unknown>(options: RequestOptions): Promise<T> {
         reject(new Error(`HTTP ${res.statusCode}`))
       },
       fail: (err: any) => {
-        reject(new Error(err.errMsg || '网络请求失败'))
+        const msg = err.errMsg || '网络请求失败'
+        uni.showToast({ title: msg, icon: 'none', duration: 2000 })
+        reject(new Error(msg))
       },
     })
   })

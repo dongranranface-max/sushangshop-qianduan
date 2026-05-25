@@ -219,6 +219,7 @@ async function loadCart() {
 }
 
 async function changeQty(item: CartItem, delta: number) {
+  uni.vibrateShort({ type: 'light' })
   const newQty = item.quantity + delta
   if (newQty < 1) return
   try {
