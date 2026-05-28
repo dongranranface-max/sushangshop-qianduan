@@ -9,6 +9,8 @@
     { "path": "pages/buy/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/exchange/list", "style": { "navigationStyle": "custom" } },
     { "path": "pages/exchange/confirm", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/crowdfunding/list", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/crowdfunding/detail", "style": { "navigationStyle": "custom" } },
     { "path": "pages/redeem/list", "style": { "navigationStyle": "custom" } },
     { "path": "pages/wealth/invest", "style": { "navigationStyle": "custom" } },
     { "path": "pages/wealth/my-invest", "style": { "navigationStyle": "custom" } },
