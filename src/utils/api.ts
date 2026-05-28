@@ -857,6 +857,11 @@ export interface HotKeyword {
   isNew?: boolean
 }
 
+export interface TickerItem {
+  id: number
+  text: string
+}
+
 export interface CouponItem {
   id: string
   name: string
@@ -876,6 +881,10 @@ export const marketingApi = {
   // 首页 Banner
   getBanners: (): Promise<Banner[]> =>
     request<Banner[]>({ url: '/marketing/banners' }),
+
+  // 跑马灯公告
+  getTicker: (): Promise<TickerItem[]> =>
+    request<TickerItem[]>({ url: '/marketing/ticker' }),
 
   // 热门搜索词
   getHotKeywords: (): Promise<HotKeyword[]> =>

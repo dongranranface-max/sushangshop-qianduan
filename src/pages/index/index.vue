@@ -72,10 +72,23 @@
       @click="onBannerClick"
     />
 
-    <!-- 搜索栏 -->
-    <view class="hero-search" @click="goSearch">
-      <text class="hero-search__icon">⌕</text>
-      <text class="hero-search__placeholder">搜索商品/服务/积分</text>
+    <!-- ========== 3. Hero 品牌大卡（v5.2 shimmer）============ -->
+    <view class="hero-card">
+      <view class="hero-card__glow" />
+      <view class="hero-card__shimmer" />
+      <view class="hero-card__inner">
+        <view class="hero-card__logo">
+          <text class="hero-card__logo-text">集</text>
+        </view>
+        <view class="hero-card__brand">
+          <text class="hero-card__name">集享公社</text>
+          <text class="hero-card__slogan">轻奢金融 · 智慧积分</text>
+        </view>
+        <view class="hero-search" @click="goSearch">
+          <text class="hero-search__icon">⌕</text>
+          <text class="hero-search__placeholder">搜索商品/服务/积分</text>
+        </view>
+      </view>
     </view>
 
     <!-- ========== 3. 实时数据横幅 ========== -->
@@ -349,9 +362,10 @@ interface Category {
 
 const products = ref<Product[]>([])
 
-const tickerText = ref('平台用户突破 128,000+')
-const tickerText2 = ref('今日订单 3,892 单')
-const tickerText3 = ref('累计分红 2,100万+')
+const tickerItems = ref<{ id: number; text: string }[]>([])
+const tickerText = computed(() => tickerItems.value[0]?.text ?? '平台用户突破 128,000+')
+const tickerText2 = computed(() => tickerItems.value[1]?.text ?? '今日订单 3,892 单')
+const tickerText3 = computed(() => tickerItems.value[2]?.text ?? '累计分红 2,100万+')
 
 // 金刚区快捷服务
 const quickServices = [
@@ -414,11 +428,21 @@ onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
   safeAreaBottom.value = sys.safeAreaInsets?.bottom || 0
+  loadTicker()
   loadBanners()
   loadProducts()
   loadHotCategories()
   startCountdown()
 })
+
+async function loadTicker() {
+  try {
+    const res = await marketingApi.getTicker()
+    tickerItems.value = res || []
+  } catch {
+    // 静默失败，保持静态默认值
+  }
+}
 
 async function loadBanners() {
   bannerLoading.value = true
@@ -765,15 +789,12 @@ function onQuickAction(item: { action: string }) {
   box-shadow: $shadow-fire;
 }
 
-.hero-card__bg {
+.hero-card__glow {
   position: absolute;
   inset: 0;
-}
-
-.hero-card__gradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(145deg, #1E2433 0%, #2A3142 40%, #3D3024 100%);
+  background: radial-gradient(ellipse at 20% 80%, rgba(196,165,123,0.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, rgba(42,49,66,0.8) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .hero-card__shimmer {
@@ -781,118 +802,86 @@ function onQuickAction(item: { action: string }) {
   inset: 0;
   background: linear-gradient(
     105deg,
-    transparent 30%,
-    rgba(196,165,123,0.06) 50%,
-    transparent 70%
+    transparent 25%,
+    rgba(196,165,123,0.08) 45%,
+    rgba(196,165,123,0.12) 50%,
+    rgba(196,165,123,0.08) 55%,
+    transparent 75%
   );
-  animation: hero-shimmer 4s ease-in-out infinite;
+  background-size: 200% 100%;
+  animation: hero-shimmer 3.5s ease-in-out infinite;
+  pointer-events: none;
 }
 
 @keyframes hero-shimmer {
-  0%, 100% { transform: translateX(-100%); }
-  50% { transform: translateX(100%); }
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-.hero-card__particles {
-  position: absolute;
-  inset: 0;
-}
-
-.hero-particle {
-  position: absolute;
-  width: 6rpx;
-  height: 6rpx;
-  border-radius: 50%;
-  background: rgba(196,165,123,0.4);
-
-  &--1 { top: 20%; left: 15%; animation: float-particle 6s ease-in-out infinite; }
-  &--2 { top: 60%; left: 80%; animation: float-particle 8s ease-in-out infinite 1s; width: 4rpx; height: 4rpx; }
-  &--3 { top: 30%; left: 70%; animation: float-particle 5s ease-in-out infinite 0.5s; }
-  &--4 { top: 70%; left: 30%; animation: float-particle 7s ease-in-out infinite 2s; width: 8rpx; height: 8rpx; }
-  &--5 { top: 45%; left: 50%; animation: float-particle 6s ease-in-out infinite 1.5s; }
-  &--6 { top: 15%; left: 60%; animation: float-particle 9s ease-in-out infinite 3s; width: 5rpx; height: 5rpx; }
-}
-
-@keyframes float-particle {
-  0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
-  50% { transform: translateY(-20rpx) scale(1.2); opacity: 0.8; }
-}
-
-.hero-card__content {
+.hero-card__inner {
   position: relative;
   z-index: 2;
-  padding: 40rpx 40rpx 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12rpx;
+  padding: 32rpx 32rpx 0;
 }
 
-.hero-card__badge {
-  display: inline-flex;
+.hero-card__logo {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 18rpx;
+  background: linear-gradient(145deg, $accent 0%, $accent-dark 100%);
+  display: flex;
   align-items: center;
-  background: rgba(196,165,123,0.15);
-  border: 1rpx solid rgba(196,165,123,0.25);
-  border-radius: $radius-full;
-  padding: 6rpx 16rpx;
-  align-self: flex-start;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 8rpx 24rpx rgba(196,165,123,0.3);
 }
 
-.hero-card__badge-text {
-  font-size: 18rpx;
-  font-weight: 600;
-  color: $bronze-light;
-  letter-spacing: 1rpx;
+.hero-card__logo-text {
+  font-size: 36rpx;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0;
 }
 
-.hero-card__title {
-  font-size: 56rpx;
+.hero-card__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+  margin-top: 16rpx;
+}
+
+.hero-card__name {
+  font-size: 44rpx;
   font-weight: 800;
   color: #fff;
-  letter-spacing: 4rpx;
+  letter-spacing: 3rpx;
   line-height: 1.1;
 }
 
 .hero-card__slogan {
-  font-size: 26rpx;
-  color: rgba(255,255,255,0.6);
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.55);
   letter-spacing: 2rpx;
 }
 
-.hero-card__tags {
-  display: flex;
-  gap: 16rpx;
-  margin-top: 8rpx;
-}
-
-.hero-tag {
-  display: flex;
-  align-items: center;
-  gap: 6rpx;
-  .hero-tag__icon { font-size: 22rpx; }
-  .hero-tag__text {
-    font-size: 20rpx;
-    color: rgba(255,255,255,0.55);
-  }
-}
-
 .hero-search {
-  position: absolute;
-  bottom: 24rpx;
-  left: 32rpx;
-  right: 32rpx;
-  z-index: 3;
+  margin-top: auto;
+  margin-bottom: 28rpx;
   display: flex;
   align-items: center;
   gap: 12rpx;
   height: 72rpx;
   padding: 0 24rpx;
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1rpx solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1rpx solid rgba(255,255,255,0.18);
   border-radius: $radius-full;
   cursor: pointer;
-  &:active { background: rgba(255,255,255,0.18); }
+  &:active { background: rgba(255,255,255,0.16); }
 }
 
 .hero-search__icon {
