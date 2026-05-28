@@ -1,11 +1,9 @@
 <template>
   <view class="page-container">
 
-    <!-- ========== 顶部状态栏 ========== -->
-    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }" />
-
-    <!-- ========== 1. 资产状态聚合卡（登录后可见） ========== -->
+    <!-- ========== 1. 资产状态聚合卡（sticky 悬浮顶部，登录后可见） ========== -->
     <view v-if="loggedIn" class="asset-panel">
+      <view class="status-bar" :style="{ height: statusBarHeight + 'px' }" />
       <view class="asset-panel__card">
         <!-- 背景装饰 -->
         <view class="asset-panel__glow asset-panel__glow--tl" />
@@ -240,6 +238,9 @@
       </view>
     </view>
 
+    <!-- ========== 订单状态横栏（v5.2 ⑩） ========== -->
+    <OrderStatusBar v-if="loggedIn" />
+
     <!-- ========== 8. 精品推荐 ========== -->
     <view class="section-block">
       <view class="section-head">
@@ -312,6 +313,7 @@ import { resolveProductCover } from '@/utils/media'
 import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 import SkeletonProductGrid from '@/components/SkeletonProductGrid.vue'
 import BannerCarousel from '@/components/BannerCarousel.vue'
+import OrderStatusBar from '@/components/OrderStatusBar.vue'
 
 const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)
@@ -615,10 +617,15 @@ function onQuickAction(item: { action: string }) {
 
 // ========== 1. 资产状态聚合卡 ==========
 .asset-panel {
-  padding: 0 $spacing-base 0;
-  margin-bottom: -16rpx;
-  position: relative;
-  z-index: 10;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(180deg, rgba(30,36,51,0.98) 0%, rgba(30,36,51,0.92) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom-left-radius: 32rpx;
+  border-bottom-right-radius: 32rpx;
+  margin-bottom: 0;
 }
 
 .asset-panel__card {
