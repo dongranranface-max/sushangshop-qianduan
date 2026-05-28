@@ -65,47 +65,17 @@
       </view>
     </view>
 
-    <!-- ========== 2. Hero 品牌大卡 ========== -->
-    <view class="hero-section">
-      <view class="hero-card">
-        <!-- 动态背景层 -->
-        <view class="hero-card__bg">
-          <view class="hero-card__gradient" />
-          <view class="hero-card__shimmer" />
-          <view class="hero-card__particles">
-            <view v-for="i in 6" :key="i" class="hero-particle" :class="`hero-particle--${i}`" />
-          </view>
-        </view>
+    <!-- ========== 2. Banner 轮播 ========== -->
+    <BannerCarousel
+      :banners="homeBanners"
+      height="300rpx"
+      @click="onBannerClick"
+    />
 
-        <!-- 内容层 -->
-        <view class="hero-card__content">
-          <view class="hero-card__badge">
-            <text class="hero-card__badge-text">平台保障</text>
-          </view>
-          <text class="hero-card__title">集享生活</text>
-          <text class="hero-card__slogan">品质生活 · 从集享开始</text>
-          <view class="hero-card__tags">
-            <view class="hero-tag">
-              <text class="hero-tag__icon">🛡</text>
-              <text class="hero-tag__text">资金安全</text>
-            </view>
-            <view class="hero-tag">
-              <text class="hero-tag__icon">⚡</text>
-              <text class="hero-tag__text">积分通兑</text>
-            </view>
-            <view class="hero-tag">
-              <text class="hero-tag__icon">💎</text>
-              <text class="hero-tag__text">专属服务</text>
-            </view>
-          </view>
-        </view>
-
-        <!-- 搜索栏（嵌在 Hero 底部） -->
-        <view class="hero-search" @click="goSearch">
-          <text class="hero-search__icon">⌕</text>
-          <text class="hero-search__placeholder">搜索商品/服务/积分</text>
-        </view>
-      </view>
+    <!-- 搜索栏 -->
+    <view class="hero-search" @click="goSearch">
+      <text class="hero-search__icon">⌕</text>
+      <text class="hero-search__placeholder">搜索商品/服务/积分</text>
     </view>
 
     <!-- ========== 3. 实时数据横幅 ========== -->
@@ -328,11 +298,13 @@ import { assetStore } from '@/store/asset'
 import { resolveProductCover } from '@/utils/media'
 import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 import SkeletonProductGrid from '@/components/SkeletonProductGrid.vue'
+import BannerCarousel from '@/components/BannerCarousel.vue'
 
 const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)
 const loggedIn = ref(checkAuth())
 const loading = ref(false)
+const bannerLoading = ref(false)
 const loadMoreLoading = ref(false)
 const page = ref(1)
 const hasMore = ref(true)
@@ -394,6 +366,9 @@ const quickServices = [
   { id: 'points', label: '明细', icon: '📊', bg: 'rgba(142,116,89,0.10)', action: 'points' },
 ]
 
+// 首页 Banner 数据（v5.2: API 对接）
+const homeBanners = ref<Banner[]>([])
+
 // 秒杀商品（静态示例）
 const flashProducts = ref<Product[]>([
   { id: 1, name: '示例商品A', price: '99', image: '', type: 1 },
@@ -439,10 +414,30 @@ onMounted(() => {
   const sys = uni.getSystemInfoSync()
   statusBarHeight.value = sys.statusBarHeight || 20
   safeAreaBottom.value = sys.safeAreaInsets?.bottom || 0
+  loadBanners()
   loadProducts()
   loadHotCategories()
   startCountdown()
 })
+
+async function loadBanners() {
+  bannerLoading.value = true
+  try {
+    const res = await marketingApi.getBanners()
+    homeBanners.value = (res || []).map(b => ({
+      id: b.id,
+      title: b.title || '',
+      sub: b.sub || '',
+      image: b.image || '',
+      link: b.link || '',
+      theme: b.theme,
+    }))
+  } catch {
+    homeBanners.value = []
+  } finally {
+    bannerLoading.value = false
+  }
+}
 
 onShow(() => {
   loggedIn.value = checkAuth()
@@ -535,6 +530,11 @@ async function loadHotCategories() {
 
 function toggleHidden() { hidden.value = !hidden.value }
 function goSearch() { uni.navigateTo({ url: '/pages/search/index' }) }
+function onBannerClick(item: Banner) {
+  if (item.link) {
+    uni.navigateTo({ url: item.link })
+  }
+}
 function goWealth() { uni.switchTab({ url: '/pages/wealth/index' }) }
 function goPoints() { uni.navigateTo({ url: '/pages/user/points-detail' }) }
 function goInvite() { uni.navigateTo({ url: '/pages/user/invite' }) }
