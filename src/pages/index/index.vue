@@ -383,12 +383,9 @@ const quickServices = [
 // 首页 Banner 数据（v5.2: API 对接）
 const homeBanners = ref<Banner[]>([])
 
-// 秒杀商品（静态示例）
-const flashProducts = ref<Product[]>([
-  { id: 1, name: '示例商品A', price: '99', image: '', type: 1 },
-  { id: 2, name: '示例商品B', price: '199', image: '', type: 1 },
-  { id: 3, name: '示例商品C', price: '299', image: '', type: 1 },
-])
+// 秒杀商品（v5.2: API对接）
+const flashProducts = ref<Product[]>([])
+const loadingFlashProducts = ref(false)
 
 const mallPortals = [
   {
@@ -429,11 +426,24 @@ onMounted(() => {
   statusBarHeight.value = sys.statusBarHeight || 20
   safeAreaBottom.value = sys.safeAreaInsets?.bottom || 0
   loadTicker()
+  loadFlashProducts()
   loadBanners()
   loadProducts()
   loadHotCategories()
   startCountdown()
 })
+
+async function loadFlashProducts() {
+  loadingFlashProducts.value = true
+  try {
+    const res =await marketingApi.getFlashProducts()
+    flashProducts.value = (res || []).slice(0, 3)
+  } catch {
+    flashProducts.value = []
+  } finally {
+    loadingFlashProducts.value = false
+  }
+}
 
 async function loadTicker() {
   try {

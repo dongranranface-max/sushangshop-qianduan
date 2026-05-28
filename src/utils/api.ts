@@ -886,6 +886,10 @@ export const marketingApi = {
   getTicker: (): Promise<TickerItem[]> =>
     request<TickerItem[]>({ url: '/marketing/ticker' }),
 
+  // 限时秒杀商品
+  getFlashProducts: (): Promise<Product[]> =>
+    request<Product[]>({ url: '/marketing/flash-products' }),
+
   // 热门搜索词
   getHotKeywords: (): Promise<HotKeyword[]> =>
     request<HotKeyword[]>({ url: '/marketing/hot-keywords' }),
