@@ -1,280 +1,121 @@
 <template>
-  <view class="page-container">
+  <view class="page">
 
-    <!-- ========== 1. 资产状态聚合卡（sticky 悬浮顶部，登录后可见） ========== -->
-    <view v-if="loggedIn" class="asset-panel">
-      <view class="status-bar" :style="{ height: statusBarHeight + 'px' }" />
-      <view class="asset-panel__card">
-        <!-- 背景装饰 -->
-        <view class="asset-panel__glow asset-panel__glow--tl" />
-        <view class="asset-panel__glow asset-panel__glow--br" />
-
-        <view class="asset-panel__main">
-          <!-- 左侧：总资产 -->
-          <view class="asset-panel__balance">
-            <text class="asset-panel__balance-label">总资产</text>
-            <view class="asset-panel__balance-row">
-              <text class="asset-panel__balance-value">
-                {{ hidden ? '****' : assetStore.totalAssetsDisplay }}
-              </text>
-              <view class="asset-panel__eye" @click="toggleHidden">
-                <text class="asset-panel__eye-icon">{{ hidden ? '👁' : '👁‍🗨' }}</text>
-              </view>
-            </view>
-            <view class="asset-panel__sub">
-              <text class="asset-panel__sub-label">昨日收益</text>
-              <text class="asset-panel__sub-value">+{{ hidden ? '**' : assetStore.yesterdayProfitDisplay }}</text>
-            </view>
+    <!-- ==================== 1. 头部导航 ==================== -->
+    <header class="header">
+      <view class="header__inner">
+        <!-- 左侧：Logo + 品牌 -->
+        <view class="header__brand">
+          <view class="header__logo">
+            <text class="header__logo-text">集</text>
           </view>
-
-          <!-- 右侧：积分三栏 -->
-          <view class="asset-panel__points">
-            <view class="asset-panel__point-item">
-              <text class="asset-panel__point-value asset-panel__point-value--eco">
-                {{ hidden ? '****' : assetStore.ecoPointsDisplay }}
-              </text>
-              <text class="asset-panel__point-label">生态积分</text>
-            </view>
-            <view class="asset-panel__point-divider" />
-            <view class="asset-panel__point-item">
-              <text class="asset-panel__point-value asset-panel__point-value--consumer">
-                {{ hidden ? '****' : assetStore.consumerPointsDisplay }}
-              </text>
-              <text class="asset-panel__point-label">消费积分</text>
-            </view>
-          </view>
+          <text class="header__brand-name">集享公社</text>
         </view>
 
-        <!-- 底部：快捷操作 -->
-        <view class="asset-panel__actions">
-          <view class="asset-panel__action" @click="goWealth">
-            <text class="asset-panel__action-icon">📈</text>
-            <text class="asset-panel__action-text">增值理财</text>
-          </view>
-          <view class="asset-panel__action" @click="goPoints">
-            <text class="asset-panel__action-icon">📊</text>
-            <text class="asset-panel__action-text">积分明细</text>
-          </view>
-          <view class="asset-panel__action" @click="goInvite">
-            <text class="asset-panel__action-icon">👥</text>
-            <text class="asset-panel__action-text">邀请好友</text>
-          </view>
+        <!-- 右侧：搜索入口 -->
+        <view class="header__search" @click="goSearch">
+          <text class="header__search-icon">⌕</text>
+          <text class="header__search-text">搜索商品/服务</text>
         </view>
       </view>
-    </view>
+    </header>
 
-    <!-- ========== 2. Banner 轮播 ========== -->
+    <!-- ==================== 2. Banner 轮播 ==================== -->
     <BannerCarousel
-      :banners="homeBanners"
-      height="300rpx"
+      :banners="banners"
+      height="320rpx"
       @click="onBannerClick"
     />
 
-    <!-- ========== 3. Hero 品牌大卡（v5.2 shimmer）============ -->
-    <view class="hero-card">
-      <view class="hero-card__glow" />
-      <view class="hero-card__shimmer" />
-      <view class="hero-card__inner">
-        <view class="hero-card__logo">
-          <text class="hero-card__logo-text">集</text>
-        </view>
-        <view class="hero-card__brand">
-          <text class="hero-card__name">集享公社</text>
-          <text class="hero-card__slogan">轻奢金融 · 智慧积分</text>
-        </view>
-        <view class="hero-search" @click="goSearch">
-          <text class="hero-search__icon">⌕</text>
-          <text class="hero-search__placeholder">搜索商品/服务/积分</text>
-        </view>
-      </view>
-    </view>
-
-    <!-- ========== 3. 实时数据横幅 ========== -->
-    <view class="data-strip">
-      <view class="data-strip__left">
-        <view class="data-strip__live">
-          <view class="data-strip__dot" />
-          <text class="data-strip__live-text">实时</text>
-        </view>
-        <view class="data-strip__track">
-          <view class="data-strip__content">
-            <text class="data-strip__text">{{ tickerText }}</text>
-            <text class="data-strip__separator">|</text>
-            <text class="data-strip__text">{{ tickerText2 }}</text>
-            <text class="data-strip__separator">|</text>
-            <text class="data-strip__text">{{ tickerText3 }}</text>
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <!-- ========== 4. 金刚区 3×3 快捷服务 ========== -->
-    <view class="quick-grid-section">
-      <view class="quick-grid">
+    <!-- ==================== 3. 四大功能图标（集/购/换/兑） ==================== -->
+    <section class="section func-grid-section">
+      <view class="func-grid">
         <view
-          v-for="item in quickServices"
+          v-for="item in funcModules"
           :key="item.id"
-          class="quick-item"
-          @click="onQuickAction(item)"
+          class="func-item"
+          @click="onFuncClick(item)"
         >
-          <view class="quick-item__icon-wrap" :style="{ background: item.bg }">
-            <text class="quick-item__icon">{{ item.icon }}</text>
-            <view v-if="item.badge" class="quick-item__badge">{{ item.badge }}</view>
+          <view class="func-item__icon-wrap" :style="{ background: item.bg }">
+            <text class="func-item__icon">{{ item.icon }}</text>
           </view>
-          <text class="quick-item__label">{{ item.label }}</text>
+          <text class="func-item__label">{{ item.label }}</text>
+          <text class="func-item__sub">{{ item.sub }}</text>
         </view>
       </view>
-    </view>
+    </section>
 
-    <!-- ========== 5. 限时活动双卡片 ========== -->
-    <view class="activity-row">
-      <!-- 限时秒杀 -->
-      <view class="activity-card activity-card--flash" @click="goFlashSale">
-        <view class="activity-card__glow" />
-        <view class="activity-card__header">
-          <view class="activity-card__title-wrap">
-            <text class="activity-card__title">限时秒杀</text>
-            <view class="activity-card__hot-tag">
-              <text class="activity-card__hot-icon">🔥</text>
-            </view>
-          </view>
-          <view class="countdown">
-            <text class="countdown__unit">{{ countdownHours }}</text>
-            <text class="countdown__sep">:</text>
-            <text class="countdown__unit">{{ countdownMinutes }}</text>
-            <text class="countdown__sep">:</text>
-            <text class="countdown__unit">{{ countdownSeconds }}</text>
-          </view>
-        </view>
-        <text class="activity-card__desc">每日 10:00 / 15:00 / 20:00</text>
-        <view class="activity-card__products">
-          <view v-for="p in flashProducts" :key="p.id" class="activity-product">
-            <image class="activity-product__img" :src="p.image" mode="aspectFill" />
-            <text class="activity-product__price">¥{{ p.price }}</text>
-          </view>
-        </view>
-      </view>
-
-      <!-- 会员专区 -->
-      <view class="activity-card activity-card--member" @click="goMember">
-        <view class="activity-card__glow activity-card__glow--gold" />
-        <view class="activity-card__header">
-          <text class="activity-card__title">会员专属</text>
-          <view class="activity-card__vip-icon">👑</view>
-        </view>
-        <text class="activity-card__desc">升级享更多权益</text>
-        <view class="activity-card__member-info">
-          <text class="activity-card__level">{{ assetStore.levelName }}</text>
-          <view class="activity-card__progress">
-            <view class="activity-card__progress-bar" :style="{ width: assetStore.progressPercent + '%' }" />
-          </view>
-          <text class="activity-card__progress-text">{{ assetStore.progressPercent }}%</text>
-        </view>
-        <text class="activity-card__cta">立即升级 ›</text>
-      </view>
-    </view>
-
-    <!-- ========== 6. 三大商城入口 ========== -->
-    <view class="mall-section">
-      <view class="mall-section__head">
-        <text class="mall-section__title">精选商城</text>
-        <text class="mall-section__more" @click="goCatalog">查看全部 ›</text>
-      </view>
-
-      <view class="mall-cards">
-        <view
-          v-for="mall in mallPortals"
-          :key="mall.id"
-          class="mall-card"
-          :class="`mall-card--${mall.id}`"
-          @click="goMall(mall)"
-        >
-          <view class="mall-card__bg" :style="{ background: mall.gradient }" />
-          <view class="mall-card__glow" />
-          <view class="mall-card__content">
-            <view class="mall-card__icon-wrap">
-              <text class="mall-card__icon">{{ mall.icon }}</text>
-            </view>
-            <view class="mall-card__info">
-              <text class="mall-card__name">{{ mall.name }}</text>
-              <text class="mall-card__desc">{{ mall.desc }}</text>
-            </view>
-            <view class="mall-card__arrow">›</view>
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <!-- ========== 7. 热门分类（网格化） ========== -->
-    <view class="category-section">
-      <view class="section-head">
-        <view class="section-head__left">
-          <text class="section-title">热门分类</text>
-        </view>
-        <view class="section-head__right" @click="goCatalog">
-          <text class="section-more">查看全部 ›</text>
-        </view>
-      </view>
-      <view class="category-grid">
-        <view
-          v-for="(cat, idx) in hotCategories"
-          :key="cat.id"
-          class="category-grid__item"
-          :class="`category-grid__item--${(idx % 4) + 1}`"
-          @click="goCatalogCategory(cat)"
-        >
-          <view class="category-grid__icon-wrap" :style="{ background: cat.bg }">
-            <text class="category-grid__icon">{{ cat.icon }}</text>
-          </view>
-          <text class="category-grid__name">{{ cat.name }}</text>
-        </view>
-        <!-- 补齐到 8 个，保持双行对称 -->
-        <template v-if="hotCategories.length === 0">
-          <view v-for="i in 8" :key="`skeleton-${i}`" class="category-grid__item">
-            <view class="category-grid__icon-wrap category-grid__icon-wrap--skeleton" />
-            <view class="category-grid__name-skeleton" />
-          </view>
-        </template>
-      </view>
-    </view>
-
-    <!-- ========== 订单状态横栏（v5.2 ⑩） ========== -->
-    <OrderStatusBar v-if="loggedIn" />
-
-    <!-- ========== 8. 精品推荐 ========== -->
-    <view class="section-block">
-      <view class="section-head">
-        <view class="section-head__left">
-          <text class="section-title">精品推荐</text>
-        </view>
+    <!-- ==================== 4. 热门分类 ==================== -->
+    <section class="section">
+      <!-- 标题 -->
+      <view class="section__head">
+        <text class="section__title">热门分类</text>
+        <text class="section__more" @click="goCatalog">查看全部 ›</text>
       </view>
 
       <!-- 骨架屏 -->
-      <SkeletonProductGrid v-if="loading && products.length === 0" :count="4" />
+      <view v-if="categories.length === 0" class="category-skeleton">
+        <view v-for="i in 8" :key="i" class="category-skeleton__item">
+          <view class="category-skeleton__icon" />
+          <view class="category-skeleton__name" />
+        </view>
+      </view>
 
-      <!-- 商品网格（错位布局） -->
+      <!-- 分类网格 -->
+      <view v-else class="category-grid">
+        <view
+          v-for="cat in categories"
+          :key="cat.id"
+          class="category-card"
+          @click="goCategory(cat)"
+        >
+          <view class="category-card__icon-wrap" :style="{ background: cat.bg }">
+            <text class="category-card__icon">{{ cat.icon }}</text>
+          </view>
+          <text class="category-card__name">{{ cat.name }}</text>
+        </view>
+      </view>
+    </section>
+
+    <!-- ==================== 5. 精品推荐 ==================== -->
+    <section class="section">
+      <!-- 标题 -->
+      <view class="section__head">
+        <text class="section__title">精品推荐</text>
+        <text class="section__more" @click="goCatalog">查看全部 ›</text>
+      </view>
+
+      <!-- 骨架屏 -->
+      <view v-if="loading && products.length === 0" class="product-skeleton">
+        <view v-for="i in 6" :key="i" class="product-skeleton__item">
+          <view class="product-skeleton__img" />
+          <view class="product-skeleton__title" />
+          <view class="product-skeleton__price" />
+        </view>
+      </view>
+
+      <!-- 商品网格 -->
       <view v-else class="product-grid">
         <view
-          v-for="(p, idx) in products"
+          v-for="p in products"
           :key="p.id"
           class="product-card"
-          :class="{ 'product-card--tall': idx % 3 === 1 }"
           @click="goProduct(p)"
         >
           <view class="product-card__img-wrap">
             <image
               class="product-card__img"
-              :src="resolveProductCover(p)"
+              :src="resolveCover(p)"
               mode="aspectFill"
               lazy-load
             />
-            <!-- 销量标签 -->
-            <view v-if="p.salesCount" class="product-card__sales">
-              <text class="product-card__sales-text">已售 {{ p.salesCount }}</text>
-            </view>
             <!-- 类型角标 -->
-            <view class="product-card__type-badge" :class="`product-card__type-badge--${p.type || 1}`">
+            <view class="product-card__badge" :class="`product-card__badge--${p.type || 1}`">
               <text>{{ typeLabel(p.type) }}</text>
+            </view>
+            <!-- 销量 -->
+            <view v-if="p.salesCount" class="product-card__sales">
+              <text>已售 {{ p.salesCount }}</text>
             </view>
           </view>
           <view class="product-card__info">
@@ -288,263 +129,108 @@
       </view>
 
       <!-- 触底加载 -->
-      <view v-if="loadMoreLoading" class="load-more-tip">
-        <text class="load-more-tip__text">加载中...</text>
+      <view v-if="loadMoreLoading" class="load-tip">
+        <text>加载中...</text>
       </view>
-      <view v-else-if="!hasMore && products.length > 0" class="no-more-tip">
-        <text class="no-more-tip__text">— 没有更多了 —</text>
+      <view v-else-if="!hasMore && products.length > 0" class="load-tip load-tip--end">
+        <text>— 没有更多了 —</text>
       </view>
-    </view>
+    </section>
 
-    <view class="safe-area-bottom" :style="{ height: (100 + safeAreaBottom) + 'px' }" />
+    <!-- ==================== 6. 底部安全区 ==================== -->
+    <view class="safe-bottom" :style="{ height: (120 + safeAreaBottom) + 'px' }" />
 
-    <!-- 自定义毛玻璃 TabBar -->
+    <!-- 自定义 TabBar -->
     <LuxuryTabbar />
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { onShow, onReachBottom } from '@dcloudio/uni-app'
 import { productApi, marketingApi } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
 import { resolveProductCover } from '@/utils/media'
 import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
-import SkeletonProductGrid from '@/components/SkeletonProductGrid.vue'
 import BannerCarousel from '@/components/BannerCarousel.vue'
-import OrderStatusBar from '@/components/OrderStatusBar.vue'
 
-const statusBarHeight = ref(20)
+// ========== 状态 ==========
 const safeAreaBottom = ref(0)
-const loggedIn = ref(checkAuth())
+const loggedIn = ref(false)
 const loading = ref(false)
-const bannerLoading = ref(false)
 const loadMoreLoading = ref(false)
 const page = ref(1)
 const hasMore = ref(true)
-const hidden = ref(false)
-const PAGE_SIZE = 8
+const PAGE_SIZE = 6
 
-// 倒计时
-const countdownHours = ref('00')
-const countdownMinutes = ref('00')
-const countdownSeconds = ref('00')
-let countdownTimer: ReturnType<typeof setInterval> | null = null
-
-interface Product {
-  id: number | string
+// ========== 数据 ==========
+const banners = ref<Array<{ id: number; image: string; link?: string }>>([])
+const funcModules = [
+  { id: 'ji',   label: '集',    sub: '积分聚合', icon: '集', bg: 'rgba(196,165,123,0.12)', action: '/pages/catalog/index?type=0' },
+  { id: 'gou',  label: '购',    sub: '消费返积分', icon: '购', bg: 'rgba(61,139,110,0.10)', action: '/pages/catalog/index?type=1' },
+  { id: 'huan', label: '换',    sub: '积分抵现', icon: '换', bg: 'rgba(65,75,94,0.10)', action: '/pages/catalog/index?type=2' },
+  { id: 'dui',  label: '兑',    sub: '积分兑换', icon: '兑', bg: 'rgba(142,116,89,0.10)', action: '/pages/catalog/index?type=3' },
+]
+const categories = ref<Array<{ id: number; name: string; icon: string; bg: string }>>([])
+const products = ref<Array<{
+  id: number
   name: string
-  coverImage?: string
-  image?: string
-  price?: string | number
+  price: number
   requiredPoints?: number
   type?: number
   salesCount?: number
-  [k: string]: unknown
-}
+  coverImage?: string
+  image?: string
+}>>([])
 
-interface Banner {
-  id: number
-  title: string
-  sub: string
-  image: string
-  link?: string
-  theme?: string
-  [k: string]: unknown
-}
-
-interface Category {
-  id: number | string
-  name: string
-  icon: string
-  bg: string
-  [k: string]: unknown
-}
-
-const products = ref<Product[]>([])
-
-const tickerItems = ref<{ id: number; text: string }[]>([])
-const tickerText = computed(() => tickerItems.value[0]?.text ?? '平台用户突破 128,000+')
-const tickerText2 = computed(() => tickerItems.value[1]?.text ?? '今日订单 3,892 单')
-const tickerText3 = computed(() => tickerItems.value[2]?.text ?? '累计分红 2,100万+')
-
-// 金刚区快捷服务
-const quickServices = [
-  { id: 'recharge', label: '充值', icon: '⚡', bg: 'rgba(255,200,80,0.12)', action: 'recharge' },
-  { id: 'withdraw', label: '提现', icon: '💰', bg: 'rgba(61,139,110,0.10)', action: 'withdraw' },
-  { id: 'transfer', label: '转账', icon: '🔄', bg: 'rgba(65,75,94,0.10)', action: 'transfer' },
-  { id: 'signin', label: '签到', icon: '📝', bg: 'rgba(196,165,123,0.12)', action: 'signin' },
-  { id: 'invite', label: '邀请', icon: '👥', bg: 'rgba(255,100,100,0.08)', action: 'invite' },
-  { id: 'coupon', label: '卡券', icon: '🎫', bg: 'rgba(212,133,10,0.10)', action: 'coupon' },
-  { id: 'order', label: '订单', icon: '📦', bg: 'rgba(65,75,94,0.08)', action: 'order' },
-  { id: 'service', label: '客服', icon: '💬', bg: 'rgba(61,139,110,0.08)', action: 'service' },
-  { id: 'points', label: '明细', icon: '📊', bg: 'rgba(142,116,89,0.10)', action: 'points' },
-]
-
-// 首页 Banner 数据（v5.2: API 对接）
-const homeBanners = ref<Banner[]>([])
-
-// 秒杀商品（v5.2: API对接）
-const flashProducts = ref<Product[]>([])
-const loadingFlashProducts = ref(false)
-
-const mallPortals = [
-  {
-    id: 'consume',
-    name: '消费商城',
-    desc: '精选商品 消费即返积分',
-    icon: '购',
-    gradient: 'linear-gradient(135deg, #2F3542 0%, #3D4656 100%)',
-    type: 1,
-  },
-  {
-    id: 'exchange',
-    name: '换购商城',
-    desc: '积分抵现 超值换购',
-    icon: '换',
-    gradient: 'linear-gradient(135deg, #3D3024 0%, #5C4A32 100%)',
-    type: 2,
-  },
-  {
-    id: 'redeem',
-    name: '兑换商城',
-    desc: '积分全额兑换 零元好物',
-    icon: '兑',
-    gradient: 'linear-gradient(135deg, #1E2530 0%, #2F3A4A 100%)',
-    type: 3,
-  },
-]
-
-const hotCategories = ref<Category[]>([])
-
-// 类型标签
+// ========== 工具函数 ==========
 function typeLabel(type?: number) {
-  return type === 1 ? '购' : type === 2 ? '换' : '兑'
+  return type === 1 ? '购' : type === 2 ? '换' : type === 3 ? '兑' : '集'
 }
 
+function resolveCover(p: { coverImage?: string; image?: string }) {
+  return resolveProductCover(p as any)
+}
+
+// ========== 生命周期 ==========
 onMounted(() => {
   const sys = uni.getSystemInfoSync()
-  statusBarHeight.value = sys.statusBarHeight || 20
   safeAreaBottom.value = sys.safeAreaInsets?.bottom || 0
-  loadTicker()
-  loadFlashProducts()
   loadBanners()
+  loadCategories()
   loadProducts()
-  loadHotCategories()
-  startCountdown()
 })
-
-async function loadFlashProducts() {
-  loadingFlashProducts.value = true
-  try {
-    const res =await marketingApi.getFlashProducts()
-    flashProducts.value = (res || []).slice(0, 3)
-  } catch {
-    flashProducts.value = []
-  } finally {
-    loadingFlashProducts.value = false
-  }
-}
-
-async function loadTicker() {
-  try {
-    const res = await marketingApi.getTicker()
-    tickerItems.value = res || []
-  } catch {
-    // 静默失败，保持静态默认值
-  }
-}
-
-async function loadBanners() {
-  bannerLoading.value = true
-  try {
-    const res = await marketingApi.getBanners()
-    homeBanners.value = (res || []).map(b => ({
-      id: b.id,
-      title: b.title || '',
-      sub: b.sub || '',
-      image: b.image || '',
-      link: b.link || '',
-      theme: b.theme,
-    }))
-  } catch {
-    homeBanners.value = []
-  } finally {
-    bannerLoading.value = false
-  }
-}
 
 onShow(() => {
   loggedIn.value = checkAuth()
-  if (loggedIn.value) assetStore.fetchBalance()
+  if (loggedIn.value) {
+    assetStore.fetchBalance()
+  }
 })
 
-onUnmounted(() => {
-  if (countdownTimer) clearInterval(countdownTimer)
-})
+onUnmounted(() => {})
 
 // 触底加载
 onReachBottom(() => {
   loadProducts(false)
 })
 
-function startCountdown() {
-  // 设置到下一个整点
-  const now = new Date()
-  const next = new Date(now)
-  next.setMinutes(0, 0, 0)
-  const hour = next.getHours()
-  if (hour >= 20) {
-    next.setDate(next.getDate() + 1)
-    next.setHours(10, 0, 0, 0)
-  } else if (hour >= 15) {
-    next.setHours(20, 0, 0, 0)
-  } else if (hour >= 10) {
-    next.setHours(15, 0, 0, 0)
-  } else {
-    next.setHours(10, 0, 0, 0)
-  }
-
-  function update() {
-    const diff = next.getTime() - Date.now()
-    if (diff <= 0) {
-      // 重置到下一场
-      next.setHours(next.getHours() + 5)
-      return
-    }
-    const h = Math.floor(diff / 3600000)
-    const m = Math.floor((diff % 3600000) / 60000)
-    const s = Math.floor((diff % 60000) / 1000)
-    countdownHours.value = String(h).padStart(2, '0')
-    countdownMinutes.value = String(m).padStart(2, '0')
-    countdownSeconds.value = String(s).padStart(2, '0')
-  }
-
-  update()
-  countdownTimer = setInterval(update, 1000)
-}
-
-async function loadProducts(reset = false) {
-  if (reset) { page.value = 1; hasMore.value = true }
-  if (!hasMore.value || loadMoreLoading.value) return
-  loadMoreLoading.value = true
+// ========== 数据加载 ==========
+async function loadBanners() {
   try {
-    const res = await productApi.getList({ type: 1, limit: PAGE_SIZE, page: page.value })
-    const list: Product[] = (res.list || []).slice(0, 4)
-    if (reset) products.value = list
-    else products.value.push(...list)
-    hasMore.value = list.length === PAGE_SIZE
-    page.value++
+    const res = await marketingApi.getBanners()
+    banners.value = (res || []).map((b: any) => ({
+      id: b.id,
+      image: b.image || '',
+      link: b.link || '',
+    }))
   } catch {
-    if (reset) products.value = []
-    hasMore.value = false
-  } finally {
-    loadMoreLoading.value = false
+    banners.value = []
   }
 }
 
-async function loadHotCategories() {
+async function loadCategories() {
   try {
     const res = await productApi.getCategories()
     const bgPalettes = [
@@ -553,904 +239,375 @@ async function loadHotCategories() {
       'rgba(142,116,89,0.10)',
       'rgba(65,75,94,0.08)',
     ]
-    hotCategories.value = (res || []).slice(0, 8).map((cat: Category, idx: number) => ({
+    categories.value = (res || []).slice(0, 8).map((cat: any, idx: number) => ({
       id: cat.id,
       name: cat.name,
-      icon: (cat as { icon?: string }).icon || '📦',
+      icon: cat.icon || '📦',
       bg: bgPalettes[idx % bgPalettes.length],
     }))
   } catch {
-    hotCategories.value = []
+    categories.value = []
   }
 }
 
-function toggleHidden() { hidden.value = !hidden.value }
-function goSearch() { uni.navigateTo({ url: '/pages/search/index' }) }
-function onBannerClick(item: Banner) {
+async function loadProducts(reset = true) {
+  if (reset) {
+    page.value = 1
+    hasMore.value = true
+    loading.value = true
+  }
+  if (!hasMore.value || loadMoreLoading.value) return
+
+  loadMoreLoading.value = true
+  try {
+    const res = await productApi.getList({ type: 1, limit: PAGE_SIZE, page: page.value })
+    const list = (res?.list || []).slice(0, PAGE_SIZE)
+    if (reset) products.value = list
+    else products.value.push(...list)
+    hasMore.value = list.length === PAGE_SIZE
+    page.value++
+  } catch {
+    if (reset) products.value = []
+    hasMore.value = false
+  } finally {
+    loading.value = false
+    loadMoreLoading.value = false
+  }
+}
+
+// ========== 路由跳转 ==========
+function goSearch() {
+  uni.navigateTo({ url: '/pages/search/index' })
+}
+
+function onBannerClick(item: { link?: string }) {
   if (item.link) {
     uni.navigateTo({ url: item.link })
   }
 }
-function goWealth() { uni.switchTab({ url: '/pages/wealth/index' }) }
-function goPoints() { uni.navigateTo({ url: '/pages/user/points-detail' }) }
-function goInvite() { uni.navigateTo({ url: '/pages/user/invite' }) }
-function goCatalog() { uni.switchTab({ url: '/pages/catalog/index' }) }
-function goFlashSale() { uni.navigateTo({ url: '/pages/activity/flash-sale' }) }
-function goMember() { uni.navigateTo({ url: '/pages/user/level' }) }
-function goMall(mall: { type: number }) {
-  uni.navigateTo({ url: `/pages/catalog/index?type=${mall.type}` })
-}
-function goCatalogCategory(cat: { id: string | number }) {
-  if (cat.id) uni.navigateTo({ url: `/pages/catalog/index?categoryId=${cat.id}` })
-}
-function goProduct(p: Product) {
-  if (p.id) uni.navigateTo({ url: `/pages/product/detail?id=${p.id}&type=${p.type || 1}` })
+
+function onFuncClick(item: { action?: string }) {
+  if (item.action) {
+    uni.navigateTo({ url: item.action })
+  }
 }
 
-function onQuickAction(item: { action: string }) {
-  const routes: Record<string, string> = {
-    recharge: '/pages/wallet/recharge',
-    withdraw: '/pages/wallet/withdraw',
-    transfer: '/pages/wallet/transfer',
-    signin: '/pages/user/sign-in',
-    invite: '/pages/user/invite',
-    coupon: '/pages/coupon/list',
-    order: '/pages/order/list',
-    service: '/pages/user/service',
-    points: '/pages/user/points-detail',
+function goCatalog() {
+  uni.switchTab({ url: '/pages/catalog/index' })
+}
+
+function goCategory(cat: { id: number }) {
+  if (cat.id) {
+    uni.navigateTo({ url: `/pages/catalog/index?categoryId=${cat.id}` })
   }
-  const url = routes[item.action]
-  if (url) uni.navigateTo({ url })
+}
+
+function goProduct(p: { id: number; type?: number }) {
+  if (p.id) {
+    uni.navigateTo({ url: `/pages/product/detail?id=${p.id}&type=${p.type || 1}` })
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 @import '@/styles/theme.scss';
 
-.page-container {
+// ========== 全局重置 ==========
+.page {
   min-height: 100vh;
-  @include page-bg;
+  background: $bg-primary;
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
 }
 
-.status-bar { width: 100%; }
+// ========== 间距系统（4/8/16/24px） ==========
+$gap-4:  4rpx;
+$gap-8:  8rpx;
+$gap-16: 16rpx;
+$gap-24: 24rpx;
 
-// ========== 1. 资产状态聚合卡 ==========
-.asset-panel {
+// ========== 1. 头部导航 ==========
+.header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: linear-gradient(180deg, rgba(30,36,51,0.98) 0%, rgba(30,36,51,0.92) 100%);
+  height: 120rpx;
+  padding-top: env(safe-area-inset-top);
+  background: rgba(30, 36, 51, 0.97);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom-left-radius: 32rpx;
-  border-bottom-right-radius: 32rpx;
-  margin-bottom: 0;
 }
 
-.asset-panel__card {
-  position: relative;
-  padding: 28rpx 32rpx 20rpx;
-  background: $asset-card-bg;
-  border: 1rpx solid $asset-card-border;
-  border-radius: $radius-2xl;
-  box-shadow: $asset-card-shadow;
-  overflow: hidden;
-}
-
-.asset-panel__glow {
-  position: absolute;
-  width: 200rpx;
-  height: 200rpx;
-  border-radius: 50%;
-  pointer-events: none;
-  &--tl {
-    top: -60rpx;
-    left: -40rpx;
-    background: radial-gradient(circle, rgba(196,165,123,0.14) 0%, transparent 70%);
-  }
-  &--br {
-    bottom: -80rpx;
-    right: -40rpx;
-    width: 240rpx;
-    height: 240rpx;
-    background: radial-gradient(circle, rgba(65,75,94,0.4) 0%, transparent 70%);
-  }
-}
-
-.asset-panel__main {
+.header__inner {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 20rpx;
-  position: relative;
-  z-index: 1;
-}
-
-.asset-panel__balance {
-  display: flex;
-  flex-direction: column;
-  gap: 6rpx;
-}
-
-.asset-panel__balance-label {
-  font-size: $asset-label-size;
-  color: $asset-label-color;
-  font-weight: $asset-label-weight;
-}
-
-.asset-panel__balance-row {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-}
-
-.asset-panel__balance-value {
-  font-family: $asset-balance-font;
-  font-size: 52rpx;
-  font-weight: $asset-balance-weight;
-  color: $asset-balance-color;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -1rpx;
-  line-height: 1;
-}
-
-.asset-panel__eye {
-  .asset-panel__eye-icon {
-    font-size: 32rpx;
-    color: $asset-eye-color;
-  }
-}
-
-.asset-panel__sub {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  margin-top: 8rpx;
-}
-
-.asset-panel__sub-label {
-  font-size: 20rpx;
-  color: rgba(255,255,255,0.45);
-}
-
-.asset-panel__sub-value {
-  font-size: 24rpx;
-  font-weight: 600;
-  color: $asset-profit-color;
-  font-variant-numeric: tabular-nums;
-}
-
-.asset-panel__points {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  background: rgba(255,255,255,0.05);
-  border: 1rpx solid rgba(255,255,255,0.06);
-  border-radius: $radius-lg;
-  padding: 16rpx 20rpx;
-  position: relative;
-  z-index: 1;
-}
-
-.asset-panel__point-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6rpx;
-  padding: 0 20rpx;
-}
-
-.asset-panel__point-value {
-  font-family: $asset-balance-font;
-  font-size: 28rpx;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  &--eco { color: rgba(212,196,174,0.9); }
-  &--consumer { color: rgba(212,180,131,0.95); }
-}
-
-.asset-panel__point-label {
-  font-size: 18rpx;
-  color: rgba(255,255,255,0.45);
-  white-space: nowrap;
-}
-
-.asset-panel__point-divider {
-  width: 1rpx;
-  height: 48rpx;
-  background: rgba(255,255,255,0.08);
-}
-
-.asset-panel__actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding-top: 16rpx;
-  border-top: 1rpx solid rgba(255,255,255,0.06);
-  position: relative;
-  z-index: 1;
-}
-
-.asset-panel__action {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6rpx;
-  flex: 1;
-  cursor: pointer;
-  &:active { opacity: 0.7; }
-}
-
-.asset-panel__action-icon {
-  font-size: 32rpx;
-}
-
-.asset-panel__action-text {
-  font-size: 20rpx;
-  color: rgba(255,255,255,0.55);
-  font-weight: 500;
-}
-
-// ========== 2. Hero 品牌大卡 ==========
-.hero-section {
-  padding: 0 $spacing-base;
-  margin-bottom: $spacing-sm;
-}
-
-.hero-card {
-  position: relative;
-  border-radius: $radius-2xl;
-  overflow: hidden;
-  height: 340rpx;
-  box-shadow: $shadow-fire;
-}
-
-.hero-card__glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 20% 80%, rgba(196,165,123,0.12) 0%, transparent 60%),
-              radial-gradient(ellipse at 80% 20%, rgba(42,49,66,0.8) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.hero-card__shimmer {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    105deg,
-    transparent 25%,
-    rgba(196,165,123,0.08) 45%,
-    rgba(196,165,123,0.12) 50%,
-    rgba(196,165,123,0.08) 55%,
-    transparent 75%
-  );
-  background-size: 200% 100%;
-  animation: hero-shimmer 3.5s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes hero-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-.hero-card__inner {
-  position: relative;
-  z-index: 2;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 32rpx 32rpx 0;
+  padding: 0 $gap-16;
+  box-sizing: border-box;
 }
 
-.hero-card__logo {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 18rpx;
+// 左侧：Logo + 品牌
+.header__brand {
+  display: flex;
+  align-items: center;
+  gap: $gap-8;
+}
+
+.header__logo {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 16rpx;
   background: linear-gradient(145deg, $accent 0%, $accent-dark 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 8rpx 24rpx rgba(196,165,123,0.3);
 }
 
-.hero-card__logo-text {
-  font-size: 36rpx;
+.header__logo-text {
+  font-size: 32rpx;
   font-weight: 900;
   color: #fff;
-  letter-spacing: 0;
 }
 
-.hero-card__brand {
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
-  margin-top: 16rpx;
-}
-
-.hero-card__name {
-  font-size: 44rpx;
-  font-weight: 800;
+.header__brand-name {
+  font-size: 34rpx;
+  font-weight: 700;
   color: #fff;
-  letter-spacing: 3rpx;
-  line-height: 1.1;
-}
-
-.hero-card__slogan {
-  font-size: 22rpx;
-  color: rgba(255,255,255,0.55);
   letter-spacing: 2rpx;
 }
 
-.hero-search {
-  margin-top: auto;
-  margin-bottom: 28rpx;
+// 右侧：搜索入口
+.header__search {
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  gap: $gap-8;
   height: 72rpx;
-  padding: 0 24rpx;
-  background: rgba(255,255,255,0.10);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1rpx solid rgba(255,255,255,0.18);
-  border-radius: $radius-full;
+  padding: 0 $gap-16;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1rpx solid rgba(255, 255, 255, 0.12);
+  border-radius: 36rpx;
+  box-sizing: border-box;
   cursor: pointer;
-  &:active { background: rgba(255,255,255,0.16); }
-}
-
-.hero-search__icon {
-  font-size: 28rpx;
-  color: rgba(255,255,255,0.5);
-}
-
-.hero-search__placeholder {
-  flex: 1;
-  font-size: 26rpx;
-  color: rgba(255,255,255,0.45);
-}
-
-// ========== 3. 实时数据横幅 ==========
-.data-strip {
-  margin: $spacing-sm $spacing-base 0;
-  display: flex;
-  align-items: center;
-  padding: 14rpx 24rpx;
-  background: rgba(47,53,66,0.92);
-  border-radius: $radius-full;
-  overflow: hidden;
-}
-
-.data-strip__left {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  flex: 1;
-  overflow: hidden;
-}
-
-.data-strip__live {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  flex-shrink: 0;
-}
-
-.data-strip__dot {
-  width: 8rpx;
-  height: 8rpx;
-  border-radius: 50%;
-  background: $accent;
-  animation: pulse-dot 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
-}
-
-.data-strip__live-text {
-  font-size: 18rpx;
-  font-weight: 700;
-  color: $accent-light;
-  letter-spacing: 0.5rpx;
-}
-
-.data-strip__track {
-  overflow: hidden;
-  flex: 1;
-}
-
-.data-strip__content {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  width: max-content;
-  animation: data-marquee 20s linear infinite;
-}
-
-@keyframes data-marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-33.33%); }
-}
-
-.data-strip__text {
-  font-size: 24rpx;
-  color: rgba(255,255,255,0.8);
-  white-space: nowrap;
-}
-
-.data-strip__separator {
-  font-size: 20rpx;
-  color: rgba(255,255,255,0.25);
-}
-
-// ========== 4. 金刚区 3×3 ==========
-.quick-grid-section {
-  padding: $spacing-base $spacing-base 0;
-}
-
-.quick-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rpx;
-  background: $border-light;
-  border-radius: $radius-xl;
-  overflow: hidden;
-  border: 1rpx solid $border-light;
-}
-
-.quick-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10rpx;
-  padding: 28rpx 16rpx;
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  cursor: pointer;
-  transition: background 0.2s ease;
-  position: relative;
-  &:active { background: rgba(255,255,255,0.85); }
-}
-
-.quick-item__icon-wrap {
-  position: relative;
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: $radius-lg;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.quick-item__icon {
-  font-size: 36rpx;
-}
-
-.quick-item__badge {
-  position: absolute;
-  top: -6rpx;
-  right: -6rpx;
-  min-width: 28rpx;
-  height: 28rpx;
-  padding: 0 6rpx;
-  background: $danger;
-  border-radius: $radius-full;
-  font-size: 16rpx;
-  font-weight: 700;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.quick-item__label {
-  font-size: 22rpx;
-  font-weight: 600;
-  color: $text-secondary;
-}
-
-// ========== 5. 限时活动双卡片 ==========
-.activity-row {
-  display: flex;
-  gap: $spacing-sm;
-  padding: $spacing-base $spacing-base 0;
-}
-
-.activity-card {
-  flex: 1;
-  position: relative;
-  border-radius: $radius-xl;
-  overflow: hidden;
-  padding: 24rpx;
-  min-height: 200rpx;
-  display: flex;
-  flex-direction: column;
-  gap: 12rpx;
-  &:active { transform: scale(0.98); }
-}
-
-.activity-card__glow {
-  position: absolute;
-  top: -40%;
-  right: -20%;
-  width: 70%;
-  height: 100%;
-  background: radial-gradient(circle, rgba(255,80,80,0.15) 0%, transparent 70%);
-  pointer-events: none;
-  &--gold {
-    background: radial-gradient(circle, rgba(196,165,123,0.2) 0%, transparent 70%);
+  &:active {
+    background: rgba(255, 255, 255, 0.12);
   }
 }
 
-// 限时秒杀
-.activity-card--flash {
-  background: linear-gradient(145deg, #2F3542 0%, #1E2433 100%);
-  border: 1rpx solid rgba(255,80,80,0.15);
-  box-shadow: 0 8rpx 32rpx rgba(47,53,66,0.15);
+.header__search-icon {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.activity-card__header {
+.header__search-text {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+}
+
+// ========== 通用区块 ==========
+.section {
+  padding: $gap-24 $gap-16;
+}
+
+.section__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: relative;
-  z-index: 1;
+  margin-bottom: $gap-16;
 }
 
-.activity-card__title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-}
-
-.activity-card__title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #fff;
-}
-
-.activity-card__hot-tag {
-  .activity-card__hot-icon { font-size: 24rpx; }
-}
-
-.countdown {
-  display: flex;
-  align-items: center;
-  gap: 2rpx;
-}
-
-.countdown__unit {
-  min-width: 36rpx;
-  height: 36rpx;
-  padding: 0 6rpx;
-  background: rgba(255,80,80,0.2);
-  border: 1rpx solid rgba(255,80,80,0.3);
-  border-radius: 8rpx;
-  font-size: 22rpx;
-  font-weight: 700;
-  color: #FF6B6B;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-variant-numeric: tabular-nums;
-}
-
-.countdown__sep {
-  font-size: 22rpx;
-  font-weight: 700;
-  color: rgba(255,80,80,0.5);
-  margin: 0 2rpx;
-}
-
-.activity-card__desc {
-  font-size: 20rpx;
-  color: rgba(255,255,255,0.45);
-  position: relative;
-  z-index: 1;
-}
-
-.activity-card__products {
-  display: flex;
-  gap: 12rpx;
-  margin-top: auto;
-  position: relative;
-  z-index: 1;
-}
-
-.activity-product {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6rpx;
-}
-
-.activity-product__img {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: $radius-md;
-  background: rgba(255,255,255,0.08);
-  border: 1rpx solid rgba(255,255,255,0.08);
-}
-
-.activity-product__price {
-  font-size: 20rpx;
-  font-weight: 700;
-  color: $accent-light;
-}
-
-// 会员专区
-.activity-card--member {
-  background: linear-gradient(145deg, #2A2418 0%, #1E1810 100%);
-  border: 1rpx solid rgba(196,165,123,0.2);
-  box-shadow: 0 8rpx 32rpx rgba(47,53,66,0.12);
-}
-
-.activity-card__vip-icon {
-  font-size: 28rpx;
-}
-
-.activity-card__member-info {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  margin-top: auto;
-  position: relative;
-  z-index: 1;
-}
-
-.activity-card__level {
-  font-size: 28rpx;
-  font-weight: 800;
-  color: $bronze-light;
-  font-variant-numeric: tabular-nums;
-}
-
-.activity-card__progress {
-  flex: 1;
-  height: 8rpx;
-  background: rgba(255,255,255,0.08);
-  border-radius: 4rpx;
-  overflow: hidden;
-}
-
-.activity-card__progress-bar {
-  height: 100%;
-  background: $accent-gradient;
-  border-radius: 4rpx;
-  transition: width 0.5s ease;
-}
-
-.activity-card__progress-text {
-  font-size: 18rpx;
-  color: rgba(255,255,255,0.45);
-  font-variant-numeric: tabular-nums;
-}
-
-.activity-card__cta {
-  font-size: 22rpx;
-  color: $bronze-light;
-  font-weight: 600;
-  position: relative;
-  z-index: 1;
-  &:active { opacity: 0.7; }
-}
-
-// ========== 6. 三大商城入口 ==========
-.mall-section {
-  padding: $spacing-base $spacing-base 0;
-}
-
-.mall-section__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: $spacing-base;
-}
-
-.mall-section__title {
+.section__title {
   font-size: 32rpx;
   font-weight: 700;
   color: $mineral-gray;
+  letter-spacing: 0.5rpx;
 }
 
-.mall-section__more {
-  font-size: 24rpx;
+.section__more {
+  font-size: 26rpx;
   color: $text-muted;
   &:active { opacity: 0.6; }
 }
 
-.mall-cards {
+// ========== 3. 四大功能图标（Grid 4列） ==========
+.func-grid-section {
+  padding-top: $gap-16;
+  padding-bottom: $gap-8;
+}
+
+.func-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $gap-16;
+}
+
+.func-item {
   display: flex;
   flex-direction: column;
-  gap: $spacing-sm;
-}
-
-.mall-card {
-  position: relative;
-  border-radius: $radius-xl;
-  overflow: hidden;
-  height: 140rpx;
-  cursor: pointer;
-  &:active { transform: scale(0.99); }
-}
-
-.mall-card__bg {
-  position: absolute;
-  inset: 0;
-}
-
-.mall-card__glow {
-  position: absolute;
-  top: -30%;
-  right: -5%;
-  width: 50%;
-  height: 100%;
-  background: radial-gradient(circle, rgba(184,152,118,0.15) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.mall-card__content {
-  position: relative;
-  z-index: 1;
-  display: flex;
   align-items: center;
-  gap: $spacing-base;
-  padding: 28rpx $spacing-lg;
-  height: 140rpx;
-  box-sizing: border-box;
+  gap: $gap-8;
+  cursor: pointer;
+  &:active { opacity: 0.7; }
 }
 
-.mall-card__icon-wrap {
-  width: 80rpx;
-  height: 80rpx;
+.func-item__icon-wrap {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 28rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,0.1);
-  border-radius: $radius-lg;
-  border: 1rpx solid rgba(255,255,255,0.12);
-  flex-shrink: 0;
-  .mall-card__icon {
-    font-size: 32rpx;
-    font-weight: 800;
-    color: $bronze-light;
-  }
+  box-shadow: $clay-shadow;
+  border: 1rpx solid rgba(255, 255, 255, 0.7);
+  box-sizing: border-box;
 }
 
-.mall-card__info {
-  flex: 1;
-  .mall-card__name {
-    display: block;
-    font-size: 30rpx;
-    font-weight: 700;
-    color: $bronze-light;
-    margin-bottom: 4rpx;
-  }
-  .mall-card__desc {
-    display: block;
-    font-size: 22rpx;
-    color: rgba(255,255,255,0.5);
-  }
+.func-item__icon {
+  font-size: 40rpx;
+  font-weight: 800;
+  color: $accent-dark;
 }
 
-.mall-card__arrow {
-  font-size: 36rpx;
-  color: rgba(255,255,255,0.3);
-  font-weight: 300;
-}
-
-// ========== 7. 热门分类（网格化） ==========
-.category-section {
-  padding: $spacing-lg $spacing-base 0;
-}
-
-.section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: $spacing-base;
-}
-
-.section-head__left {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-}
-
-.section-title {
-  font-size: 32rpx;
+.func-item__label {
+  font-size: 30rpx;
   font-weight: 700;
   color: $mineral-gray;
-  letter-spacing: 0.5rpx;
+  line-height: 1;
 }
 
-.section-more {
-  font-size: 24rpx;
+.func-item__sub {
+  font-size: 20rpx;
   color: $text-muted;
+  line-height: 1;
+}
+
+// ========== 4. 热门分类（Grid 4列） ==========
+.category-skeleton {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $gap-16;
+}
+
+.category-skeleton__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $gap-8;
+}
+
+.category-skeleton__icon {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 24rpx;
+  background: $bg-tertiary;
+  animation: shim 1.4s ease-in-out infinite;
+}
+
+.category-skeleton__name {
+  width: 60rpx;
+  height: 22rpx;
+  border-radius: 6rpx;
+  background: $bg-tertiary;
+  animation: shim 1.4s ease-in-out infinite;
 }
 
 .category-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: $spacing-sm;
+  gap: $gap-16;
 }
 
-.category-grid__item {
+.category-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10rpx;
+  gap: $gap-8;
   cursor: pointer;
   &:active { opacity: 0.7; }
 }
 
-.category-grid__icon-wrap {
+.category-card__icon-wrap {
   width: 96rpx;
   height: 96rpx;
-  border-radius: $radius-lg;
+  border-radius: 24rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: $clay-shadow;
-  border: 1rpx solid rgba(255,255,255,0.7);
-  &--skeleton {
-    background: $bg-tertiary;
-    animation: shim 1.4s ease-in-out infinite;
-  }
+  border: 1rpx solid rgba(255, 255, 255, 0.7);
+  box-sizing: border-box;
 }
 
-.category-grid__icon {
+.category-card__icon {
   font-size: 36rpx;
 }
 
-.category-grid__name {
-  font-size: 22rpx;
-  color: $text-secondary;
+.category-card__name {
+  font-size: 24rpx;
   font-weight: 500;
+  color: $text-secondary;
   text-align: center;
+  line-height: 1.2;
+  max-width: 120rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.category-grid__name-skeleton {
-  width: 60rpx;
-  height: 22rpx;
+// ========== 5. 精品推荐（Grid 2列） ==========
+.product-skeleton {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $gap-16;
+}
+
+.product-skeleton__item {
+  display: flex;
+  flex-direction: column;
+  gap: $gap-8;
+}
+
+.product-skeleton__img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 16rpx;
   background: $bg-tertiary;
-  border-radius: 6rpx;
   animation: shim 1.4s ease-in-out infinite;
 }
 
-// ========== 8. 精品推荐 ==========
-.section-block {
-  padding: $spacing-lg $spacing-base 0;
+.product-skeleton__title {
+  width: 100%;
+  height: 32rpx;
+  border-radius: 8rpx;
+  background: $bg-tertiary;
+  animation: shim 1.4s ease-in-out infinite;
+}
+
+.product-skeleton__price {
+  width: 50%;
+  height: 28rpx;
+  border-radius: 8rpx;
+  background: $bg-tertiary;
+  animation: shim 1.4s ease-in-out infinite;
 }
 
 .product-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: $spacing-base;
+  gap: $gap-16;
 }
 
 .product-card {
-  position: relative;
-  border-radius: $radius-lg;
+  border-radius: 16rpx;
   overflow: hidden;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1rpx solid rgba(255,255,255,0.6);
+  background: $bg-secondary;
+  border: 1rpx solid $border-light;
   box-shadow: $clay-shadow;
-  transition: transform 0.2s ease;
-  &:active { transform: scale(0.97); }
-
-  &--tall {
-    .product-card__img-wrap {
-      aspect-ratio: 4 / 3;
-    }
-  }
+  box-sizing: border-box;
+  cursor: pointer;
+  &:active { transform: scale(0.98); }
 }
 
 .product-card__img-wrap {
@@ -1467,40 +624,54 @@ function onQuickAction(item: { action: string }) {
   background: $bg-tertiary;
 }
 
-.product-card__sales {
+.product-card__badge {
   position: absolute;
-  bottom: 8rpx;
-  left: 8rpx;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(8px);
-  border-radius: $radius-full;
-  padding: 4rpx 12rpx;
-  .product-card__sales-text {
-    font-size: 16rpx;
-    color: rgba(255,255,255,0.85);
-    font-weight: 500;
-  }
-}
-
-.product-card__type-badge {
-  position: absolute;
-  top: 10rpx;
-  left: 10rpx;
-  min-width: 40rpx;
-  height: 40rpx;
-  padding: 0 10rpx;
-  background: $warm-yellow;
-  border: 1rpx solid $border-primary;
-  border-radius: 20rpx;
-  font-size: 20rpx;
+  top: 12rpx;
+  left: 12rpx;
+  min-width: 44rpx;
+  height: 44rpx;
+  padding: 0 12rpx;
+  border-radius: 22rpx;
+  font-size: 22rpx;
   font-weight: 800;
-  color: $accent-dark;
   display: flex;
   align-items: center;
   justify-content: center;
-  &--1 { background: $warm-yellow; color: $accent-dark; border-color: $border-primary; }
-  &--2 { background: rgba(47,53,66,0.88); color: $bronze-light; border-color: rgba(47,53,66,0.3); }
-  &--3 { background: $mineral-gray; color: $bronze-light; border-color: rgba(47,53,66,0.3); }
+  box-sizing: border-box;
+
+  &--1 {
+    background: $warm-yellow;
+    color: $accent-dark;
+    border: 1rpx solid $border-primary;
+  }
+  &--2 {
+    background: rgba(47, 53, 66, 0.88);
+    color: $accent-light;
+    border: 1rpx solid rgba(47, 53, 66, 0.3);
+  }
+  &--3 {
+    background: $mineral-gray;
+    color: $accent-light;
+    border: 1rpx solid rgba(47, 53, 66, 0.3);
+  }
+  &--0 {
+    background: rgba(196, 165, 123, 0.15);
+    color: $accent-dark;
+    border: 1rpx solid $border-primary;
+  }
+}
+
+.product-card__sales {
+  position: absolute;
+  bottom: 12rpx;
+  left: 12rpx;
+  padding: 4rpx 12rpx;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  border-radius: 20rpx;
+  font-size: 18rpx;
+  color: rgba(255, 255, 255, 0.85);
+  box-sizing: border-box;
 }
 
 .product-card__info {
@@ -1509,58 +680,62 @@ function onQuickAction(item: { action: string }) {
 
 .product-card__name {
   display: block;
-  font-size: 26rpx;
+  font-size: 28rpx;
   font-weight: 600;
   color: $text-primary;
   line-height: 1.4;
-  margin-bottom: 8rpx;
+  margin-bottom: $gap-8;
+  overflow: hidden;
+  text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  overflow: hidden;
 }
 
 .product-card__price-row {
   display: flex;
   align-items: baseline;
-  gap: 8rpx;
+  gap: $gap-8;
 }
 
 .product-card__cash {
-  font-family: $asset-balance-font;
-  font-size: 28rpx;
+  font-family: $font-sans;
+  font-size: 30rpx;
   font-weight: 700;
   color: $mineral-gray;
   font-variant-numeric: tabular-nums;
 }
 
 .product-card__points {
-  font-size: 20rpx;
-  color: $accent-dark;
+  font-size: 22rpx;
   font-weight: 600;
+  color: $accent-dark;
 }
 
-// ========== 骨架屏 & 加载状态 ==========
-@keyframes shim {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.7; }
-}
-
-.load-more-tip,
-.no-more-tip {
+// ========== 加载状态 ==========
+.load-tip {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 32rpx 0;
+
+  text {
+    font-size: 26rpx;
+    color: $text-muted;
+  }
+
+  &--end text {
+    color: $text-muted;
+  }
 }
 
-.load-more-tip__text,
-.no-more-tip__text {
-  font-size: 24rpx;
-  color: $text-muted;
-}
-
-.safe-area-bottom {
+.safe-bottom {
   width: 100%;
+}
+
+// ========== 动画 ==========
+@keyframes shim {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.7; }
 }
 </style>
