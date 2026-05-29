@@ -11,6 +11,7 @@
     { "path": "pages/exchange/confirm", "style": { "navigationStyle": "custom" } },
     { "path": "pages/crowdfunding/list", "style": { "navigationStyle": "custom" } },
     { "path": "pages/crowdfunding/detail", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/marketing/flash", "style": { "navigationStyle": "custom" } },
     { "path": "pages/redeem/list", "style": { "navigationStyle": "custom" } },
     { "path": "pages/redeem/confirm", "style": { "navigationStyle": "custom" } },
     { "path": "pages/wealth/invest", "style": { "navigationStyle": "custom" } },

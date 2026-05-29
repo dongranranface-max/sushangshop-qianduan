@@ -31,6 +31,22 @@
       </view>
     </section>
 
+    <!-- 3.5 限时秒杀入口 -->
+    <section class="section flash-entry" @click="goFlash">
+      <view class="flash-entry__inner">
+        <view class="flash-entry__left">
+          <text class="flash-entry__icon">⚡</text>
+          <view class="flash-entry__text">
+            <text class="flash-entry__title">限时秒杀</text>
+            <text class="flash-entry__sub">限时限量，抢完即止</text>
+          </view>
+        </view>
+        <view class="flash-entry__right">
+          <text class="flash-entry__btn">立即抢购</text>
+        </view>
+      </view>
+    </section>
+
     <!-- 4. 热门分类 -->
     <section class="section">
       <view class="section__head">
@@ -195,6 +211,7 @@ function goSearch() { uni.navigateTo({ url: '/pages/search/index' }) }
 function onBannerClick(item: { link?: string }) { if (item.link) uni.navigateTo({ url: item.link }) }
 function onFuncClick(item: { action?: string }) { if (item.action) uni.navigateTo({ url: item.action }) }
 function goCatalog() { uni.switchTab({ url: '/pages/catalog/index' }) }
+function goFlash() { uni.navigateTo({ url: '/pages/marketing/flash' }) }
 function goCategory(cat: { id: number }) { if (cat.id) uni.navigateTo({ url: `/pages/catalog/index?categoryId=${cat.id}` }) }
 function goProduct(p: { id: number; type?: number }) { if (p.id) uni.navigateTo({ url: `/pages/product/detail?id=${p.id}&type=${p.type || 1}` }) }
 </script>
@@ -245,6 +262,28 @@ $gap-4: 4rpx; $gap-8: 8rpx; $gap-16: 16rpx; $gap-24: 24rpx;
 
 // 通用区块
 .section { padding: $gap-24 $gap-16; }
+
+.flash-entry {
+  padding: $gap-16;
+  &__inner {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: $gap-16 $gap-24; border-radius: $radius-lg;
+    background: linear-gradient(135deg, #c0392b 0%, #e74c3c 50%, #c0392b 100%);
+    box-shadow: 0 8rpx 24rpx rgba(192,57,43,0.25); box-sizing: border-box;
+  }
+  &__left { display: flex; align-items: center; gap: 12rpx; }
+  &__icon { font-size: 44rpx; }
+  &__text { display: flex; flex-direction: column; gap: 2rpx; }
+  &__title { font-size: 34rpx; font-weight: 800; color: #fff; letter-spacing: 1rpx; }
+  &__sub { font-size: 22rpx; color: rgba(255,255,255,0.75); }
+  &__right {}
+  &__btn {
+    height: 64rpx; padding: 0 28rpx; background: rgba(255,255,255,0.20); border: 2rpx solid rgba(255,255,255,0.45);
+    border-radius: $radius-full; display: flex; align-items: center; justify-content: center;
+    font-size: 26rpx; font-weight: 700; color: #fff; box-sizing: border-box;
+    backdrop-filter: blur(8px);
+  }
+}
 
 .section__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: $gap-16; }
 .section__title { font-size: 32rpx; font-weight: 700; color: $mineral-gray; letter-spacing: 0.5rpx; }
