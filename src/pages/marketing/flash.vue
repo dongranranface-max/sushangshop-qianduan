@@ -102,8 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { marketingApi } from '@/utils/api'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)

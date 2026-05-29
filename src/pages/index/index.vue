@@ -116,7 +116,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { onShow, onReachBottom } from '@dcloudio/uni-app'
-import { productApi, marketingApi } from '@/utils/api'
+import { productApi, marketingApi, type Banner, type ProductCategory } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
 import { resolveProductCover } from '@/utils/media'
@@ -155,7 +155,7 @@ function typeLabel(type?: number) {
 }
 
 function resolveCover(p: { coverImage?: string; image?: string }) {
-  return resolveProductCover(p as any)
+  return resolveProductCover(p)
 }
 
 onMounted(() => {
@@ -176,7 +176,7 @@ onReachBottom(() => { loadProducts(false) })
 async function loadBanners() {
   try {
     const res = await marketingApi.getBanners()
-    banners.value = (res || []).map((b: any) => ({ id: b.id, image: b.image || '', link: b.link || '' }))
+    banners.value = (res || []).map((b: Banner) => ({ id: b.id, image: b.image || '', link: b.link || '' }))
   } catch { banners.value = [] }
 }
 
@@ -184,7 +184,7 @@ async function loadCategories() {
   try {
     const res = await productApi.getCategories()
     const bgPalettes = ['rgba(184,152,118,0.12)', 'rgba(65,75,94,0.08)', 'rgba(142,116,89,0.10)', 'rgba(65,75,94,0.08)']
-    categories.value = (res || []).slice(0, 8).map((cat: any, idx: number) => ({
+    categories.value = (res || []).slice(0, 8).map((cat: ProductCategory, idx: number) => ({
       id: cat.id, name: cat.name, icon: cat.icon || '📦', bg: bgPalettes[idx % bgPalettes.length],
     }))
   } catch { categories.value = [] }

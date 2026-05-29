@@ -140,7 +140,7 @@ class AssetStore {
       }
       this.state.lastUpdate = Date.now()
     } catch (e) {
-      console.error('[AssetStore] fetchBalance', e)
+      // 静默失败，不打扰用户
     } finally {
       this.state.loading = false
     }

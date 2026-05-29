@@ -101,7 +101,7 @@ import { ref, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { checkAuth } from '@/utils/auth'
 import { resolveAvatar } from '@/utils/media'
-import { userApi, referralApi, type UserTeam, type TeamMember, type ReferralChild, type PageResult } from '@/utils/api'
+import { userApi, referralApi, type UserTeam, type TeamMember, type ReferralChild } from '@/utils/api'
 
 const DEFAULT_AVATAR = '/static/images/default-avatar.png'
 
@@ -206,7 +206,7 @@ function formatTime(dateStr: string): string {
   }
 }
 
-function onAvatarError(e: Event, member: ReferralChild | TeamMember) {
+function onAvatarError(e: Event, _member: ReferralChild | TeamMember) {
   const target = e.target as HTMLImageElement
   target.src = DEFAULT_AVATAR
 }

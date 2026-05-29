@@ -380,7 +380,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { orderApi, addressApi, marketingApi, walletApi, productApi, cartApi, userApi } from '@/utils/api'
+import { orderApi, addressApi, marketingApi, walletApi, productApi, userApi } from '@/utils/api'
 import { checkAuth } from '@/utils/auth'
 import { assetStore } from '@/store/asset'
 import { useToast } from '@/composables/useToast'
@@ -807,7 +807,7 @@ async function handleSubmit() {
       taxNo: invoiceType.value === 2 ? invoiceTaxNo.value : '',
     } : null
 
-    const payload: Parameters<typeof orderApi.createOrder>[0] = {
+    const payload: Parameters<typeof orderApi.createOrder>[0] & { cartIds?: string; productId?: string; quantity?: number } = {
       orderType,
       addressId: address.value.id,
       items,
@@ -819,15 +819,15 @@ async function handleSubmit() {
 
     // 购物车下单时传入 cartIds
     if (cartIds) {
-      (payload as any).cartIds = cartIds
+      payload.cartIds = cartIds
     }
     // 立即购买时传入 productId + quantity
     if (productId) {
-      (payload as any).productId = productId
-      ;(payload as any).quantity = Number(quantity || 1)
+      payload.productId = productId
+      payload.quantity = Number(quantity || 1)
     }
 
-    const result = await orderApi.createOrder(payload)
+    await orderApi.createOrder(payload)
     uni.hideLoading()
 
     // 成功后清理 storage 并跳转

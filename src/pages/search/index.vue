@@ -212,7 +212,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { onShow, onReachBottom } from '@dcloudio/uni-app'
 import { productApi, marketingApi } from '@/utils/api'
 import HomeProductCard from '@/components/HomeProductCard.vue'

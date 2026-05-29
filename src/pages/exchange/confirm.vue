@@ -132,7 +132,7 @@ async function loadData() {
       userApi.getProfile().catch(() => null),
     ])
     product.value = prodRes
-    bankCardInfo.value = (userRes as any)?.bankCard || null
+    bankCardInfo.value = (userRes as { bankCard?: { bankName: string; bankCard: string; realName: string } | null })?.bankCard || null
     hasBankCard.value = !!(bankCardInfo.value && bankCardInfo.value.bankCard)
     const savedAddr = uni.getStorageSync('selectedAddress')
     if (savedAddr) { try { address.value = JSON.parse(savedAddr) } catch {} }
