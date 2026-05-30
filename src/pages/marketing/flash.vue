@@ -198,7 +198,14 @@ async function loadProducts() {
     const firstEndAt = products.value.find(p => p.flashEndAt)?.flashEndAt
     startCountdown(firstEndAt)
   } catch (err: unknown) {
-    fetchError.value = (err as Error).message ?? '加载失败，请重试'
+    const msg = (err as Error).message ?? ''
+    // 后端未实现接口（404）时静默降级为空状态，不打扰用户
+    if (msg.includes('404') || msg.includes('Not Found')) {
+      products.value = []
+      hasMore.value = false
+      return
+    }
+    fetchError.value = msg || '加载失败，请重试'
     uni.showToast({ title: fetchError.value, icon: 'none' })
   } finally {
     loading.value = false
