@@ -54,10 +54,9 @@ function isTokenExpired(): boolean {
   return (Date.now() - t) >= TOKEN_EXPIRY_MS
 }
 
-// 增强 setToken：记录签发时间
-const _origSetToken = setToken
+// setToken：存储 token 并记录签发时间（用于静默刷新过期判断）
 function setToken(token: string) {
-  _origSetToken(token)
+  uni.setStorageSync('token', token)
   setTokenIssueTime(Date.now())
 }
 

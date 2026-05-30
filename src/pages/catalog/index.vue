@@ -43,9 +43,22 @@
           </view>
         </view>
 
-        <view v-else-if="currentService === 'products'" class="category-grid">
+        <!-- 普通网格（<50项） -->
+        <view v-else-if="currentService === 'products' && !useVirtual" class="category-grid">
           <HomeProductCard v-for="p in products" :key="p.id" :product="p" :type="currentType" :default-cover="defaultCover" @click="goProduct(p)" />
         </view>
+        <!-- 虚拟列表（≥50项） -->
+        <VirtualList
+          v-else-if="currentService === 'products' && useVirtual"
+          :items="products"
+          :itemHeight="320"
+          :buffer="5"
+          keyField="id"
+        >
+          <template #default="{ item }">
+            <HomeProductCard :product="item" :type="currentType" :default-cover="defaultCover" @click="goProduct(item)" />
+          </template>
+        </VirtualList>
 
         <view v-else class="category-list">
           <view v-for="cat in categories" :key="cat.id" class="cat-card" @click="goCategoryProducts(cat)">
@@ -83,6 +96,7 @@ import { HOME_CATEGORY_FALLBACK, flattenCategories, normalizeCategoryTree } from
 import { DEFAULT_PRODUCT_COVER } from '@/utils/media'
 import LuxuryTabbar from '@/components/LuxuryTabbar.vue'
 import HomeProductCard from '@/components/HomeProductCard.vue'
+import VirtualList from '@/components/VirtualList.vue'
 
 const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)
@@ -103,6 +117,7 @@ const loadMoreLoading = ref(false)
 const page = ref(1)
 const limit = 20
 const hasMore = ref(true)
+const useVirtual = computed(() => products.value.length > 50)
 let categorySeq = 0
 
 const mallTabs = [

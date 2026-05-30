@@ -103,10 +103,19 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { marketingApi } from '@/utils/api'
+import type { Product } from '@/utils/api'
+
+type FlashProduct = Product & {
+  flashPrice?: string | number
+  discount?: number
+  totalStock?: number
+}
 
 const statusBarHeight = ref(20)
 const safeAreaBottom = ref(0)
 const loading = ref(false)
+const fetchError = ref<string | null>(null)
 const products = ref<FlashProduct[]>([])
 const page = ref(1)
 const hasMore = ref(true)
@@ -118,18 +127,6 @@ const STATUS_CONFIG = {
   upcoming: { title: '即将开始', sub: '秒杀即将开始，敬请期待' },
   ongoing: { title: '秒杀进行中', sub: '限时限量，抢完即止' },
   ended: { title: '秒杀已结束', sub: '感谢参与，下次再来' },
-}
-
-interface FlashProduct {
-  id: string
-  name: string
-  coverImage?: string
-  price: string | number
-  originalPrice?: string | number
-  flashPrice?: string | number
-  discount?: number
-  stock: number
-  totalStock?: number
 }
 
 onMounted(() => {
@@ -146,6 +143,7 @@ onUnmounted(() => {
 
 function startCountdown() {
   // 模拟倒计时：距离秒杀结束还有 2小时 34分 12秒
+  // 正式环境应由后端返回 flashEndAt 并据此计算
   let totalSec = 2 * 3600 + 34 * 60 + 12
   countdownTimer = setInterval(() => {
     if (totalSec <= 0) {
@@ -174,20 +172,18 @@ async function loadProducts() {
   if (loading.value) return
   if (!hasMore.value) return
   loading.value = true
+  fetchError.value = null
   try {
-    // TODO: 替换为真实 API: marketingApi.getFlashProducts()
-    await new Promise(r => setTimeout(r, 500))
-    const mock: FlashProduct[] = [
-      { id: '1', name: '有机生态大米5kg装', coverImage: '/static/logo.png', price: 89, originalPrice: 158, flashPrice: 59, discount: 3.7, stock: 23, totalStock: 200 },
-      { id: '2', name: '东北黑木耳干货礼盒', coverImage: '/static/logo.png', price: 68, originalPrice: 128, flashPrice: 38, discount: 3.0, stock: 45, totalStock: 150 },
-      { id: '3', name: '农家土鸡蛋30枚', coverImage: '/static/logo.png', price: 55, originalPrice: 99, flashPrice: 39, discount: 3.9, stock: 8, totalStock: 100 },
-      { id: '4', name: '纯正蜂蜜礼盒装500g', coverImage: '/static/logo.png', price: 128, originalPrice: 236, flashPrice: 88, discount: 3.7, stock: 0, totalStock: 80 },
-      { id: '5', name: '有机糙米5kg', coverImage: '/static/logo.png', price: 76, originalPrice: 138, flashPrice: 49, discount: 3.6, stock: 67, totalStock: 200 },
-      { id: '6', name: '手工红糖姜茶礼盒', coverImage: '/static/logo.png', price: 58, originalPrice: 108, flashPrice: 36, discount: 3.3, stock: 34, totalStock: 120 },
-    ]
-    if (page.value === 1) products.value = mock
-    else products.value.push(...mock)
+    const data = await marketingApi.getFlashProducts() as FlashProduct[]
+    if (page.value === 1) {
+      products.value = data ?? []
+    } else {
+      products.value.push(...(data ?? []))
+    }
     hasMore.value = false
+  } catch (err: unknown) {
+    fetchError.value = (err as Error).message ?? '加载失败，请重试'
+    uni.showToast({ title: fetchError.value, icon: 'none' })
   } finally {
     loading.value = false
   }
